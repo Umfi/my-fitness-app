@@ -9,6 +9,7 @@ import Calories from '../views/Calories.vue'
 import Weight from '../views/Weight.vue'
 import Workouts from '../views/Workouts.vue'
 import Profile from '../views/Profile.vue'
+import Setup from '../views/Setup.vue'
 
 const routes = [
   {
@@ -75,6 +76,14 @@ const routes = [
       requiresAuth: true
     },
   },
+  {
+    path: '/setup',
+    name: 'Setup',
+    component: Setup,
+    meta: {
+      requiresAuth: true
+    },
+  },
 
 ]
 
@@ -87,9 +96,20 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.requiresAuth)) {
 
+    if (to.name == "Setup") {
+      next()
+      return
+    }
+
     store.dispatch("valid").then(() => {
         if (store.getters.isLoggedIn) {
-          next()
+
+          if (store.getters.isSetup) {
+            next()
+          } else {
+            next('/setup')
+          }
+          
           return
         }
         next('/login')
