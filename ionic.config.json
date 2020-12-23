@@ -1,0 +1,7 @@
+{
+  "name": "myfitnessapp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
