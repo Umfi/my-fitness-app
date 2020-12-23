@@ -259,12 +259,7 @@ export default defineComponent({
           this.searchResult = response.data.searchResult;
           this.history = response.data.searchHistory;
 
-          if (this.searchFilter == "history" && searchTerm != "") {
-            this.history = this.history.filter(function(value){ 
-              return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
-            });
-          }
-          
+          this.filterHistory(searchTerm);
           this.isSearching = false;
 
 
@@ -276,10 +271,18 @@ export default defineComponent({
     },
     searchFilterChanged(filter) {
       this.searchFilter = filter;
+      this.filterHistory(this.searchTerm);
 
       if (this.searchTerm == "" && filter == "all") {
         this.searchResult = [];
       } 
+    },
+    filterHistory(searchTerm) {
+      if (this.searchFilter == "history" && searchTerm != "") {
+        this.history = this.history.filter(function(value){ 
+          return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
+        });
+      }
     },
     async addCalories(itm) {
 
