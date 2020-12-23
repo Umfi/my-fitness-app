@@ -10,7 +10,7 @@
           <ion-content fullscreen>
             <ion-list>
               <ion-item>
-                  <ion-input type="number" v-model="amount" /> 
+                  <ion-input type="number" v-model="amount" placeholder="Amount in gram"/> 
               </ion-item>
             </ion-list>
 

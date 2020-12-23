@@ -7,12 +7,12 @@
           <ion-label>Calories</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="weight" href="/tabs/weight">
+        <ion-tab-button tab="overview" href="/tabs/overview">
           <ion-icon :icon="man"></ion-icon>
           <ion-label>Overview</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="workouts" href="/tabs/workouts">
+        <ion-tab-button tab="workouts" href="/tabs/workouts" disabled>
           <ion-icon :icon="barbell"></ion-icon>
           <ion-label>Workouts</ion-label>
         </ion-tab-button>

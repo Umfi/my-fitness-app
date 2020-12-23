@@ -212,8 +212,12 @@ export default defineComponent({
             'goal':  this.goal,
             'language' : 'en'
       }).then((response) => {
-        console.log(response.data);
-        this.showToast("Update succesful!");
+
+        if (response.data.user.calories > 0) {
+          this.showToast("Update succesful!");
+        } else {
+          this.showToast("Update failed!");
+        }
       }).catch(() => {
             this.showToast("Update failed!");
       });

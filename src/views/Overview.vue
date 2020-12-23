@@ -137,15 +137,15 @@ import {
   IonCol,
   IonRow,
   IonCard,
-    IonCardHeader,
-    IonCardContent,
-    IonCardTitle,
+  IonCardHeader,
+  IonCardContent,
+  IonCardTitle,
 } from "@ionic/vue";
 
 import { config } from "../config.js"
 
 export default defineComponent({
-  name: "Weight",
+  name: "Overview",
   components: {
     IonContent,
     IonHeader,

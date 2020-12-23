@@ -152,9 +152,6 @@ export default defineComponent({
             }).then((response) => {
               if (response.data.status) {
                 this.showToast("Product updated.");
-
-                console.log(this.$parent);
-
                 this.$props.parent.doRefresh(false);
                 this.dismissModal();
               } else {

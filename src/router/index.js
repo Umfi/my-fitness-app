@@ -6,7 +6,7 @@ import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import ForgotPassword from '../views/ForgotPassword.vue'
 import Calories from '../views/Calories.vue'
-import Weight from '../views/Weight.vue'
+import Overview from '../views/Overview.vue'
 import Workouts from '../views/Workouts.vue'
 import Profile from '../views/Profile.vue'
 import Setup from '../views/Setup.vue'
@@ -14,7 +14,7 @@ import Setup from '../views/Setup.vue'
 const routes = [
   {
     path: '/',
-    redirect: '/tabs/calories'
+    redirect: '/tabs/overview'
   },
   {
     path: '/login',
@@ -40,7 +40,7 @@ const routes = [
     children: [
       {
         path: "",
-        redirect: "calories",
+        redirect: "overview",
       },
       {
         path: "calories",
@@ -51,9 +51,9 @@ const routes = [
         }
       },
       {
-        path: "weight",
-        name: "Weight",
-        component: Weight,
+        path: "overview",
+        name: "Overview",
+        component: Overview,
         meta: {
           requiresAuth: true
         }

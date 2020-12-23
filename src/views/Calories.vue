@@ -34,10 +34,9 @@
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
 
-      <ion-list v-if="searchResult && !isSearching" class="search-results-list">
+      <ion-list v-if="searchResult && !isSearching && searchFilter == 'all'" class="search-results-list">
 
-
-        <ion-item-sliding v-for="item in searchResult" :key="item.id" v-show="item.show">
+        <ion-item-sliding v-for="item in searchResult" :key="item.id">
           <ion-item @click="addCalories(item)">
             <ion-label>
               <ion-grid>
@@ -60,19 +59,59 @@
             </ion-label>
           </ion-item>
 
-    <ion-item-options>
-        <ion-item-option color="secondary" @click="editItem(item)" v-if="item.editable">
-          <ion-icon slot="top" :icon="create" class="ion-margin-bottom"></ion-icon>
-          Edit
-        </ion-item-option>
-        <ion-item-option color="danger" @click="deleteItem(item)" v-if="item.deletable">
-          <ion-icon slot="top" :icon="trash" class="ion-margin-bottom"></ion-icon>
-          Delete
-        </ion-item-option>
-      </ion-item-options>
+          <ion-item-options>
+            <ion-item-option color="secondary" @click="editItem(item)" v-if="item.editable">
+              <ion-icon slot="top" :icon="create" class="ion-margin-bottom"></ion-icon>
+              Edit
+            </ion-item-option>
+            <ion-item-option color="danger" @click="deleteItem(item)" v-if="item.deletable">
+              <ion-icon slot="top" :icon="trash" class="ion-margin-bottom"></ion-icon>
+              Delete
+            </ion-item-option>
+          </ion-item-options>
 
         </ion-item-sliding>
       </ion-list>
+
+
+      <ion-list v-if="history && !isSearching && searchFilter == 'history'" class="search-history-list">
+        <ion-item-sliding v-for="item in history" :key="item.id">
+          <ion-item @click="addCalories(item)">
+            <ion-label>
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="12">
+                    <strong>{{ item.name }} (  {{ parseInt(item.calories) }} kcal )</strong>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    {{ item.brand }}
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    <small>Protein: {{ parseInt(item.protein) }} g | Carbs: {{ parseInt(item.carbohydrate) }} g | Fat: {{ parseInt(item.fat) }} g</small>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-label>
+          </ion-item>
+
+          <ion-item-options>
+            <ion-item-option color="secondary" @click="editItem(item)" v-if="item.editable">
+              <ion-icon slot="top" :icon="create" class="ion-margin-bottom"></ion-icon>
+              Edit
+            </ion-item-option>
+            <ion-item-option color="danger" @click="deleteItem(item)" v-if="item.deletable">
+              <ion-icon slot="top" :icon="trash" class="ion-margin-bottom"></ion-icon>
+              Delete
+            </ion-item-option>
+          </ion-item-options>
+
+        </ion-item-sliding>
+      </ion-list>
+
       
       <ion-list v-if="isSearching">
         <ion-item v-for="n in 10" :key="n">
@@ -142,8 +181,7 @@ import { add, create, trash } from "ionicons/icons";
 import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
 
-
-import { Plugins } from '@capacitor/core';
+import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
@@ -194,13 +232,11 @@ export default defineComponent({
     };
   },
   created() {
-    this.fillHistory();
+    this.doRefresh(false);
   },
   methods: {
     doRefresh(event) {
-        this.fillHistory();
         this.search(this.searchTerm);
-
         if (event) event.target.complete();
     },
     async showToast(msg) {
@@ -212,57 +248,38 @@ export default defineComponent({
     },
     search(searchTerm) {
 
-      Keyboard.hide();
-
-      if (searchTerm != "") {
-
-        this.isSearching = true;
-        this.$http
-          .get(
-            config.API_BASE_URL + "foodsearch?name=" +
-              searchTerm
-          )
-          .then((response) => {
-            this.searchResult = response.data;
-            this.applySearchFilter();
-            this.isSearching = false;
-
-            if (this.searchResult.length == 0) {
-              this.showToast("No products found.");
-            }
-          });
-      } else {
-        this.searchTerm = "";
-        this.searchFilterChanged(this.searchFilter);
-        this.isSearching = false;
+      if (Capacitor.isPluginAvailable('Keyboard')) {
+        Keyboard.hide();
       }
-    },
-    applySearchFilter() {
-     requestAnimationFrame(() => {
-        this.searchResult.forEach(item => {
-          if (this.searchFilter == "history") {
-            item.show = item.historyItem;
-          } else {
-            item.show = true;
+        
+      this.isSearching = true;
+
+      this.$http.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm)
+        .then((response) => {
+          this.searchResult = response.data.searchResult;
+          this.history = response.data.searchHistory;
+
+          if (this.searchFilter == "history" && searchTerm != "") {
+            this.history = this.history.filter(function(value){ 
+              return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
+            });
+          }
+          
+          this.isSearching = false;
+
+
+          if ((this.searchResult.length == 0 && searchTerm != "") || (this.history.length == 0 && searchTerm != ""))  {
+            this.showToast("No products found.");
           }
         });
-      });
+      
     },
     searchFilterChanged(filter) {
       this.searchFilter = filter;
 
-      if (this.searchTerm == "" && filter == "history") {
-        this.searchResult = this.history;
-      } else if (this.searchTerm == "" && filter == "all") {
+      if (this.searchTerm == "" && filter == "all") {
         this.searchResult = [];
       } 
-
-      this.applySearchFilter();
-    },
-    fillHistory() {
-        this.$http.get(config.API_BASE_URL + "foodhistory").then((response) => {
-          this.history = response.data;
-        });
     },
     async addCalories(itm) {
 

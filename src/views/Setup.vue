@@ -195,7 +195,7 @@ export default defineComponent({
         if (response.data.user.calories > 0) {
           this.showToast("Setup succesful!");
           store.dispatch("updateUser", response.data.user).then(() => {
-             this.$router.push('/tabs/weight');
+             this.$router.push('/tabs/overview');
           });
         } else {
           this.showToast("Setup failed!");
