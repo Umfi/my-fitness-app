@@ -101,20 +101,16 @@ router.beforeEach((to, from, next) => {
       return
     }
 
-    store.dispatch("valid").then(() => {
-        if (store.getters.isLoggedIn) {
-
-          if (store.getters.isSetup) {
-            next()
-          } else {
-            next('/setup')
-          }
-          
-          return
-        }
-        next('/login')
+    if (store.getters.isLoggedIn) {
+      if (store.getters.isSetup) {
+        next()
+      } else {
+        next('/setup')
       }
-    )
+      
+      return
+    }
+    next('/login')
   } else {
     if (store.getters.isLoggedIn) {
       next('/')

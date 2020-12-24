@@ -75,6 +75,7 @@
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonRow, IonCol, IonList, IonItem, IonInput, IonLabel, modalController, toastController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { config } from "../config.js"
+import $axios from "../axios.js"
 
 export default defineComponent({
   name: 'ModalManageProduct',
@@ -122,7 +123,7 @@ export default defineComponent({
 
         if (this.$props.mode == "create") 
         {
-          this.$http.post(config.API_BASE_URL + "createProduct", {
+          $axios.post(config.API_BASE_URL + "createProduct", {
               name: this.name,
               calories: this.calories,
               carbohydrate: this.carbohydrate,
@@ -142,7 +143,7 @@ export default defineComponent({
         } 
         else if (this.$props.mode == "edit") 
         {
-          this.$http.post(config.API_BASE_URL + "editProduct", {
+          $axios.post(config.API_BASE_URL + "editProduct", {
                 name: this.name,
                 calories: this.calories,
                 carbohydrate: this.carbohydrate,

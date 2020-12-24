@@ -186,6 +186,7 @@ import { Capacitor, Plugins } from '@capacitor/core';
 const { Keyboard } = Plugins;
 
 import { config } from "../config.js"
+import $axios from "../axios.js"
 
 export default defineComponent({
   name: "Calories",
@@ -254,7 +255,7 @@ export default defineComponent({
         
       this.isSearching = true;
 
-      this.$http.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm)
+      $axios.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm)
         .then((response) => {
           this.searchResult = response.data.searchResult;
           this.history = response.data.searchHistory;
@@ -311,7 +312,7 @@ export default defineComponent({
               text: 'Okay',
               handler: () => {
                 
-                this.$http.post(config.API_BASE_URL + "deleteProduct", {
+                $axios.post(config.API_BASE_URL + "deleteProduct", {
                     name: item.name,
                     id: item.id
                 }).then((response) => {

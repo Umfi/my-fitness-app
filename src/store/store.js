@@ -1,6 +1,5 @@
 import { createStore } from 'vuex';
-
-import axios from 'axios'
+import $axios from "../axios.js";
 import { config } from "../config.js"
 
 
@@ -25,6 +24,9 @@ export const store = createStore({
         state.user = payload.user
         state.is_setup = payload.is_setup
       },
+      auth_refresh(state, payload) {
+        state.access_token = payload.access_token
+      },
       auth_error(state){
         state.status = 'error'
       },
@@ -38,7 +40,7 @@ export const store = createStore({
         return new Promise((resolve, reject) => {
           commit('auth_request')
 
-          axios({url: config.API_BASE_URL + 'login', data: user, method: 'POST' })
+          $axios({url: config.API_BASE_URL + 'login', data: user, method: 'POST' })
           .then(resp => {
             const access_token = resp.data.access_token
             const user =  resp.data.user;
@@ -47,7 +49,6 @@ export const store = createStore({
             localStorage.setItem('access_token', access_token)
             localStorage.setItem('is_setup', is_setup)
 
-            axios.defaults.headers.common['Authorization'] = "Bearer " + access_token;
             commit('auth_success', {
               access_token: access_token,
               user: user,
@@ -63,61 +64,70 @@ export const store = createStore({
         })
     },
     register({commit}, user){
-        return new Promise((resolve, reject) => {
-          commit('auth_request')
-          axios({url: config.API_BASE_URL + 'register', data: user, method: 'POST' })
-          .then(resp => {
-            resolve(resp)
+      return new Promise((resolve, reject) => {
+        commit('auth_request')
+        $axios({url: config.API_BASE_URL + 'register', data: user, method: 'POST' })
+        .then(resp => {
+          resolve(resp)
+        })
+        .catch(err => {
+          commit('auth_error', err)
+          localStorage.removeItem('access_token')
+          reject(err)
+        })
+      })
+    },
+    logout({commit}){
+      return new Promise((resolve) => {
+        $axios({url: config.API_BASE_URL + 'logout', method: 'POST' })
+        commit('logout')
+        localStorage.removeItem('access_token')
+        delete $axios.defaults.headers.common['Authorization']
+        resolve()
+      })
+    },
+    forcelogout({commit}){
+      return new Promise((resolve) => {
+        commit('logout')
+        localStorage.removeItem('access_token')
+        delete $axios.defaults.headers.common['Authorization']
+        resolve()
+      })
+    },
+    refreshToken({commit, dispatch}){
+      return new Promise((resolve, reject) => {
+
+        $axios({url: config.API_BASE_URL + 'refresh', method: 'POST' })
+        .then(resp => {
+          const access_token = resp.data.access_token
+
+          localStorage.setItem('access_token', access_token)
+
+          commit('auth_refresh', {
+            access_token: access_token
           })
-          .catch(err => {
-            commit('auth_error', err)
-            localStorage.removeItem('access_token')
+          resolve(resp)
+        })
+        .catch((err) => {
+          dispatch('forcelogout').then(() => {
             reject(err)
           })
         })
-      },
-      logout({commit}){
-        return new Promise((resolve) => {
-          axios({url: config.API_BASE_URL + 'logout', method: 'POST' })
-          commit('logout')
-          //localStorage.removeItem('access_token')
-          //delete axios.defaults.headers.common['Authorization']
+      })
+    },
+    updateUser({commit}, user){
+      return new Promise((resolve) => {
+          
+          const is_setup = user.calories > 0 ? 'true' : 'false'; 
+          localStorage.setItem('is_setup', is_setup)
+
+          commit('auth_updateuser', {
+            user: user,
+            is_setup: is_setup
+          })
+
           resolve()
-        })
-      },
-      valid({commit}){
-        return new Promise((resolve, reject) => {
-          axios({url: config.API_BASE_URL + 'valid', method: 'POST' })
-          .then(resp => {
-            
-            if (!resp.data.valid) {
-              commit('logout')
-              localStorage.removeItem('access_token')
-              delete axios.defaults.headers.common['Authorization']
-            }
-
-            resolve()
-         }).catch(err => {
-            commit('logout')
-            //localStorage.removeItem('access_token')
-            //delete axios.defaults.headers.common['Authorization']
-            reject(err)
-          })
-        })
-      },
-      updateUser({commit}, user){
-        return new Promise((resolve) => {
-            
-            const is_setup = user.calories > 0 ? 'true' : 'false'; 
-            localStorage.setItem('is_setup', is_setup)
-
-            commit('auth_updateuser', {
-              user: user,
-              is_setup: is_setup
-            })
-
-            resolve()
-        })
+      })
     },
   },
   getters : {

@@ -27,6 +27,7 @@
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonRow, IonCol, IonList, IonItem, IonInput, modalController, toastController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import { config } from "../config.js"
+import $axios from "../axios.js"
 
 export default defineComponent({
   name: 'ModalAddCalories',
@@ -53,7 +54,7 @@ export default defineComponent({
       trackItem() {
         var item = this.$props.item;
 
-         this.$http.post(config.API_BASE_URL + "track", {
+         $axios.post(config.API_BASE_URL + "track", {
             name: item.name,
             brand: item.brand,
             calories: item.calories,

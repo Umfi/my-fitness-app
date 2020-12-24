@@ -143,6 +143,7 @@ import {
 } from "@ionic/vue";
 
 import { config } from "../config.js"
+import $axios from "../axios.js"
 
 export default defineComponent({
   name: "Overview",
@@ -189,7 +190,7 @@ export default defineComponent({
   },
   methods: {
     doRefresh(event) {
-      this.$http
+      $axios
         .post(config.API_BASE_URL + "dailyCalories")
         .then((response) => {
           if (response.data) {

@@ -1,10 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router';
+import router from './router'
 import { store }from './store/store.js'
 
-import { IonicVue } from '@ionic/vue';
-import axios from 'axios'
+import { IonicVue } from '@ionic/vue'
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -31,17 +30,6 @@ const app = createApp(App)
   .use(router)
   .use(store);
 
-app.config.globalProperties.$http = axios;
-const access_token = localStorage.getItem('access_token')
-if (access_token) {
-  app.config.globalProperties.$http.defaults.headers.common['Authorization'] = "Bearer " + access_token;
-}
-/*
-app.config.globalProperties.$http.defaults.headers.common['Content-Type'] = 'application/json';
-app.config.globalProperties.$http.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-app.config.globalProperties.$http.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
-app.config.globalProperties.$http.defaults.headers.common['Accept'] = 'application/json, text/plain';
-*/
 router.isReady().then(() => {
   app.mount('#app');
 });

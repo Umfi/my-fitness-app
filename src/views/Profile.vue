@@ -141,6 +141,7 @@ import {
 import { defineComponent } from "vue";
 
 import { config } from "../config.js"
+import $axios from "../axios.js"
 
 export default defineComponent({
   name: "Profile",
@@ -179,7 +180,7 @@ export default defineComponent({
   },
   created() {
    
-     this.$http.get(config.API_BASE_URL + "user")
+     $axios.get(config.API_BASE_URL + "user")
           .then((response) => {
             if (response.data[0]) {
               if (response.data[0].calories != null) {
@@ -203,7 +204,7 @@ export default defineComponent({
     },
     updateProfile: function () {
 
-      this.$http.post(config.API_BASE_URL + "user", {
+      $axios.post(config.API_BASE_URL + "user", {
             'gender' : this.gender,
             'dob' : this.dob,
             'weight': this.weight,
