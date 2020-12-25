@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { store } from '../store/store.js'
+import { isLoggedIn, isSetup } from "../service/AuthService.js";
+
 
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
@@ -94,6 +95,7 @@ const router = createRouter({
 
 
 router.beforeEach((to, from, next) => {
+
   if(to.matched.some(record => record.meta.requiresAuth)) {
 
     if (to.name == "Setup") {
@@ -101,22 +103,30 @@ router.beforeEach((to, from, next) => {
       return
     }
 
-    if (store.getters.isLoggedIn) {
-      if (store.getters.isSetup) {
-        next()
+    isLoggedIn().then(res => {
+      if (res) {
+        isSetup().then(set => {
+          if (set) {
+            next()
+          } else {
+            next('/setup')
+          }
+        })
       } else {
-        next('/setup')
+        next('/login')
       }
-      
-      return
-    }
-    next('/login')
+    })
+
   } else {
-    if (store.getters.isLoggedIn) {
-      next('/')
-      return
-    }
-    next()
+
+    isLoggedIn().then(res => {
+      if (res) {
+        next('/')
+      } else {
+        next()
+      }
+    })
+    
   }
 })
 

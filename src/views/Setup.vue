@@ -129,14 +129,12 @@ import {
   IonSelect,
   IonSelectOption,
   IonDatetime,
-  toastController
+  toastController,
+  loadingController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { store } from '../store/store.js'
-
-import { config } from "../config.js"
-import $axios from "../axios.js"
+import { setup } from "../service/AuthService.js";
 
 export default defineComponent({
   name: "Setup",
@@ -181,9 +179,17 @@ export default defineComponent({
       });
       toast.present();
     },
-    setupProfile: function () {
+    async showLoading() {
+      const loading = await loadingController.create({
+        message: "Please wait...",
+      });
 
-      $axios.post(config.API_BASE_URL + "user", {
+      await loading.present();
+    },
+    async setupProfile() {
+      this.showLoading();
+      
+      let setupSuccessful = await setup({
             'gender' : this.gender,
             'dob' : this.dob,
             'weight': this.weight,
@@ -191,19 +197,15 @@ export default defineComponent({
             'activity' : this.activity,
             'goal':  this.goal,
             'language' : 'en'
-      }).then((response) => {
-        
-        if (response.data.user.calories > 0) {
-          this.showToast("Setup succesful!");
-          store.dispatch("updateUser", response.data.user).then(() => {
-             this.$router.push('/tabs/overview');
-          });
-        } else {
-          this.showToast("Setup failed!");
-        }
-      }).catch(() => {
-        this.showToast("Update failed!");
       });
+
+      loadingController.dismiss();
+      if (setupSuccessful) {
+       this.$router.push('/tabs/overview');
+       this.showToast("Setup succesful!");
+      } else {
+        this.showToast("Setup failed!");
+      }
     },
   },
 });

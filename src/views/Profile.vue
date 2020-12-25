@@ -69,7 +69,9 @@
               </ion-item>
 
               <ion-item>
-                <ion-label position="stacked" color="primary">Activity level</ion-label>
+                <ion-label position="stacked" color="primary"
+                  >Activity level</ion-label
+                >
                 <ion-select
                   v-model="activity"
                   name="activity"
@@ -77,10 +79,16 @@
                   required
                 >
                   <ion-select-option value="0">little active</ion-select-option>
-                  <ion-select-option value="1">slightly active</ion-select-option>
-                  <ion-select-option value="2">moderately active</ion-select-option>
+                  <ion-select-option value="1"
+                    >slightly active</ion-select-option
+                  >
+                  <ion-select-option value="2"
+                    >moderately active</ion-select-option
+                  >
                   <ion-select-option value="3">very active</ion-select-option>
-                  <ion-select-option value="4">extremely active</ion-select-option>
+                  <ion-select-option value="4"
+                    >extremely active</ion-select-option
+                  >
                 </ion-select>
               </ion-item>
 
@@ -93,17 +101,19 @@
                   required
                 >
                   <ion-select-option value="0">Fat loss</ion-select-option>
-                  <ion-select-option value="1">Muscle building</ion-select-option>
+                  <ion-select-option value="1"
+                    >Muscle building</ion-select-option
+                  >
                   <ion-select-option value="2">Keep weight</ion-select-option>
                 </ion-select>
               </ion-item>
-              
             </ion-list>
-
 
             <ion-row responsive-sm>
               <ion-col>
-                <ion-button type="submit" expand="block">Update calories requirement</ion-button>
+                <ion-button type="submit" expand="block"
+                  >Update calories requirement</ion-button
+                >
               </ion-col>
             </ion-row>
           </form>
@@ -136,12 +146,14 @@ import {
   IonSelect,
   IonSelectOption,
   IonDatetime,
-  toastController
+  toastController,
+  loadingController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { config } from "../config.js"
 import $axios from "../axios.js"
+import { setup } from "../service/AuthService.js";
 
 export default defineComponent({
   name: "Profile",
@@ -166,7 +178,7 @@ export default defineComponent({
     IonRow,
     IonSelect,
     IonSelectOption,
-    IonDatetime
+    IonDatetime,
   },
   data() {
     return {
@@ -175,24 +187,22 @@ export default defineComponent({
       weight: null,
       height: null,
       activity: null,
-      goal: null
+      goal: null,
     };
   },
   created() {
-   
-     $axios.get(config.API_BASE_URL + "user")
-          .then((response) => {
-            if (response.data[0]) {
-              if (response.data[0].calories != null) {
-                  this.gender = response.data[0].details.gender.toString();
-                  this.dob = response.data[0].details.birthday;
-                  this.weight = response.data[0].details.weight;
-                  this.height = response.data[0].details.height;
-                  this.activity = response.data[0].details.activity.toString();
-                  this.goal = response.data[0].details.goal.toString();
-              }
-            }
-          })
+    $axios.get(config.API_BASE_URL + "user").then((response) => {
+      if (response.data[0]) {
+        if (response.data[0].calories != null) {
+          this.gender = response.data[0].details.gender.toString();
+          this.dob = response.data[0].details.birthday;
+          this.weight = response.data[0].details.weight;
+          this.height = response.data[0].details.height;
+          this.activity = response.data[0].details.activity.toString();
+          this.goal = response.data[0].details.goal.toString();
+        }
+      }
+    });
   },
   methods: {
     async showToast(msg) {
@@ -202,26 +212,32 @@ export default defineComponent({
       });
       toast.present();
     },
-    updateProfile: function () {
-
-      $axios.post(config.API_BASE_URL + "user", {
-            'gender' : this.gender,
-            'dob' : this.dob,
-            'weight': this.weight,
-            'height' : this.height,
-            'activity' : this.activity,
-            'goal':  this.goal,
-            'language' : 'en'
-      }).then((response) => {
-
-        if (response.data.user.calories > 0) {
-          this.showToast("Update succesful!");
-        } else {
-          this.showToast("Update failed!");
-        }
-      }).catch(() => {
-            this.showToast("Update failed!");
+    async showLoading() {
+      const loading = await loadingController.create({
+        message: "Please wait...",
       });
+
+      await loading.present();
+    },
+    async updateProfile() {
+      this.showLoading();
+
+      let updateSuccessful = await setup({
+        gender: this.gender,
+        dob: this.dob,
+        weight: this.weight,
+        height: this.height,
+        activity: this.activity,
+        goal: this.goal,
+        language: "en",
+      });
+
+      loadingController.dismiss();
+      if (updateSuccessful) {
+        this.showToast("Update succesful!");
+      } else {
+        this.showToast("Update failed!");
+      }
     },
   },
 });

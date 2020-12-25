@@ -182,9 +182,6 @@ export default defineComponent({
       fatValue: 0
     };
   },
-  created() {
-    this.doRefresh(false);
-  },
   ionViewWillEnter() {
     this.doRefresh(false);
   },

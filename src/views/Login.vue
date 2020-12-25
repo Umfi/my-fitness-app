@@ -91,8 +91,11 @@ import {
   IonCol,
   IonRow,
   toastController,
+  loadingController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
+
+import { login } from "../service/AuthService.js";
 
 export default defineComponent({
   name: "Login",
@@ -159,24 +162,33 @@ export default defineComponent({
       });
       toast.present();
     },
-    login: function () {
+    async showLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+        });
+
+      await loading.present();
+    },
+    async login() {
+      this.showLoading();
       this.onceSubmitted = true;
 
       let email = this.email;
       let password = this.password;
-      this.$store
-        .dispatch("login", { email, password })
-        .then(() => {
-          this.$router.push("/tabs/calories");
+      let loginSuccessful = await login({ email, password });
+
+      loadingController.dismiss()
+      if (loginSuccessful) {
+          this.$router.push("/tabs/overview");
           this.showToast("Login succesful!");
           this.onceSubmitted = false;
           this.email = "";
           this.password = "";
-        })
-        .catch(() => {
+      } else {
           this.password = "";
           this.showToast("Login failed!");
-        });
+      }  
     },
   },
 });
