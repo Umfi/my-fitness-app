@@ -9,8 +9,8 @@
       "launchShowDuration": 3000,
       "launchAutoHide": true,
       "showSpinner": true,
-      "splashFullScreen": true,
-      "splashImmersive": true
+      "splashFullScreen": false,
+      "splashImmersive": false
     }
   },
   "cordova": {},

@@ -207,7 +207,11 @@ export default defineComponent({
               if (event) event.target.complete();
             }
           }
-        });
+        }).catch(() => {
+           setTimeout(() => {
+            this.doRefresh(event);
+          }, 1000);
+        })
     },
   },
 });
