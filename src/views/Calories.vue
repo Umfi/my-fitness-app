@@ -311,7 +311,7 @@ export default defineComponent({
           this.isSearching = false;
 
 
-          if ((this.searchResult.length == 0 && searchTerm != "") || (this.history.length == 0 && searchTerm != ""))  {
+          if ((this.searchResult.length == 0 && searchTerm != "" && this.searchFilter == "all") || (this.history.length == 0 && searchTerm != "" && this.searchFilter == "history"))  {
             this.showToast("No products found.");
           }
         });
