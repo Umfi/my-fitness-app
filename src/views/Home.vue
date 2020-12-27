@@ -12,7 +12,7 @@
           <ion-label>Overview</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="workouts" href="/tabs/workouts" disabled>
+        <ion-tab-button tab="workouts" href="/tabs/workouts">
           <ion-icon :icon="barbell"></ion-icon>
           <ion-label>Workouts</ion-label>
         </ion-tab-button>

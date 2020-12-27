@@ -237,3 +237,65 @@ http://ionicframework.com/docs/theming/ */
     white-space: normal !important;
   }
 }
+
+.event_shoulder {
+  background-color: #3C52B4;
+  color: white;
+}
+.event_chest {
+  background-color: #119411;
+  color: white;
+}
+.event_back {
+  background-color: #3C551C;
+  color: white;
+}
+.event_arms {
+  background-color: #a7a548;
+  color: white;
+}
+.event_abs {
+  background-color: #A28CD9;
+  color: white;
+}
+.event_legs {
+  background-color: #CB638F;
+  color: white;
+}
+.event_cardio {
+  background-color: #582879;
+  color: white;
+}
+.event_misc {
+  background-color: #15293F;
+  color: white;
+}
+
+.muscle-groups {
+  height: 40%;
+  padding-top: 5%;
+}
+
+.muscle-groups svg g[id] path {
+  opacity: 0.2;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.muscle-groups svg g g[id].active path {
+  cursor: pointer;
+  opacity: 0.5;
+  fill: #00bcd4 !important;
+}
+
+.vuecal--month-view .vuecal__cell-content {
+  justify-content: flex-start;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.vuecal--month-view .vuecal__cell-date {padding: 4px;}
+.vuecal--month-view .vuecal__no-event {display: none;}
+
+.vuecal__cell--current, .vuecal__cell--today {
+  background-color: #4c8dff3b;
+}
