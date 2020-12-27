@@ -12,7 +12,7 @@
 
     <ion-row >
       <ion-col size="12">
-        <ion-searchbar v-model="searchTerm" @change="search($event.target.value)"></ion-searchbar>
+        <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)"></ion-searchbar>
       </ion-col>
         <ion-col size="12">
          <ion-segment @ionChange="searchFilterChanged($event.target.value)" :value="searchFilter">
@@ -41,8 +41,12 @@
             <ion-label>
               <ion-grid>
                 <ion-row>
-                  <ion-col size="12">
+                  <ion-col size="11">
                     <strong>{{ item.name }} (  {{ parseInt(item.calories) }} kcal )</strong>
+                  </ion-col>
+                  <ion-col size="1">
+                    <ion-icon v-if="item.editable && item.deletable" :icon="personCircleOutline"></ion-icon>
+                    <ion-icon v-if="!item.editable && item.deletable" :icon="timeOutline"></ion-icon>
                   </ion-col>
                 </ion-row>
                 <ion-row>
@@ -72,6 +76,17 @@
 
         </ion-item-sliding>
       </ion-list>
+
+      <ion-infinite-scroll v-if="searchResult && !isSearching && searchFilter == 'all'"
+        @ionInfinite="loadData($event)" 
+        threshold="100px" 
+        id="infinite-scroll"
+      >
+        <ion-infinite-scroll-content
+          loading-spinner="bubbles"
+          loading-text="Loading more data...">
+        </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
 
 
       <ion-list v-if="history && !isSearching && searchFilter == 'history'" class="search-history-list">
@@ -171,12 +186,14 @@ import {
   IonItemSliding,
   IonRefresher,
   IonRefresherContent,
+  IonInfiniteScroll, 
+  IonInfiniteScrollContent,
   modalController,
   alertController,
   toastController
 } from "@ionic/vue";
 
-import { add, create, trash } from "ionicons/icons";
+import { add, create, trash, timeOutline, personCircleOutline } from "ionicons/icons";
 
 import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
@@ -215,6 +232,8 @@ export default defineComponent({
     IonItemSliding,
     IonRefresher,
     IonRefresherContent,
+    IonInfiniteScroll, 
+    IonInfiniteScrollContent,
   },
   data() {
     return {
@@ -223,21 +242,26 @@ export default defineComponent({
       searchTerm: "",
       searchFilter: "all",
       isSearching: false,
+      page: 1,
+      maxResults: 400
     };
   },
   setup() {
     return {
       add,
       create,
-      trash
+      trash,
+      timeOutline,
+      personCircleOutline
     };
   },
   created() {
+    this.page = 1;
     this.doRefresh(false);
   },
   methods: {
     doRefresh(event) {
-        this.search(this.searchTerm);
+        this.search(this.searchTerm, 1);
         if (event) event.target.complete();
     },
     async showToast(msg) {
@@ -247,19 +271,42 @@ export default defineComponent({
       });
       toast.present();
     },
-    search(searchTerm) {
+    loadData(ev) {
+      setTimeout(() => {
+        this.page += 1;
+        this.search(this.searchTerm, this.page);
+        ev.target.complete();
+
+        // App logic to determine if all data is loaded
+        // and disable the infinite scroll
+        if (this.searchResult.length == this.maxResults) {
+          ev.target.disabled = true;
+        }
+      }, 500);
+    },
+    search(searchTerm, page) {
 
       if (Capacitor.isPluginAvailable('Keyboard')) {
         Keyboard.hide();
       }
-        
-      this.isSearching = true;
-
-      $axios.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm)
+       
+      if (page == 1) {
+        this.isSearching = true;
+      } 
+      
+      $axios.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm + "&page=" + page)
         .then((response) => {
-          this.searchResult = response.data.searchResult;
+          
+          if (page > 1) {
+            this.searchResult.push(...response.data.searchResult);
+          } else {
+            this.page = 1;
+            this.searchResult = response.data.searchResult;
+          }
+          
           this.history = response.data.searchHistory;
-
+          this.maxResults = response.data.maxResults;
+          
           this.filterHistory(searchTerm);
           this.isSearching = false;
 
