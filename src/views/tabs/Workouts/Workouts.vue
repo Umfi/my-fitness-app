@@ -47,8 +47,7 @@ import {
   modalController,
 } from "@ionic/vue";
 
-import { config } from "@/config.js";
-import $axios from "@/axios.js";
+import { getAllWorkouts } from "@/service/WorkoutService.js";
 
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
@@ -78,20 +77,18 @@ export default defineComponent({
     this.doRefresh(false);
   },
   methods: {
-    doRefresh(event) {
-      $axios
-        .get(config.API_BASE_URL + "trainings")
-        .then((response) => {
-          if (response.data) {
-            this.events = response.data;
-            if (event) event.target.complete();
-          }
-        })
-        .catch(() => {
-          setTimeout(() => {
+    async doRefresh(event) {
+
+      const workouts = await getAllWorkouts();
+
+      if (workouts != null) {
+        this.events = workouts;
+        if (event) event.target.complete();
+      } else {
+        setTimeout(() => {
             this.doRefresh(event);
           }, 1000);
-        });
+      }
     },
     async onEventClick(event, e) {
       // Prevent navigating to narrower view (default vue-cal behavior).

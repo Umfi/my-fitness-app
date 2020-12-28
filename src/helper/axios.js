@@ -1,7 +1,7 @@
 import axios from 'axios'
-import router from './router/index.js'
-import { logout, refreshToken } from "./service/AuthService.js";
-import { get } from "./service/storage.js";
+import router from '../router/index.js'
+import { logout, refreshToken } from "../service/AuthService.js";
+import { get } from "./storage.js";
 
 const $axios = axios.create();
 

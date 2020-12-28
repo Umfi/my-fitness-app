@@ -134,7 +134,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { setup } from "@/service/AuthService.js";
+import { updateUserData } from "@/service/UserService.js";
 
 export default defineComponent({
   name: "Setup",
@@ -189,7 +189,7 @@ export default defineComponent({
     async setupProfile() {
       this.showLoading();
       
-      let setupSuccessful = await setup({
+      let setupSuccessful = await updateUserData({
             'gender' : this.gender,
             'dob' : this.dob,
             'weight': this.weight,

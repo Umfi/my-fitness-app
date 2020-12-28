@@ -254,8 +254,9 @@ import {
   alertController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { config } from "@/config.js";
-import $axios from "@/axios.js";
+
+import { storeWorkout, updateWorkout, removeWorkout } from "@/service/WorkoutService.js";
+
 
 export default defineComponent({
   name: "ModalManageWorkout",
@@ -302,7 +303,7 @@ export default defineComponent({
       });
       toast.present();
     },
-    trackWorkout() {
+    async trackWorkout() {
       var item = this.$props.item;
 
       if (!this.shoulders && !this.chest && !this.back && !this.arms && !this.abs && !this.legs && !this.cardio) {
@@ -310,8 +311,7 @@ export default defineComponent({
         return;
       }
 
-      $axios
-        .post(config.API_BASE_URL + "createTraining", {
+      const newEvent = await storeWorkout({
           date: item.date,
           shoulders: (this.shoulders ? 1 : 0),
           chest: (this.chest ? 1 : 0),
@@ -320,81 +320,55 @@ export default defineComponent({
           abs: (this.abs ? 1 : 0),
           legs: (this.legs ? 1 : 0),
           cardio: (this.cardio ? 1 : 0),
-        })
-        .then((response) => {
-
-          if (response.data) {
-
-            var event = {
-                date: response.data.date,
-                start: response.data.start,
-                end: response.data.end,
-                id: response.data.id, 
-                title: response.data.title, 
-                class: response.data.class,
-                shoulders: response.data.shoulders,
-                chest: response.data.chest,
-                back: response.data.back,
-                arms: response.data.arms,
-                legs: response.data.legs,
-                abs: response.data.abs,
-                cardio: response.data.cardio
-            }
-
-            this.$props.parent.events.push(event);
-            
-            this.showToast("Workout tracked.");
-            this.dismissModal();
-          } else {
-            this.showToast("Couldn't track workout.");
-          }
-        }).catch(() => {
-          this.showToast("Couldn't track workout.");
         });
+      
+      if (newEvent != null) {
+        this.$props.parent.events.push(newEvent);   
+        this.showToast("Workout tracked.");
+        this.dismissModal();
+      } else {
+        this.showToast("Couldn't track workout.");
+      }
     },
-    editWorkout() {
+    async editWorkout() {
       if (!this.shoulders && !this.chest && !this.back && !this.arms && !this.abs && !this.legs && !this.cardio) {
         this.showToast("No muscle group selected.");
         return;
       }
 
-      $axios
-        .post(config.API_BASE_URL + "editTraining", {
-          id: this.id,
-          shoulders: (this.shoulders ? 1 : 0),
-          chest: (this.chest ? 1 : 0),
-          back: (this.back ? 1 : 0),
-          arms: (this.arms ? 1 : 0),
-          abs: (this.abs ? 1 : 0),
-          legs: (this.legs ? 1 : 0),
-          cardio: (this.cardio ? 1 : 0),
-        })
-        .then((response) => {
-
-          if (response.data) {
-
-            for (var i=0; i<this.$props.parent.events.length; i++) {
-              if (this.$props.parent.events[i].id == this.id) {
-                this.$props.parent.events[i].title = response.data[0].title;
-                this.$props.parent.events[i].class = response.data[0].class;
-                this.$props.parent.events[i].shoulders = response.data[0].shoulders;
-                this.$props.parent.events[i].chest = response.data[0].chest;
-                this.$props.parent.events[i].back = response.data[0].back;
-                this.$props.parent.events[i].arms = response.data[0].arms;
-                this.$props.parent.events[i].legs = response.data[0].legs;
-                this.$props.parent.events[i].abs = response.data[0].abs;
-                this.$props.parent.events[i].cardio = response.data[0].cardio;
-              }
-            }
-
-            this.showToast("Workout updated.");
-            this.dismissModal();
-          } else {
-            this.showToast("Couldn't update workout.");
+      const updateEvent = await updateWorkout({
+        id: this.id,
+        shoulders: (this.shoulders ? 1 : 0),
+        chest: (this.chest ? 1 : 0),
+        back: (this.back ? 1 : 0),
+        arms: (this.arms ? 1 : 0),
+        abs: (this.abs ? 1 : 0),
+        legs: (this.legs ? 1 : 0),
+        cardio: (this.cardio ? 1 : 0),
+      });
+      
+      if (updateEvent != null) {
+        
+        for (var i=0; i<this.$props.parent.events.length; i++) {
+          if (this.$props.parent.events[i].id == this.id) {
+            this.$props.parent.events[i].title = updateEvent.title;
+            this.$props.parent.events[i].class = updateEvent.class;
+            this.$props.parent.events[i].shoulders = updateEvent.shoulders;
+            this.$props.parent.events[i].chest = updateEvent.chest;
+            this.$props.parent.events[i].back = updateEvent.back;
+            this.$props.parent.events[i].arms = updateEvent.arms;
+            this.$props.parent.events[i].legs = updateEvent.legs;
+            this.$props.parent.events[i].abs = updateEvent.abs;
+            this.$props.parent.events[i].cardio = updateEvent.cardio;
           }
-        }).catch(() => {
-          this.showToast("Couldn't update workout.");
-        });
+        }
+
+        this.showToast("Workout updated.");
+        this.dismissModal();
+
+      } else {
+        this.showToast("Couldn't update workout.");
+      }
     },
     async deleteWorkout() {
 
@@ -412,26 +386,20 @@ export default defineComponent({
             },
             {
               text: 'Okay',
-              handler: () => {
+              handler: async () => {
                 
-                $axios.post(config.API_BASE_URL + "deleteTraining/" + deleteID)
-                  .then((response) => {
+                const removed = await removeWorkout(deleteID);
 
-                    if (response.data) {
-
-                      this.$props.parent.events = this.$props.parent.events.filter(function( obj ) {
-                          return obj.id !== deleteID;
-                      });
-
-                      this.showToast("Workout deleted.");
-                      this.dismissModal();
-                    } else {
-                      this.showToast("Couldn't delete workout.");
-                    }
-                  }).catch(() => {
-                    this.showToast("Couldn't delete workout.");
+                if (removed) {
+                  this.$props.parent.events = this.$props.parent.events.filter(function( obj ) {
+                      return obj.id !== deleteID;
                   });
-                
+
+                  this.showToast("Workout deleted.");
+                  this.dismissModal();
+                } else {
+                  this.showToast("Couldn't delete workout.");
+                }
               },
             },
           ],

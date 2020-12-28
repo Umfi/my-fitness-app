@@ -202,8 +202,7 @@ import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
-import { config } from "@/config.js"
-import $axios from "@/axios.js"
+import { searchProduct, removeProduct } from "@/service/ProductService.js";
 
 export default defineComponent({
   name: "Calories",
@@ -284,7 +283,7 @@ export default defineComponent({
         }
       }, 500);
     },
-    search(searchTerm, page) {
+    async search(searchTerm, page) {
 
       if (Capacitor.isPluginAvailable('Keyboard')) {
         Keyboard.hide();
@@ -294,18 +293,17 @@ export default defineComponent({
         this.isSearching = true;
       } 
       
-      $axios.get(config.API_BASE_URL + "foodsearch?name=" + searchTerm + "&page=" + page)
-        .then((response) => {
-          
+      const results = await searchProduct(searchTerm, page);
+      if (results != null) {
           if (page > 1) {
-            this.searchResult.push(...response.data.searchResult);
+            this.searchResult.push(...results.searchResult);
           } else {
             this.page = 1;
-            this.searchResult = response.data.searchResult;
+            this.searchResult = results.searchResult;
           }
           
-          this.history = response.data.searchHistory;
-          this.maxResults = response.data.maxResults;
+          this.history = results.searchHistory;
+          this.maxResults = results.maxResults;
           
           this.filterHistory(searchTerm);
           this.isSearching = false;
@@ -314,8 +312,7 @@ export default defineComponent({
           if ((this.searchResult.length == 0 && searchTerm != "" && this.searchFilter == "all") || (this.history.length == 0 && searchTerm != "" && this.searchFilter == "history"))  {
             this.showToast("No products found.");
           }
-        });
-      
+      }
     },
     searchFilterChanged(filter) {
       this.searchFilter = filter;
@@ -343,44 +340,6 @@ export default defineComponent({
         })
       return modal.present();
     },
-    async deleteItem(item) {
-
-      const alert = await alertController
-        .create({
-          header: 'Delete Item!',
-          message: 'Do you really want to delete this item from your history?',
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel',
-              cssClass: 'secondary',
-            },
-            {
-              text: 'Okay',
-              handler: () => {
-                
-                $axios.post(config.API_BASE_URL + "deleteProduct", {
-                    name: item.name,
-                    id: item.id
-                }).then((response) => {
-                  if (response.data.status) {
-                    this.showToast("Product deleted.");
-
-                    this.doRefresh(false);
-
-                  } else {
-                    this.showToast("Couldn't delete product.");
-                  }
-                }).catch(() => {
-                  this.showToast("Couldn't delete product.");
-                });
-
-              },
-            },
-          ],
-        });
-      return alert.present();
-    },
     async addProduct() {
       const modal = await modalController
         .create({
@@ -406,6 +365,40 @@ export default defineComponent({
           },
         })
       return modal.present();
+    },
+    async deleteItem(item) {
+
+      const alert = await alertController
+        .create({
+          header: 'Delete Item!',
+          message: 'Do you really want to delete this item from your history?',
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary',
+            },
+            {
+              text: 'Okay',
+              handler: async () => {
+                
+                const deleted = await removeProduct({
+                    name: item.name,
+                    id: item.id
+                });
+
+                if (deleted) {
+                  this.showToast("Product deleted.");
+                  this.doRefresh(false);
+                } else {
+                  this.showToast("Couldn't delete product.");
+                }
+
+              },
+            },
+          ],
+        });
+      return alert.present();
     },
   },
 });

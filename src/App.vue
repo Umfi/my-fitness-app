@@ -38,7 +38,7 @@ import { logout, isLoggedIn } from "@/service/AuthService.js";
 
 
 import { config } from "@/config.js";
-import $axios from "@/axios.js";
+import $axios from "@/helper/axios.js";
 
 import { Plugins } from "@capacitor/core";
 

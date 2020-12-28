@@ -203,8 +203,8 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { config } from "@/config.js"
-import $axios from "@/axios.js"
+import { getDailyCalories, getMonthlyWorkoutSummary } from "@/service/StatsService.js";
+
 
 export default defineComponent({
   name: "Overview",
@@ -288,75 +288,56 @@ export default defineComponent({
   ionViewWillEnter() {
     this.doRefresh(false);
   },
-  methods: {
-  async doRefresh(event) {
-      this.loading = true;
+  methods: 
+  {
+    async doRefresh(event) {
+        this.loading = true;
 
-      const loadCalories = await this.loadCaloriesSummary();
-      const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
-      
-      if (!loadCalories || !loadMonthlyWorkout) {
-        setTimeout(() => {
-          this.doRefresh(event);
-        }, 1000);
-      } else {
-        window.dispatchEvent(new Event('resize'));
-        this.loading = false;
-        if (event) 
-          event.target.complete();
-      }
-  },
-  async loadCaloriesSummary() {
-
-    const data = await $axios(config.API_BASE_URL + 'dailyCalories')
-    .then(response => {
-
-         if (response.data) {
-
-            if (response.data.user != null) {
-              this.user = response.data.user;
-              this.calories = response.data.calories;
-              this.protein = response.data.protein;
-              this.carbohydrate = response.data.carbohydrate;
-              this.fat = response.data.fat;
-
-              this.caloriesValue = parseInt(this.calories) / parseInt(this.user.calories);
-              this.proteinValue = parseInt(this.protein) / parseInt(this.user.protein);
-              this.carbohydrateValue = parseInt(this.carbohydrate) / parseInt(this.user.carbohydrate);
-              this.fatValue = parseInt(this.fat) / parseInt(this.user.fat);
-
-            }
+        const loadCalories = await this.loadCaloriesSummary();
+        const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
+        
+        if (!loadCalories || !loadMonthlyWorkout) {
+          setTimeout(() => {
+            this.doRefresh(event);
+          }, 1000);
+        } else {
+          window.dispatchEvent(new Event('resize'));
+          this.loading = false;
+          if (event) 
+            event.target.complete();
         }
+    },
+    async loadCaloriesSummary() {
+
+      const data = await getDailyCalories();
+      
+      if (data != null) {
+        this.user = data.user;
+        this.calories = data.calories;
+        this.protein = data.protein;
+        this.carbohydrate = data.carbohydrate;
+        this.fat = data.fat;
+        this.caloriesValue = data.caloriesValue;
+        this.proteinValue = data.proteinValue;
+        this.carbohydrateValue = data.carbohydrateValue;
+        this.fatValue = data.fatValue;
 
         return true;
-    })
-    .catch(err => {
-        console.log(err);
-        return false;
-    })
-
-    return data;
-  },
-  async loadMonthlyWorkoutSummary() {
-
-    var that = this;
-
-    const data = await $axios(config.API_BASE_URL + 'monthlyWorkoutSummary')
-    .then(response => {
-
-      if (response.data) {
-       that.series[0].data = response.data.asArray;
       }
 
-      return true;
-    })
-    .catch(err => {
-        console.log(err);
-        return false;
-    })
+      return false;
+    },
+    async loadMonthlyWorkoutSummary() {
 
-    return data;
-  },
+      const data = await getMonthlyWorkoutSummary();
+
+      if (data != null) {
+        this.series[0].data = data;
+        return true;
+      }
+
+      return false;
+    },
   }
 })
 </script>

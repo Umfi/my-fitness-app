@@ -151,9 +151,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { config } from "@/config.js"
-import $axios from "@/axios.js"
-import { setup } from "@/service/AuthService.js";
+import { updateUserData, getUserData } from "@/service/UserService.js";
 
 export default defineComponent({
   name: "Profile",
@@ -190,19 +188,17 @@ export default defineComponent({
       goal: null,
     };
   },
-  created() {
-    $axios.get(config.API_BASE_URL + "user").then((response) => {
-      if (response.data[0]) {
-        if (response.data[0].calories != null) {
-          this.gender = response.data[0].details.gender.toString();
-          this.dob = response.data[0].details.birthday;
-          this.weight = response.data[0].details.weight;
-          this.height = response.data[0].details.height;
-          this.activity = response.data[0].details.activity.toString();
-          this.goal = response.data[0].details.goal.toString();
-        }
-      }
-    });
+  async created() {
+    const userData = await getUserData();
+
+    if (userData != null) {
+      this.gender = userData.details.gender.toString();
+      this.dob = userData.details.birthday;
+      this.weight = userData.details.weight;
+      this.height = userData.details.height;
+      this.activity = userData.details.activity.toString();
+      this.goal = userData.details.goal.toString();
+    }
   },
   methods: {
     async showToast(msg) {
@@ -222,7 +218,7 @@ export default defineComponent({
     async updateProfile() {
       this.showLoading();
 
-      let updateSuccessful = await setup({
+      let updateSuccessful = await updateUserData({
         gender: this.gender,
         dob: this.dob,
         weight: this.weight,
