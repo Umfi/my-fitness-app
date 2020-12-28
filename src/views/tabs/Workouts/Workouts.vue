@@ -47,8 +47,8 @@ import {
   modalController,
 } from "@ionic/vue";
 
-import { config } from "../config.js";
-import $axios from "../axios.js";
+import { config } from "@/config.js";
+import $axios from "@/axios.js";
 
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";

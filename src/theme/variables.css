@@ -239,35 +239,35 @@ http://ionicframework.com/docs/theming/ */
 }
 
 .event_shoulder {
-  background-color: #3C52B4;
+  background-color: #84A07C;
   color: white;
 }
 .event_chest {
-  background-color: #119411;
+  background-color: #01BAEF;
   color: white;
 }
 .event_back {
-  background-color: #3C551C;
+  background-color: #20BF55;
   color: white;
 }
 .event_arms {
-  background-color: #a7a548;
+  background-color: #FF674D;
   color: white;
 }
 .event_abs {
-  background-color: #A28CD9;
+  background-color: #CF1259;
   color: white;
 }
 .event_legs {
-  background-color: #CB638F;
+  background-color: #1B998B;
   color: white;
 }
 .event_cardio {
-  background-color: #582879;
+  background-color: #7776BC;
   color: white;
 }
 .event_misc {
-  background-color: #15293F;
+  background-color: #342E37;
   color: white;
 }
 

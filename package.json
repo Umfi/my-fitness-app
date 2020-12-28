@@ -15,12 +15,14 @@
     "@ionic-native/splash-screen": "^5.30.0",
     "@ionic/vue": "^5.4.0",
     "@ionic/vue-router": "^5.4.0",
+    "apexcharts": "^3.23.0",
     "axios": "^0.21.0",
     "cordova-res": "^0.15.2",
     "core-js": "^3.6.5",
     "vue": "^3.0.0-0",
     "vue-cal": "^4.1.0",
     "vue-router": "^4.0.0-0",
+    "vue3-apexcharts": "^1.1.1",
     "vuex": "^4.0.0-rc.2"
   },
   "devDependencies": {

@@ -2,15 +2,15 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { isLoggedIn, isSetup } from "../service/AuthService.js";
 
 
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
-import ForgotPassword from '../views/ForgotPassword.vue'
-import Calories from '../views/Calories.vue'
-import Overview from '../views/Overview.vue'
-import Workouts from '../views/Workouts.vue'
-import Profile from '../views/Profile.vue'
-import Setup from '../views/Setup.vue'
+import Home from '../views/tabs/Home.vue'
+import Login from '../views/Unauthenticated/Login.vue'
+import Register from '../views/Unauthenticated/Register.vue'
+import ForgotPassword from '../views/Unauthenticated/ForgotPassword.vue'
+import Calories from '../views/tabs/Calories/Calories.vue'
+import Overview from '../views/tabs/Overview/Overview.vue'
+import Workouts from '../views/tabs/Workouts/Workouts.vue'
+import Profile from '../views/User/Profile.vue'
+import Setup from '../views/User/Setup.vue'
 
 const routes = [
   {

@@ -202,8 +202,8 @@ import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
-import { config } from "../config.js"
-import $axios from "../axios.js"
+import { config } from "@/config.js"
+import $axios from "@/axios.js"
 
 export default defineComponent({
   name: "Calories",

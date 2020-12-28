@@ -134,7 +134,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { setup } from "../service/AuthService.js";
+import { setup } from "@/service/AuthService.js";
 
 export default defineComponent({
   name: "Setup",

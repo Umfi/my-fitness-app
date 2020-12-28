@@ -254,8 +254,8 @@ import {
   alertController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
-import { config } from "../config.js";
-import $axios from "../axios.js";
+import { config } from "@/config.js";
+import $axios from "@/axios.js";
 
 export default defineComponent({
   name: "ModalManageWorkout",

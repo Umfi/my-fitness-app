@@ -74,8 +74,8 @@
 <script>
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonButton, IonButtons, IonRow, IonCol, IonList, IonItem, IonInput, IonLabel, modalController, toastController } from '@ionic/vue';
 import { defineComponent } from 'vue';
-import { config } from "../config.js"
-import $axios from "../axios.js"
+import { config } from "@/config.js"
+import $axios from "@/axios.js"
 
 export default defineComponent({
   name: 'ModalManageProduct',

@@ -34,11 +34,11 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { logout, isLoggedIn } from "./service/AuthService.js";
+import { logout, isLoggedIn } from "@/service/AuthService.js";
 
 
-import { config } from "./config.js";
-import $axios from "./axios.js";
+import { config } from "@/config.js";
+import $axios from "@/axios.js";
 
 import { Plugins } from "@capacitor/core";
 

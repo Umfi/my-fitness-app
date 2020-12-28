@@ -122,7 +122,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { register } from "../service/AuthService.js";
+import { register } from "@/service/AuthService.js";
 
 export default defineComponent({
   name: "Register",
