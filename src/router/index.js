@@ -6,6 +6,7 @@ import Home from '../views/tabs/Home.vue'
 import Login from '../views/Unauthenticated/Login.vue'
 import Register from '../views/Unauthenticated/Register.vue'
 import ForgotPassword from '../views/Unauthenticated/ForgotPassword.vue'
+import ResetPassword from '../views/Unauthenticated/ResetPassword.vue'
 import Calories from '../views/tabs/Calories/Calories.vue'
 import Overview from '../views/tabs/Overview/Overview.vue'
 import Workouts from '../views/tabs/Workouts/Workouts.vue'
@@ -31,6 +32,11 @@ const routes = [
     path: '/forgotPassword',
     name: 'ForgotPassword',
     component: ForgotPassword
+  },
+  {
+    path: '/resetPassword',
+    name: 'ResetPassword',
+    component: ResetPassword
   },
   {
     path: "/tabs/",

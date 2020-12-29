@@ -76,3 +76,39 @@ export async function refreshToken() {
 
     return data;
 }
+
+export async function forgotPassword(email) {
+    const data = await $axios({url: config.API_BASE_URL + 'forgotPassword', data: email, method: 'POST' })
+    .then(response => {
+        if (response.data.status) {
+            return true;
+        } 
+        
+        return false;
+    })
+    .catch(err => {
+        console.log(err);
+        return false;
+    })
+
+    return data;
+}
+
+
+export async function resetPassword(cred) {
+
+    const data = await $axios({url: config.API_BASE_URL + 'resetPassword', data: cred, method: 'POST' })
+    .then(response => {
+        if (response.data.status) {
+            return true;
+        } 
+        
+        return false;
+    })
+    .catch(err => {
+        console.log(err);
+        return false;
+    })
+
+    return data;
+}

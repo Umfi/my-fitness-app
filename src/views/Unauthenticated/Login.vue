@@ -55,11 +55,14 @@
 
             <ion-row responsive-sm>
               <ion-col>
-                <ion-button type="submit" expand="block">Login</ion-button>
+                <ion-button type="submit" expand="block" :disabled="disableSend">Login</ion-button>
               </ion-col>
             </ion-row>
 
             <ion-row responsive-sm>
+               <ion-col size="12" class="ion-text-center">
+                <ion-label><a href="/forgotPassword">Forgot password?</a></ion-label>
+              </ion-col>
               <ion-col size="12" class="ion-text-center">
                 <ion-label>Don't have an account? <a href="/register">Sign up now!</a></ion-label>
               </ion-col>
@@ -125,6 +128,7 @@ export default defineComponent({
       password: "",
       errorPassword: "",
       onceSubmitted: false,
+      disableSend: false
     };
   },
   methods: {
@@ -171,12 +175,20 @@ export default defineComponent({
       await loading.present();
     },
     async login() {
-      this.showLoading();
+
       this.onceSubmitted = true;
 
       let email = this.email;
       let password = this.password;
+
+      if (!this.emailValid() || !this.passwordValid()) {
+        return;
+      }
+
+      this.showLoading();
+      this.disableSend = true;
       let loginSuccessful = await login({ email, password });
+      this.disableSend = false;
 
       loadingController.dismiss()
       if (loginSuccessful) {
