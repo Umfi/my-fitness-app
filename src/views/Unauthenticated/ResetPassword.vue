@@ -160,8 +160,6 @@ export default defineComponent({
     };
   },
   created() {
-    console.log(this.$router);
-
     this.email = decodeURIComponent(this.$route.query.email);
   },
   methods: {
@@ -179,7 +177,6 @@ export default defineComponent({
 
       await loading.present();
     },
-
     emailValid() {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
