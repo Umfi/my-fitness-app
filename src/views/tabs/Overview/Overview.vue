@@ -169,7 +169,43 @@
           </ion-thumbnail>
         </ion-card-content>
       </ion-card>
+
+
+      <!-- Weight Card -->
+      <ion-card v-show="!loading">
+        <ion-card-header>
+          <ion-card-title>
+            Monthly Weight Summary
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+         <apexchart
+            width="100%"
+            height="300"
+            type="line"
+            :options="weightChartOptions"
+            :series="weightSeries"
+          ></apexchart>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card v-if="loading">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-thumbnail style="width: 100%;">
+          <ion-skeleton-text animated></ion-skeleton-text>
+          </ion-thumbnail>
+        </ion-card-content>
+      </ion-card>
      
+     <ion-fab-button ref="addWeightBtn" class="fab-add" @click="trackWeight">
+        <ion-icon :icon="add"></ion-icon>
+      </ion-fab-button>
+
     </ion-content>
   </ion-page>
 </template>
@@ -198,12 +234,19 @@ import {
   IonCardContent,
   IonCardTitle,
   IonSkeletonText,
-  IonThumbnail
+  IonThumbnail,
+  IonFabButton,
+  IonIcon,
+  modalController,
 } from "@ionic/vue";
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { getDailyCalories, getMonthlyWorkoutSummary } from "@/service/StatsService.js";
+import { add } from "ionicons/icons";
+
+
+import { getDailyCalories, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
+import ModalTrackWeight from "./ModalTrackWeight.vue";
 
 
 export default defineComponent({
@@ -231,7 +274,14 @@ export default defineComponent({
     IonCardTitle,
     IonSkeletonText,
     IonThumbnail,
+    IonFabButton,
+    IonIcon,
     apexchart: VueApexCharts
+  },
+  setup() {
+    return {
+      add
+    };
   },
   data() {
     return {
@@ -282,6 +332,36 @@ export default defineComponent({
         },
       ],
       ///
+      weightChartOptions: {
+        chart: {
+          id: 'vuechart-weight',
+          toolbar: {
+            show: false
+          },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        tooltip: {
+          enabled: false,
+        },
+        legend: {
+          show: false
+        },
+        xaxis: {
+          labels: {
+            show: false
+          }
+        },
+      
+      },
+      weightSeries: [
+        {
+          name: "Weight",
+          data: [1,1,1,1,1,1,1],
+        },
+      ],
+      ///
       loading: false
     };
   },
@@ -295,8 +375,9 @@ export default defineComponent({
 
         const loadCalories = await this.loadCaloriesSummary();
         const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
-        
-        if (!loadCalories || !loadMonthlyWorkout) {
+        const loadMonthlyWeight = await this.loadMonthlyWeightSummary();
+
+        if (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight) {
           setTimeout(() => {
             this.doRefresh(event);
           }, 1000);
@@ -338,6 +419,40 @@ export default defineComponent({
 
       return false;
     },
+    async loadMonthlyWeightSummary() {
+
+      const data = await getWeightSummary();
+
+      if (data != null) {
+
+        var arr = [];
+        if (data.month.length > 0) {
+          for (var i = 0; i < data.month.length; i++) {
+            arr.push(data.month[i].weight);
+          }
+        } else {
+          if (data.fallback > 0) {
+            arr.push(data.fallback);
+          }
+        }
+        
+        this.weightSeries[0].data = arr;
+        return true;
+      }
+
+      return false;
+    },
+    async trackWeight() {
+
+      const modal = await modalController
+        .create({
+          component: ModalTrackWeight,
+           componentProps: {
+            parent: this
+          },
+        })
+      return modal.present();
+    },
   }
 })
 </script>
@@ -345,5 +460,12 @@ export default defineComponent({
 .center-tex {
   display: flex;
   justify-content: center;
+}
+
+.fab-add {
+  position: fixed;
+  bottom: 25px;
+  right: 15px;
+  font-size: 30px;
 }
 </style>

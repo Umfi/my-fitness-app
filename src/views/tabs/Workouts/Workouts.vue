@@ -29,6 +29,10 @@
       >
       </vue-cal>
     </ion-content>
+
+    <ion-fab-button ref="addWorkoutBtn" class="fab-add" @click="trackWorkout">
+      <ion-icon :icon="add"></ion-icon>
+    </ion-fab-button>
   </ion-page>
 </template>
 
@@ -44,6 +48,8 @@ import {
   IonMenuButton,
   IonRefresher,
   IonRefresherContent,
+  IonFabButton,
+  IonIcon,
   modalController,
 } from "@ionic/vue";
 
@@ -52,6 +58,8 @@ import { getAllWorkouts } from "@/service/WorkoutService.js";
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
 import ModalManageWorkout from "./ModalManageWorkout.vue";
+
+import { add } from "ionicons/icons";
 
 export default defineComponent({
   name: "Workouts",
@@ -65,7 +73,14 @@ export default defineComponent({
     IonMenuButton,
     IonRefresher,
     IonRefresherContent,
+    IonFabButton,
+    IonIcon,
     VueCal,
+  },
+  setup() {
+    return {
+      add
+    };
   },
   data() {
     return {
@@ -89,6 +104,9 @@ export default defineComponent({
             this.doRefresh(event);
           }, 1000);
       }
+    },
+    trackWorkout() {
+      this.onDateClick(new Date());
     },
     async onEventClick(event, e) {
       // Prevent navigating to narrower view (default vue-cal behavior).
@@ -136,5 +154,12 @@ export default defineComponent({
 <style scoped>
 .scroll {
   height: 100%;
+}
+
+.fab-add {
+  position: fixed;
+  bottom: 25px;
+  right: 15px;
+  font-size: 30px;
 }
 </style>

@@ -47,4 +47,20 @@ export async function getMonthlyWorkoutSummary() {
         return data;
 }
 
+export async function getWeightSummary() {
+    const data = await $axios(config.API_BASE_URL + 'weightSummary')
+        .then(response => {
+            if (response.data) { 
+                return response.data;
+            }
+            
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
 

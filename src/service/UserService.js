@@ -49,4 +49,19 @@ export async function getUserData() {
         return data;
 }
 
+export async function trackWeight(weight) {
+    const data = await $axios({ url: config.API_BASE_URL + 'trackWeight', data: weight, method: 'POST' })
+        .then(response => {
+            if (response.data.weight) {
+                return true;
+            } 
+            
+            return false;
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
 
+        return data;
+}
