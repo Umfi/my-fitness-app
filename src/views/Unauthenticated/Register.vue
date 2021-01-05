@@ -247,7 +247,7 @@ export default defineComponent({
         return;
       }
 
-      this.showLoading();
+      await this.showLoading();
 
       let name = this.name;
       let email = this.email;

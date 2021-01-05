@@ -216,7 +216,7 @@ export default defineComponent({
       await loading.present();
     },
     async updateProfile() {
-      this.showLoading();
+      await this.showLoading();
 
       let updateSuccessful = await updateUserData({
         gender: this.gender,

@@ -226,7 +226,7 @@ export default defineComponent({
         return;
       }
 
-      this.showLoading();
+      await this.showLoading();
       const resetSuccess = await resetPassword({ 
         email: this.email,
         password: this.password,

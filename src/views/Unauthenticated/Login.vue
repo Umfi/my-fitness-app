@@ -185,12 +185,13 @@ export default defineComponent({
         return;
       }
 
-      this.showLoading();
+      await this.showLoading();
       this.disableSend = true;
       let loginSuccessful = await login({ email, password });
       this.disableSend = false;
-
+      
       loadingController.dismiss()
+
       if (loginSuccessful) {
           this.$router.push("/tabs/overview");
           this.showToast("Login succesful!");
@@ -201,6 +202,7 @@ export default defineComponent({
           this.password = "";
           this.showToast("Login failed!");
       }  
+
     },
   },
 });
