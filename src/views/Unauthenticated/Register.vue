@@ -243,7 +243,7 @@ export default defineComponent({
      
       this.onceSubmitted = true;
 
-      if (!this.nameValid() || !this,this.emailValid() || !this.passwordValid() || !this.passwordconfirmValid()) {
+      if (!this.nameValid() || !this.emailValid() || !this.passwordValid() || !this.passwordconfirmValid()) {
         return;
       }
 
