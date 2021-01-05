@@ -362,7 +362,8 @@ export default defineComponent({
         },
       ],
       ///
-      loading: false
+      loading: false,
+      reloadAttempt: 0
     };
   },
   ionViewWillEnter() {
@@ -377,11 +378,13 @@ export default defineComponent({
         const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
         const loadMonthlyWeight = await this.loadMonthlyWeightSummary();
 
-        if (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight) {
+        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight)) {
+          this.reloadAttempt++;
           setTimeout(() => {
             this.doRefresh(event);
           }, 1000);
         } else {
+          this.reloadAttempt = 0;
           window.dispatchEvent(new Event('resize'));
           this.loading = false;
           if (event) 

@@ -86,6 +86,7 @@ export default defineComponent({
     return {
       selectedDate: null,
       events: [],
+      reloadAttempt: 0
     };
   },
   ionViewWillEnter() {
@@ -96,13 +97,17 @@ export default defineComponent({
 
       const workouts = await getAllWorkouts();
 
-      if (workouts != null) {
+      if ((this.reloadAttempt < 5) && workouts == null) {
+        this.reloadAttempt++;
+
+        setTimeout(() => {
+          this.doRefresh(event);
+        }, 1000);
+      } else {
+        this.reloadAttempt = 0;
+
         this.events = workouts;
         if (event) event.target.complete();
-      } else {
-        setTimeout(() => {
-            this.doRefresh(event);
-          }, 1000);
       }
     },
     trackWorkout() {
