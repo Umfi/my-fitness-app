@@ -323,7 +323,7 @@ export default defineComponent({
         });
       
       if (newEvent != null) {
-        this.$props.parent.events.push(newEvent);   
+        this.$props.parent.doRefresh(false);
         this.showToast("Workout tracked.");
         this.dismissModal();
       } else {

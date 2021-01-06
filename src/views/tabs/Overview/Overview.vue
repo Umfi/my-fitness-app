@@ -202,9 +202,21 @@
         </ion-card-content>
       </ion-card>
      
-     <ion-fab-button ref="addWeightBtn" class="fab-add" @click="trackWeight">
-        <ion-icon :icon="add"></ion-icon>
-      </ion-fab-button>
+
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button>
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+        <ion-fab-list side="top">
+          <ion-fab-button @click="trackWeight">
+            <ion-icon :icon="man"></ion-icon>
+           </ion-fab-button>
+           <ion-fab-button @click="trackWorkout">
+             <ion-icon :icon="barbell"></ion-icon>
+             </ion-fab-button>
+        </ion-fab-list>
+      </ion-fab>
+
 
     </ion-content>
   </ion-page>
@@ -235,6 +247,8 @@ import {
   IonCardTitle,
   IonSkeletonText,
   IonThumbnail,
+  IonFab,
+  IonFabList,
   IonFabButton,
   IonIcon,
   modalController,
@@ -242,12 +256,12 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add } from "ionicons/icons";
+import { add, man, barbell } from "ionicons/icons";
 
 
 import { getDailyCalories, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
-
+import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 
 export default defineComponent({
   name: "Overview",
@@ -274,13 +288,15 @@ export default defineComponent({
     IonCardTitle,
     IonSkeletonText,
     IonThumbnail,
+    IonFab,
+    IonFabList,
     IonFabButton,
     IonIcon,
     apexchart: VueApexCharts
   },
   setup() {
     return {
-      add
+      add, man, barbell
     };
   },
   data() {
@@ -456,6 +472,24 @@ export default defineComponent({
         })
       return modal.present();
     },
+    async trackWorkout() {
+
+      var today = new Date();
+      
+      const modal = await modalController
+        .create({
+          component: ModalManageWorkout,
+           componentProps: {
+            item: {
+              date: today.format(),
+            },
+            title: "Track workout",
+            mode: "create",
+            parent: this,
+          },
+        })
+      return modal.present();
+    },
   }
 })
 </script>
@@ -463,12 +497,5 @@ export default defineComponent({
 .center-tex {
   display: flex;
   justify-content: center;
-}
-
-.fab-add {
-  position: fixed;
-  bottom: 25px;
-  right: 15px;
-  font-size: 30px;
 }
 </style>

@@ -151,10 +151,12 @@
           </ion-label>
         </ion-item>
       </ion-list>
-
-      <ion-fab-button ref="addProductBtn" class="fab-add" @click="addProduct">
-        <ion-icon :icon="add"></ion-icon>
-      </ion-fab-button>
+      
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button ref="addProductBtn" @click="addProduct">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ion-content>
   </ion-page>
 </template>
@@ -170,6 +172,7 @@ import {
   IonSearchbar,
   IonList,
   IonItem,
+  IonFab,
   IonFabButton,
   IonIcon,
   IonButtons,
@@ -215,6 +218,7 @@ export default defineComponent({
     IonSearchbar,
     IonList,
     IonItem,
+    IonFab,
     IonFabButton,
     IonIcon,
     IonButtons,
@@ -403,13 +407,3 @@ export default defineComponent({
   },
 });
 </script>
-
-
-<style scoped>
-.fab-add {
-  position: fixed;
-  bottom: 25px;
-  right: 15px;
-  font-size: 30px;
-}
-</style>

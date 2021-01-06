@@ -30,9 +30,11 @@
       </vue-cal>
     </ion-content>
 
-    <ion-fab-button ref="addWorkoutBtn" class="fab-add" @click="trackWorkout">
-      <ion-icon :icon="add"></ion-icon>
-    </ion-fab-button>
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+        <ion-fab-button ref="addWorkoutBtn" @click="trackWorkout">
+          <ion-icon :icon="add"></ion-icon>
+        </ion-fab-button>
+    </ion-fab>
   </ion-page>
 </template>
 
@@ -48,6 +50,7 @@ import {
   IonMenuButton,
   IonRefresher,
   IonRefresherContent,
+  IonFab,
   IonFabButton,
   IonIcon,
   modalController,
@@ -73,6 +76,7 @@ export default defineComponent({
     IonMenuButton,
     IonRefresher,
     IonRefresherContent,
+    IonFab,
     IonFabButton,
     IonIcon,
     VueCal,
@@ -159,12 +163,5 @@ export default defineComponent({
 <style scoped>
 .scroll {
   height: 100%;
-}
-
-.fab-add {
-  position: fixed;
-  bottom: 25px;
-  right: 15px;
-  font-size: 30px;
 }
 </style>
