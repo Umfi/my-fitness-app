@@ -3,18 +3,36 @@
     <ion-toolbar>
       <ion-title>How much grams?</ion-title>
       <ion-buttons slot="end">
-        <ion-button @click="dismissModal">Close</ion-button>
+        <ion-button @click="dismissModal">
+          <ion-icon slot="icon-only" :icon="close"></ion-icon>
+        </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
   <ion-content fullscreen>
     <ion-list>
       <ion-item>
-        <ion-input
-          type="number"
-          v-model="amount"
-          placeholder="Amount in gram"
-        />
+        <ion-grid>
+          <ion-row>
+            <ion-col size="2">
+              <ion-button expand="block" color="medium" fill="outline" @click="adjustAmount('-')">
+                <ion-icon slot="icon-only" :icon="remove"></ion-icon>
+              </ion-button>
+            </ion-col>
+            <ion-col size="8">
+              <ion-input
+                type="number"
+                v-model="amount"
+                placeholder="Amount in gram"
+              />
+            </ion-col>
+            <ion-col size="2">
+              <ion-button expand="block" color="medium" fill="outline" @click="adjustAmount('+')">
+                <ion-icon slot="icon-only" :icon="add"></ion-icon>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </ion-item>
     </ion-list>
 
@@ -34,17 +52,20 @@ import {
   IonToolbar,
   IonButton,
   IonButtons,
+  IonGrid,
   IonRow,
   IonCol,
   IonList,
   IonItem,
   IonInput,
+  IonIcon,
   modalController,
   toastController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { trackCalories } from "@/service/ProductService.js";
+import { add, remove, close } from "ionicons/icons";
 
 export default defineComponent({
   name: "ModalAddCalories",
@@ -55,18 +76,25 @@ export default defineComponent({
     IonToolbar,
     IonButton,
     IonButtons,
+    IonGrid,
     IonRow,
     IonCol,
     IonList,
     IonItem,
     IonInput,
+    IonIcon
   },
   props: {
     item: { type: Object, default: null },
   },
   data() {
     return {
-      amount: null,
+      amount: 100,
+    };
+  },
+  setup() {
+    return {
+      add, remove, close
     };
   },
   methods: {
@@ -80,6 +108,17 @@ export default defineComponent({
         duration: 2000,
       });
       toast.present();
+    },
+    adjustAmount(mode) {
+      let tmp = parseFloat(this.amount) 
+
+      if (mode == "+") {
+        tmp += 1;
+      } else {
+        tmp -= 2;
+      }
+      
+      this.amount = tmp.toFixed(0);
     },
     async trackItem() {
       var item = this.$props.item;

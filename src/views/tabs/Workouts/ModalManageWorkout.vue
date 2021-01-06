@@ -3,7 +3,9 @@
     <ion-toolbar>
       <ion-title>{{ $props.title }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button @click="dismissModal">Close</ion-button>
+        <ion-button @click="dismissModal">
+          <ion-icon slot="icon-only" :icon="close"></ion-icon>
+        </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -251,11 +253,13 @@ import {
   modalController,
   toastController,
   IonLabel,
+  IonIcon,
   alertController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { storeWorkout, updateWorkout, removeWorkout } from "@/service/WorkoutService.js";
+import { close } from "ionicons/icons";
 
 
 export default defineComponent({
@@ -290,6 +294,11 @@ export default defineComponent({
         this.abs = item.abs;
         this.cardio = item.cardio;
     }
+  },
+  setup() {
+    return {
+      close
+    };
   },
   methods: {
     async dismissModal() {
@@ -469,7 +478,8 @@ export default defineComponent({
     IonListHeader,
     IonItem,
     IonCheckbox,
-    IonLabel
+    IonLabel,
+    IonIcon
   },
 });
 </script>

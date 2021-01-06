@@ -3,7 +3,9 @@
     <ion-toolbar>
       <ion-title> {{ $props.title }}</ion-title>
       <ion-buttons slot="end">
-        <ion-button @click="dismissModal">Close</ion-button>
+        <ion-button @click="dismissModal">
+          <ion-icon slot="icon-only" :icon="close"></ion-icon>
+        </ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -83,12 +85,14 @@ import {
   IonItem,
   IonInput,
   IonLabel,
+  IonIcon,
   modalController,
   toastController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { createProduct, updateProduct } from "@/service/ProductService.js";
+import { close } from "ionicons/icons";
 
 export default defineComponent({
   name: "ModalManageProduct",
@@ -105,6 +109,7 @@ export default defineComponent({
     IonItem,
     IonInput,
     IonLabel,
+    IonIcon
   },
   props: {
     item: { type: Object, default: null },
@@ -133,6 +138,11 @@ export default defineComponent({
       this.fat = item.fat;
       this.id = item.id;
     }
+  },
+  setup() {
+    return {
+      close
+    };
   },
   methods: {
     async dismissModal() {
