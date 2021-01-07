@@ -10,6 +10,18 @@
     </ion-toolbar>
   </ion-header>
   <ion-content fullscreen>
+    <ion-row>
+      <ion-col>
+      <apexchart
+            width="100%"
+            height="300"
+            type="radialBar"
+            :options="chartOptions"
+            :series="series"
+          ></apexchart>
+      </ion-col>
+    </ion-row>
+
     <ion-list>
       <ion-item>
         <ion-grid>
@@ -35,7 +47,6 @@
         </ion-grid>
       </ion-item>
     </ion-list>
-
     <ion-row responsive-sm>
       <ion-col>
         <ion-button type="submit" @click="trackItem" expand="block">Track it</ion-button>
@@ -64,6 +75,9 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
+import VueApexCharts from "vue3-apexcharts";
+
+import { getDailyCalories } from "@/service/StatsService.js";
 import { trackCalories } from "@/service/ProductService.js";
 import { add, remove, close } from "ionicons/icons";
 
@@ -82,7 +96,8 @@ export default defineComponent({
     IonList,
     IonItem,
     IonInput,
-    IonIcon
+    IonIcon,
+    apexchart: VueApexCharts
   },
   props: {
     item: { type: Object, default: null },
@@ -90,12 +105,72 @@ export default defineComponent({
   data() {
     return {
       amount: 100,
+      userData: null,
+      series: [0, 0, 0, 0],
+      chartOptions: {
+        chart: {
+          id: 'vuechart-example',
+          toolbar: {
+            show: false
+          },
+        },
+        plotOptions: {
+          radialBar: {
+            offsetY: 0,
+            startAngle: 0,
+            endAngle: 270,
+            hollow: {
+              margin: 5,
+              size: '30%',
+              background: 'transparent',
+              image: undefined,
+            },
+            dataLabels: {
+              name: {
+                show: false,
+              },
+              value: {
+                show: false,
+              }
+            }
+          }
+        },
+        legend: {
+          show: true,
+          floating: true,
+          fontSize: '16px',
+          position: 'left',
+          offsetX: 30,
+          offsetY: 0,
+          labels: {
+            useSeriesColors: true,
+          },
+          markers: {
+            size: 0
+          },
+          itemMargin: {
+            vertical: 3
+          }
+        },
+        colors: ['#3880ff', '#2dd36f', '#ffc409', '#eb445a'],
+        labels: ['Calories', 'Protein', 'Carbs', 'Fat'],
+      
+      },
     };
   },
   setup() {
     return {
       add, remove, close
     };
+  },
+  async created() {
+
+    const data = await getDailyCalories();
+    
+    if (data != null) {
+      this.userData = data;
+      this.updatePreviewData();
+    }
   },
   methods: {
     async dismissModal() {
@@ -109,13 +184,37 @@ export default defineComponent({
       });
       toast.present();
     },
+    valueToPercent (value, max) {
+      return (value * 100) / max;
+    },
+    updatePreviewData() {
+
+        if (this.amount < 0) {
+          return;
+        }
+
+        var item = this.$props.item;
+
+        let calculatedCalories = item.calories * this.amount / 100;
+        let calculatedCarbohydrate = item.carbohydrate * this.amount / 100;
+        let calculatedFat = item.fat * this.amount / 100;
+        let calculatedProtein = item.protein * this.amount / 100;
+
+        this.series = [ this.valueToPercent(this.userData.calories + calculatedCalories, this.userData.user.calories),
+                      this.valueToPercent(this.userData.protein +calculatedProtein, this.userData.user.protein),
+                      this.valueToPercent(this.userData.carbohydrate +calculatedCarbohydrate, this.userData.user.carbohydrate),
+                      this.valueToPercent(this.userData.fat +calculatedFat, this.userData.user.fat) ]
+    }, 
     adjustAmount(mode) {
       let tmp = parseFloat(this.amount) 
 
       if (mode == "+") {
         tmp += 1;
       } else {
-        tmp -= 2;
+        tmp -= 1;
+        if (tmp < 0) {
+          tmp = 0;
+        }
       }
       
       this.amount = tmp.toFixed(0);
@@ -145,6 +244,14 @@ export default defineComponent({
         this.showToast("Couldn't track item.");
       }
     },
-  }
+  },
+   watch: {
+    amount(newVal) {
+      if (newVal < 0) {
+        this.amount = 0;
+      }
+      this.updatePreviewData();
+    }
+   }
 });
 </script>
