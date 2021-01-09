@@ -34,29 +34,48 @@
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
 
-      <ion-list v-if="searchResult && !isSearching && searchFilter == 'all'" class="search-results-list">
+      <ion-list v-if="searchResult && !isSearching && searchFilter == 'all' && !hideAll" class="search-results-list">
 
         <ion-item-sliding v-for="item in searchResult" :key="item.id">
           <ion-item @click="addCalories(item)">
             <ion-label>
-              <ion-grid>
+               <ion-grid>
                 <ion-row>
-                  <ion-col size="11">
-                    <strong>{{ item.name }} (  {{ parseInt(item.calories) }} kcal )</strong>
+                  <ion-col size="3">
+                    <apexchart type="donut" :options="{ chart: { type: 'donut', }, states: { active: { filter: { type: 'none', } }, }, dataLabels: { enabled: false }, tooltip: { enabled: false, }, legend: { show: false }, colors: ['#2dd36f', '#ffc409', '#eb445a'], plotOptions: { pie: { expandOnClick: false, donut: { size: '80%', labels: { show: true, name: { show: false }, total: { show: true, label: '', formatter: function () { return parseInt(item.calories); } } } } } } }" :series="[parseInt(item.protein), parseInt(item.carbohydrate), parseInt(item.fat)]" height="65%"></apexchart>
                   </ion-col>
-                  <ion-col size="1">
-                    <ion-icon v-if="item.editable && item.deletable" :icon="personCircleOutline"></ion-icon>
-                    <ion-icon v-if="!item.editable && item.deletable" :icon="timeOutline"></ion-icon>
+                  <ion-col size="9">
+                    <ion-row style="margin-top: 10px">
+                      <ion-col size="11">
+                        <strong class="ion-text-wrap">{{ item.name }}</strong>
+                      </ion-col>
+                      <ion-col size="1">
+                        <ion-icon v-if="item.editable && item.deletable" :icon="personCircleOutline"></ion-icon>
+                        <ion-icon v-if="!item.editable && item.deletable" :icon="timeOutline"></ion-icon>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="12">
+                        {{ item.brand }}
+                      </ion-col>
+                    </ion-row>
                   </ion-col>
                 </ion-row>
                 <ion-row>
-                  <ion-col size="12">
-                    {{ item.brand }}
+                  <ion-col size="4">
+                    <ion-chip color="success" outline>
+                        <ion-label>Protein: {{ parseInt(item.protein) }}g</ion-label>
+                    </ion-chip>
                   </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col size="12">
-                    <small>Protein: {{ parseInt(item.protein) }} g | Carbs: {{ parseInt(item.carbohydrate) }} g | Fat: {{ parseInt(item.fat) }} g</small>
+                  <ion-col size="4">
+                      <ion-chip color="warning" outline>
+                        <ion-label>Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
+                    </ion-chip>
+                  </ion-col>
+                  <ion-col size="4">
+                    <ion-chip color="danger" outline>
+                        <ion-label>Fat: {{ parseInt(item.fat) }}g</ion-label>
+                    </ion-chip>
                   </ion-col>
                 </ion-row>
               </ion-grid>
@@ -89,24 +108,43 @@
       </ion-infinite-scroll>
 
 
-      <ion-list v-if="history && !isSearching && searchFilter == 'history'" class="search-history-list">
+      <ion-list v-if="history && !isSearching && searchFilter == 'history' && !hideAll" class="search-history-list">
         <ion-item-sliding v-for="item in history" :key="item.id">
           <ion-item @click="addCalories(item)">
             <ion-label>
               <ion-grid>
                 <ion-row>
-                  <ion-col size="12">
-                    <strong>{{ item.name }} (  {{ parseInt(item.calories) }} kcal )</strong>
+                  <ion-col size="3">
+                    <apexchart type="donut" :options="{ chart: { type: 'donut', }, states: { active: { filter: { type: 'none', } }, }, dataLabels: { enabled: false }, tooltip: { enabled: false, }, legend: { show: false }, colors: ['#2dd36f', '#ffc409', '#eb445a'], plotOptions: { pie: { expandOnClick: false, donut: { size: '80%', labels: { show: true, name: { show: false }, total: { show: true, label: '', formatter: function () { return parseInt(item.calories); } } } } } } }" :series="[parseInt(item.protein), parseInt(item.carbohydrate), parseInt(item.fat)]" height="65%"></apexchart>
+                  </ion-col>
+                  <ion-col size="9">
+                    <ion-row style="margin-top: 10px">
+                      <ion-col size="12">
+                        <strong class="ion-text-wrap">{{ item.name }}</strong>
+                      </ion-col>
+                    </ion-row>
+                    <ion-row>
+                      <ion-col size="12">
+                        {{ item.brand }}
+                      </ion-col>
+                    </ion-row>
                   </ion-col>
                 </ion-row>
                 <ion-row>
-                  <ion-col size="12">
-                    {{ item.brand }}
+                  <ion-col size="4">
+                    <ion-chip color="success" outline>
+                        <ion-label>Protein: {{ parseInt(item.protein) }}g</ion-label>
+                    </ion-chip>
                   </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col size="12">
-                    <small>Protein: {{ parseInt(item.protein) }} g | Carbs: {{ parseInt(item.carbohydrate) }} g | Fat: {{ parseInt(item.fat) }} g</small>
+                  <ion-col size="4">
+                      <ion-chip color="warning" outline>
+                        <ion-label>Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
+                    </ion-chip>
+                  </ion-col>
+                  <ion-col size="4">
+                    <ion-chip color="danger" outline>
+                        <ion-label>Fat: {{ parseInt(item.fat) }}g</ion-label>
+                    </ion-chip>
                   </ion-col>
                 </ion-row>
               </ion-grid>
@@ -133,13 +171,22 @@
           <ion-label>
             <ion-grid>
               <ion-row>
-                <ion-col size="12">
-                  <ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
+                <ion-col size="3">
+                  <ion-thumbnail>
+                    <ion-skeleton-text></ion-skeleton-text>
+                  </ion-thumbnail>
                 </ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col size="12">
-                  <ion-skeleton-text animated style="width: 30%"></ion-skeleton-text>
+                <ion-col size="9">
+                  <ion-row>
+                    <ion-col size="12">
+                      <ion-skeleton-text animated style="width: 70%"></ion-skeleton-text>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size="12">
+                      <ion-skeleton-text animated style="width: 40%"></ion-skeleton-text>
+                    </ion-col>
+                  </ion-row>
                 </ion-col>
               </ion-row>
               <ion-row>
@@ -181,6 +228,8 @@ import {
   IonCol,
   IonRow,
   IonLabel,
+  IonChip,
+  IonThumbnail,
   IonSkeletonText,
   IonSegment,
   IonSegmentButton,
@@ -201,6 +250,8 @@ import { add, create, trash, timeOutline, personCircleOutline } from "ionicons/i
 import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
 
+import VueApexCharts from "vue3-apexcharts";
+
 import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
@@ -219,6 +270,8 @@ export default defineComponent({
     IonList,
     IonItem,
     IonFab,
+    IonChip,
+    IonThumbnail,
     IonFabButton,
     IonIcon,
     IonButtons,
@@ -237,6 +290,7 @@ export default defineComponent({
     IonRefresherContent,
     IonInfiniteScroll, 
     IonInfiniteScrollContent,
+    apexchart: VueApexCharts
   },
   data() {
     return {
@@ -245,8 +299,9 @@ export default defineComponent({
       searchTerm: "",
       searchFilter: "all",
       isSearching: false,
+      hideAll: false,
       page: 1,
-      maxResults: 400
+      maxResults: 400,
     };
   },
   setup() {
@@ -262,9 +317,16 @@ export default defineComponent({
     this.page = 1;
     this.doRefresh(false);
   },
+  ionViewDidEnter() {
+    this.hideAll = false;
+  },
+  ionViewWillLeave() {
+    this.hideAll = true;
+  },
   methods: {
     doRefresh(event) {
         this.search(this.searchTerm, 1);
+        window.dispatchEvent(new Event('resize'));
         if (event) event.target.complete();
     },
     async showToast(msg) {
@@ -278,8 +340,9 @@ export default defineComponent({
       setTimeout(() => {
         this.page += 1;
         this.search(this.searchTerm, this.page);
+        window.dispatchEvent(new Event('resize'));
         ev.target.complete();
-
+        
         // App logic to determine if all data is loaded
         // and disable the infinite scroll
         if (this.searchResult.length == this.maxResults) {

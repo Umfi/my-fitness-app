@@ -184,13 +184,21 @@ export default defineComponent({
       });
       toast.present();
     },
-    valueToPercent (value, max) {
-      return (value * 100) / max;
-    },
     updatePreviewData() {
 
         if (this.amount < 0) {
           return;
+        }
+
+        var valueToPercent = function (value, max) {
+          let tmp = (value * 100) / max;
+          if (tmp > 100) {
+            return 100;
+          } else if (tmp < 0) {
+            return 0;
+          } else {
+            return tmp;
+          }
         }
 
         var item = this.$props.item;
@@ -200,10 +208,10 @@ export default defineComponent({
         let calculatedFat = item.fat * this.amount / 100;
         let calculatedProtein = item.protein * this.amount / 100;
 
-        this.series = [ this.valueToPercent(this.userData.calories + calculatedCalories, this.userData.user.calories),
-                      this.valueToPercent(this.userData.protein +calculatedProtein, this.userData.user.protein),
-                      this.valueToPercent(this.userData.carbohydrate +calculatedCarbohydrate, this.userData.user.carbohydrate),
-                      this.valueToPercent(this.userData.fat +calculatedFat, this.userData.user.fat) ]
+        this.series = [ valueToPercent(this.userData.calories + calculatedCalories, this.userData.user.calories),
+                        valueToPercent(this.userData.protein +calculatedProtein, this.userData.user.protein),
+                        valueToPercent(this.userData.carbohydrate +calculatedCarbohydrate, this.userData.user.carbohydrate),
+                        valueToPercent(this.userData.fat +calculatedFat, this.userData.user.fat) ]
     }, 
     adjustAmount(mode) {
       let tmp = parseFloat(this.amount) 
