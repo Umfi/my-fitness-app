@@ -64,17 +64,17 @@
                 <ion-row>
                   <ion-col size="4">
                     <ion-chip color="success" outline>
-                        <ion-label>Protein: {{ parseInt(item.protein) }}g</ion-label>
+                        <ion-label class="chip-font">Protein: {{ parseInt(item.protein) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                   <ion-col size="4">
                       <ion-chip color="warning" outline>
-                        <ion-label>Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
+                        <ion-label class="chip-font">Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                   <ion-col size="4">
                     <ion-chip color="danger" outline>
-                        <ion-label>Fat: {{ parseInt(item.fat) }}g</ion-label>
+                        <ion-label class="chip-font">Fat: {{ parseInt(item.fat) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                 </ion-row>
@@ -133,17 +133,17 @@
                 <ion-row>
                   <ion-col size="4">
                     <ion-chip color="success" outline>
-                        <ion-label>Protein: {{ parseInt(item.protein) }}g</ion-label>
+                        <ion-label class="chip-font">Protein: {{ parseInt(item.protein) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                   <ion-col size="4">
                       <ion-chip color="warning" outline>
-                        <ion-label>Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
+                        <ion-label class="chip-font">Carbs: {{ parseInt(item.carbohydrate) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                   <ion-col size="4">
                     <ion-chip color="danger" outline>
-                        <ion-label>Fat: {{ parseInt(item.fat) }}g</ion-label>
+                        <ion-label class="chip-font">Fat: {{ parseInt(item.fat) }}g</ion-label>
                     </ion-chip>
                   </ion-col>
                 </ion-row>
@@ -470,3 +470,8 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.chip-font {
+  font-size: 11px;
+}
+</style>

@@ -27,7 +27,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" color="medium" fill="outline" @click="adjustAmount('-')">
+              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustAmount('-')">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -39,7 +39,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" color="medium" fill="outline" @click="adjustAmount('+')">
+              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustAmount('+')">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -80,6 +80,8 @@ import VueApexCharts from "vue3-apexcharts";
 import { getDailyCalories } from "@/service/StatsService.js";
 import { trackCalories } from "@/service/ProductService.js";
 import { add, remove, close } from "ionicons/icons";
+
+import { createGesture } from '@ionic/vue';
 
 export default defineComponent({
   name: "ModalAddCalories",
@@ -171,6 +173,66 @@ export default defineComponent({
       this.userData = data;
       this.updatePreviewData();
     }
+
+    let timer;
+    const decBtn = document.querySelector('.decBtn');
+    const gestureDec = createGesture({
+      el: decBtn,
+      threshold: 0,
+        onStart: () => {                                       
+            timer = setInterval(function(){ 
+              decBtn.click();
+            }, 100);
+        },
+        onMove: (detail) => { 
+           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+              return;
+           }
+           
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        },
+        onEnd: () => {                
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        }
+    });
+
+    gestureDec.enable(true);
+
+    const incBtn = document.querySelector('.incBtn');
+    const gestureInc = createGesture({
+      el: incBtn,
+      threshold: 0,
+        onStart: () => {                                       
+            timer = setInterval(function(){ 
+              incBtn.click();
+            }, 100);
+        },
+        onMove: (detail) => { 
+           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+              return;
+           }
+           
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        },
+        onEnd: () => {                
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        }
+    });
+
+    gestureInc.enable(true);
+
   },
   methods: {
     async dismissModal() {

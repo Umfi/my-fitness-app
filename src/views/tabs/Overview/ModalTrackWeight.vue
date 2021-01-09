@@ -15,7 +15,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" color="medium" fill="outline" @click="adjustWeight('-')">
+              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustWeight('-')">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -30,7 +30,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" color="medium" fill="outline" @click="adjustWeight('+')">
+              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustWeight('+')">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -68,6 +68,7 @@ import { defineComponent } from "vue";
 
 import { trackWeight, getUserData } from "@/service/UserService.js";
 import { add, remove, close } from "ionicons/icons";
+import { createGesture } from '@ionic/vue';
 
 
 export default defineComponent({
@@ -105,6 +106,67 @@ export default defineComponent({
     if (userData != null) {
       this.amount = userData.details.weight;
     }
+
+    let timer;
+    const decBtn = document.querySelector('.decBtn');
+    const gestureDec = createGesture({
+      el: decBtn,
+      threshold: 0,
+        onStart: () => {                                       
+            timer = setInterval(function(){ 
+              decBtn.click();
+            }, 100);
+        },
+        onMove: (detail) => { 
+           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+              return;
+            }
+
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        },
+        onEnd: () => {                
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        }
+    });
+
+    gestureDec.enable(true);
+
+    
+
+    const incBtn = document.querySelector('.incBtn');
+    const gestureInc = createGesture({
+      el: incBtn,
+      threshold: 0,
+        onStart: () => {                                       
+            timer = setInterval(function(){ 
+              incBtn.click();
+            }, 100);
+        },
+        onMove: (detail) => { 
+           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+              return;
+           }
+           
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        },
+        onEnd: () => {                
+            if (timer) {
+              clearInterval(timer);
+              timer = undefined;
+            }
+        }
+    });
+
+    gestureInc.enable(true);
   },
   methods: {
     async dismissModal() {
