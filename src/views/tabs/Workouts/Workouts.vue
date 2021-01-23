@@ -10,7 +10,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content>
+    <ion-content v-show="renderContent">
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
@@ -28,13 +28,13 @@
         @cell-click="onDateClick"
       >
       </vue-cal>
-    </ion-content>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button ref="addWorkoutBtn" @click="trackWorkout">
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
-    </ion-fab>
+      </ion-fab>
+    </ion-content>
   </ion-page>
 </template>
 
@@ -88,10 +88,17 @@ export default defineComponent({
   },
   data() {
     return {
+      renderContent: false,
       selectedDate: null,
       events: [],
       reloadAttempt: 0
     };
+  },
+  ionViewDidEnter() {
+    this.renderContent = true;
+  },
+  ionViewWillLeave() {
+    this.renderContent = false;
   },
   ionViewWillEnter() {
     this.doRefresh(false);

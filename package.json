@@ -38,7 +38,7 @@
     "@vue/test-utils": "^2.0.0-beta.13",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.4.1",
-    "vue-jest": "^5.0.0-0"
+    "vue-jest": "^5.0.0-alpha.8"
   },
   "description": "An Ionic project"
 }

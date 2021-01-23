@@ -8,7 +8,7 @@
         <ion-title>My Fitness App</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content v-if="user">
+    <ion-content v-if="user" v-show="renderContent">
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
@@ -301,6 +301,7 @@ export default defineComponent({
   },
   data() {
     return {
+      renderContent: false,
       user: null,
       calories: 0,
       protein: 0,
@@ -381,6 +382,12 @@ export default defineComponent({
       loading: false,
       reloadAttempt: 0
     };
+  },
+  ionViewDidEnter() {
+    this.renderContent = true;
+  },
+  ionViewWillLeave() {
+    this.renderContent = false;
   },
   ionViewWillEnter() {
     this.doRefresh(false);

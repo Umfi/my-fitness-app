@@ -10,7 +10,7 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-row >
+    <ion-row v-show="renderContent">
       <ion-col size="12">
         <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)"></ion-searchbar>
       </ion-col>
@@ -28,7 +28,7 @@
 
  
 
-    <ion-content class="ion-padding">
+    <ion-content class="ion-padding" v-show="renderContent">
 
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content> </ion-refresher-content>
@@ -303,7 +303,14 @@ export default defineComponent({
       hideAll: false,
       page: 1,
       maxResults: 400,
+      renderContent: false
     };
+  },
+  ionViewDidEnter() {
+    this.renderContent = true;
+  },
+  ionViewWillLeave() {
+    this.renderContent = false;
   },
   setup() {
     return {
