@@ -21,6 +21,7 @@
     "core-js": "^3.8.2",
     "vue": "^3.0.5",
     "vue-cal": "^4.2.0",
+    "vue-css-donut-chart": "git+https://github.com/Umfi/vue-css-donut-chart.git",
     "vue-router": "^4.0.2",
     "vue3-apexcharts": "^1.1.1",
     "vuex": "^4.0.0-rc.2"

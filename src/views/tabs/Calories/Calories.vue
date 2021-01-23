@@ -34,7 +34,7 @@
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
 
-      <ion-list v-if="searchResult && !isSearching && searchFilter == 'all' && !hideAll" class="search-results-list">
+      <ion-list v-if="searchResult && !isSearching && searchFilter == 'all'" class="search-results-list">
 
         <ion-item-sliding v-for="item in searchResult" :key="item.id">
           <ion-item @click="addCalories(item)">
@@ -42,7 +42,7 @@
                <ion-grid>
                 <ion-row>
                   <ion-col size="3">
-                    <apexchart type="donut" :options="{ chart: { type: 'donut', }, states: { active: { filter: { type: 'none', } }, }, dataLabels: { enabled: false }, tooltip: { enabled: false, }, legend: { show: false }, colors: ['#2dd36f', '#ffc409', '#eb445a'], plotOptions: { pie: { expandOnClick: false, donut: { size: '80%', labels: { show: true, name: { show: false }, total: { show: true, label: '', formatter: function () { return parseInt(item.calories); } } } } } } }" :series="[parseInt(item.protein), parseInt(item.carbohydrate), parseInt(item.fat)]" height="65%"></apexchart>
+                    <vc-donut :size="50" :thickness="20" :total="(parseInt(item.protein) + parseInt(item.carbohydrate) + parseInt(item.fat)) || 100" :sections="[{ label: 'Protein', value: parseInt(item.protein), color: '#2dd36f' }, { label: 'Carbs', value: parseInt(item.carbohydrate), color: '#ffc409' }, { label: 'Fat', value: parseInt(item.fat), color: '#eb445a' }]" class="ion-margin-top"><h3>{{ parseInt(item.calories) }} </h3></vc-donut>
                   </ion-col>
                   <ion-col size="9">
                     <ion-row style="margin-top: 10px">
@@ -108,14 +108,14 @@
       </ion-infinite-scroll>
 
 
-      <ion-list v-if="history && !isSearching && searchFilter == 'history' && !hideAll" class="search-history-list">
+      <ion-list v-if="history && !isSearching && searchFilter == 'history'" class="search-history-list">
         <ion-item-sliding v-for="item in history" :key="item.id">
           <ion-item @click="addCalories(item)">
             <ion-label>
               <ion-grid>
                 <ion-row>
                   <ion-col size="3">
-                    <apexchart type="donut" :options="{ chart: { type: 'donut', }, states: { active: { filter: { type: 'none', } }, }, dataLabels: { enabled: false }, tooltip: { enabled: false, }, legend: { show: false }, colors: ['#2dd36f', '#ffc409', '#eb445a'], plotOptions: { pie: { expandOnClick: false, donut: { size: '80%', labels: { show: true, name: { show: false }, total: { show: true, label: '', formatter: function () { return parseInt(item.calories); } } } } } } }" :series="[parseInt(item.protein), parseInt(item.carbohydrate), parseInt(item.fat)]" height="65%"></apexchart>
+                    <vc-donut :size="50" :thickness="20" :total="(parseInt(item.protein) + parseInt(item.carbohydrate) + parseInt(item.fat)) || 100" :sections="[{ label: 'Protein', value: parseInt(item.protein), color: '#2dd36f' }, { label: 'Carbs', value: parseInt(item.carbohydrate), color: '#ffc409' }, { label: 'Fat', value: parseInt(item.fat), color: '#eb445a' }]" class="ion-margin-top"><h3>{{ parseInt(item.calories) }} </h3></vc-donut>
                   </ion-col>
                   <ion-col size="9">
                     <ion-row style="margin-top: 10px">
@@ -250,13 +250,14 @@ import { add, create, trash, timeOutline, personCircleOutline } from "ionicons/i
 import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
 
-import VueApexCharts from "vue3-apexcharts";
-
 import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
 import { searchProduct, removeProduct } from "@/service/ProductService.js";
+
+import  Donut  from 'vue-css-donut-chart/src/components/Donut';
+//import 'vue-css-donut-chart/dist/vcdonut.css';
 
 export default defineComponent({
   name: "Calories",
@@ -290,7 +291,7 @@ export default defineComponent({
     IonRefresherContent,
     IonInfiniteScroll, 
     IonInfiniteScrollContent,
-    apexchart: VueApexCharts
+    'vc-donut' : Donut
   },
   data() {
     return {
@@ -316,12 +317,6 @@ export default defineComponent({
   created() {
     this.page = 1;
     this.doRefresh(false);
-  },
-  ionViewDidEnter() {
-    this.hideAll = false;
-  },
-  ionViewWillLeave() {
-    this.hideAll = true;
   },
   methods: {
     doRefresh(event) {
