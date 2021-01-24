@@ -17,10 +17,10 @@
         <ion-col size="12">
          <ion-segment @ionChange="searchFilterChanged($event.target.value)" :value="searchFilter">
           <ion-segment-button value="all">
-            <ion-label>All</ion-label>
+            <ion-label>Search Results</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="history">
-            <ion-label>History</ion-label>
+          <ion-segment-button value="today">
+            <ion-label>Today</ion-label>
           </ion-segment-button>
         </ion-segment>
         </ion-col>
@@ -108,9 +108,9 @@
       </ion-infinite-scroll>
 
 
-      <ion-list v-if="history && !isSearching && searchFilter == 'history'" class="search-history-list">
-        <ion-item-sliding v-for="item in history" :key="item.id">
-          <ion-item @click="addCalories(item)">
+      <ion-list v-if="today && !isSearching && searchFilter == 'today'" class="search-history-list">
+        <ion-item-sliding v-for="item in today" :key="item.id">
+          <ion-item>
             <ion-label>
               <ion-grid>
                 <ion-row>
@@ -152,13 +152,9 @@
           </ion-item>
 
           <ion-item-options>
-            <ion-item-option color="secondary" @click="editItem(item)" v-if="item.editable">
-              <ion-icon slot="top" :icon="create" class="ion-margin-bottom"></ion-icon>
-              Edit
-            </ion-item-option>
-            <ion-item-option color="danger" @click="deleteItem(item)" v-if="item.deletable">
+            <ion-item-option color="danger" @click="removeCalories(item)">
               <ion-icon slot="top" :icon="trash" class="ion-margin-bottom"></ion-icon>
-              Delete
+              Untrack
             </ion-item-option>
           </ion-item-options>
 
@@ -254,7 +250,7 @@ import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
-import { searchProduct, removeProduct } from "@/service/ProductService.js";
+import { searchProduct, removeProduct, untrackCalories } from "@/service/ProductService.js";
 
 import  Donut  from 'vue-css-donut-chart/src/components/Donut';
 //import 'vue-css-donut-chart/dist/vcdonut.css';
@@ -296,7 +292,7 @@ export default defineComponent({
   data() {
     return {
       searchResult: [],
-      history: [],
+      today: [],
       searchTerm: "",
       searchFilter: "all",
       isSearching: false,
@@ -371,43 +367,75 @@ export default defineComponent({
             this.searchResult = results.searchResult;
           }
           
-          this.history = results.searchHistory;
+          this.today = results.todayResults;
           this.maxResults = results.maxResults;
           
-          this.filterHistory(searchTerm);
+          this.filterToday(searchTerm);
           this.isSearching = false;
 
 
-          if ((this.searchResult.length == 0 && searchTerm != "" && this.searchFilter == "all") || (this.history.length == 0 && searchTerm != "" && this.searchFilter == "history"))  {
+          if ((this.searchResult.length == 0 && searchTerm != "" && this.searchFilter == "all") || (this.today.length == 0 && searchTerm != "" && this.searchFilter == "today"))  {
             this.showToast("No products found.");
           }
       }
     },
     searchFilterChanged(filter) {
+      this.searchTerm = "";
       this.searchFilter = filter;
-      this.filterHistory(this.searchTerm);
 
-      if (this.searchTerm == "" && filter == "all") {
+      if (this.searchTerm == "" && this.searchFilter == "all") {
         this.searchResult = [];
       } 
     },
-    filterHistory(searchTerm) {
-      if (this.searchFilter == "history" && searchTerm != "") {
-        this.history = this.history.filter(function(value){ 
+    filterToday(searchTerm) {
+      if (this.searchFilter == "today" && searchTerm != "") {
+        this.today = this.today.filter(function(value){ 
           return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
         });
       }
     },
     async addCalories(itm) {
-
       const modal = await modalController
         .create({
           component: ModalAddCalories,
           componentProps: {
-            item: itm
+            item: itm,
+            parent: this
           },
         })
       return modal.present();
+    },
+    async removeCalories(itm) {
+        const alert = await alertController
+        .create({
+          header: 'Untrack Item!',
+          message: 'Do you really want to untrack this item?',
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary',
+            },
+            {
+              text: 'Yes',
+              handler: async () => {
+                
+                const deleted = await untrackCalories({
+                    id: itm.id
+                });
+
+                if (deleted) {
+                  this.showToast("Product untracked.");
+                  this.doRefresh(false);
+                } else {
+                  this.showToast("Couldn't untrack product.");
+                }
+
+              },
+            },
+          ],
+        });
+      return alert.present();
     },
     async addProduct() {
       const modal = await modalController
@@ -440,7 +468,7 @@ export default defineComponent({
       const alert = await alertController
         .create({
           header: 'Delete Item!',
-          message: 'Do you really want to delete this item from your history?',
+          message: 'Do you really want to delete this item?',
           buttons: [
             {
               text: 'Cancel',
@@ -448,7 +476,7 @@ export default defineComponent({
               cssClass: 'secondary',
             },
             {
-              text: 'Okay',
+              text: 'Yes',
               handler: async () => {
                 
                 const deleted = await removeProduct({

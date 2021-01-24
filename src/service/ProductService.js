@@ -85,3 +85,20 @@ export async function trackCalories(product) {
 
         return data;
 }
+
+export async function untrackCalories(product) {
+    const data = await $axios({ url: config.API_BASE_URL + 'untrack', data: product, method: 'POST' })
+        .then(response => {
+            if (response.data.status) {
+                return true;
+            } 
+            
+            return false;
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}

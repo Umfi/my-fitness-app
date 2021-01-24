@@ -103,6 +103,7 @@ export default defineComponent({
   },
   props: {
     item: { type: Object, default: null },
+    parent: { type: Object, default: null },
   },
   data() {
     return {
@@ -309,6 +310,7 @@ export default defineComponent({
 
       if (tracked) {
         this.showToast("Item tracked.");
+        this.$props.parent.doRefresh(false);
         this.dismissModal();
       } else {
         this.showToast("Couldn't track item.");
