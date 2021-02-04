@@ -27,7 +27,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustAmount('-')">
+              <ion-button expand="block" class="decBtn" color="medium" fill="outline">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -39,7 +39,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustAmount('+')">
+              <ion-button expand="block" class="incBtn" color="medium" fill="outline">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -108,6 +108,9 @@ export default defineComponent({
   data() {
     return {
       amount: 100,
+      increment: 1,
+      multiplier: 1,
+      counter: 0,
       userData: null,
       series: [0, 0, 0, 0],
       chartOptions: {
@@ -175,14 +178,19 @@ export default defineComponent({
       this.updatePreviewData();
     }
 
+
     let timer;
-    const decBtn = document.querySelector('.decBtn');
+    let that = this;
     const gestureDec = createGesture({
-      el: decBtn,
+      el: document.querySelector('.decBtn'),
       threshold: 0,
-        onStart: () => {                                       
+        onStart: () => {  
+            that.increment = 1;
+            that.multiplier = 1;
+            that.counter = 0;
+
             timer = setInterval(function(){ 
-              decBtn.click();
+              that.adjustAmount('-');
             }, 100);
         },
         onMove: (detail) => { 
@@ -205,13 +213,17 @@ export default defineComponent({
 
     gestureDec.enable(true);
 
-    const incBtn = document.querySelector('.incBtn');
+
     const gestureInc = createGesture({
-      el: incBtn,
+      el: document.querySelector('.incBtn'),
       threshold: 0,
-        onStart: () => {                                       
+        onStart: () => {  
+            that.increment = 1;
+            that.multiplier = 1;
+            that.counter = 0;
+
             timer = setInterval(function(){ 
-              incBtn.click();
+              that.adjustAmount('+');
             }, 100);
         },
         onMove: (detail) => { 
@@ -279,15 +291,23 @@ export default defineComponent({
     adjustAmount(mode) {
       let tmp = parseFloat(this.amount) 
 
+      this.counter++;
+
+      if (this.counter >= 10 && this.multiplier < 4) {
+        this.multiplier++;
+        this.increment = this.increment * this.multiplier;
+        this.counter = 0;
+      }
+
       if (mode == "+") {
-        tmp += 1;
+        tmp += this.increment;
       } else {
-        tmp -= 1;
-        if (tmp < 0) {
-          tmp = 0;
-        }
+        tmp -= this.increment;
       }
       
+      if (tmp < 0) 
+        tmp = 0;
+
       this.amount = tmp.toFixed(0);
     },
     async trackItem() {

@@ -15,7 +15,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustWeight('-')">
+              <ion-button expand="block" class="decBtn" color="medium" fill="outline">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -30,7 +30,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustWeight('+')">
+              <ion-button expand="block" class="incBtn" color="medium" fill="outline">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -99,6 +99,9 @@ export default defineComponent({
   data() {
     return {
       amount: null,
+      increment: 0.1,
+      multiplier: 1,
+      counter: 0
     };
   },
   async created() {
@@ -108,13 +111,17 @@ export default defineComponent({
     }
 
     let timer;
-    const decBtn = document.querySelector('.decBtn');
+    let that = this;
     const gestureDec = createGesture({
-      el: decBtn,
+      el: document.querySelector('.decBtn'),
       threshold: 0,
-        onStart: () => {                                       
+        onStart: () => { 
+            that.increment = 0.1;
+            that.multiplier = 1;
+            that.counter = 0;
+
             timer = setInterval(function(){ 
-              decBtn.click();
+              that.adjustWeight('-');
             }, 100);
         },
         onMove: (detail) => { 
@@ -137,15 +144,17 @@ export default defineComponent({
 
     gestureDec.enable(true);
 
-    
 
-    const incBtn = document.querySelector('.incBtn');
     const gestureInc = createGesture({
-      el: incBtn,
+      el: document.querySelector('.incBtn'),
       threshold: 0,
-        onStart: () => {                                       
+        onStart: () => {   
+            that.increment = 0.1;
+            that.multiplier = 1;
+            that.counter = 0;
+
             timer = setInterval(function(){ 
-              incBtn.click();
+              that.adjustWeight('+');
             }, 100);
         },
         onMove: (detail) => { 
@@ -183,12 +192,23 @@ export default defineComponent({
     adjustWeight(mode) {
       let tmp = parseFloat(this.amount) 
 
-      if (mode == "+") {
-        tmp += 0.1;
-      } else {
-        tmp -= 0.1;
+      this.counter++;
+
+      if (this.counter >= 10 && this.multiplier < 4) {
+        this.multiplier++;
+        this.increment = this.increment * this.multiplier;
+        this.counter = 0;
       }
       
+      if (mode == "+") {
+        tmp += this.increment;
+      } else {
+        tmp -= this.increment;
+      }
+      
+      if (tmp < 0) 
+        tmp = 0;
+
       this.amount = tmp.toFixed(1);
     },
     async trackItem() {
