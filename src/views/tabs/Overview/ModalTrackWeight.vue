@@ -15,7 +15,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" class="decBtn" color="medium" fill="outline">
+              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustWeight('-')">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -30,7 +30,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" class="incBtn" color="medium" fill="outline">
+              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustWeight('+')">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>

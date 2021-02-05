@@ -13,6 +13,9 @@
           <ion-item @click="logout">Logout</ion-item>
         </ion-list>
       </ion-content>
+      <ion-footer class="bar-stable">
+          <ion-item>{{ version }}</ion-item>
+      </ion-footer>
     </ion-menu>
 
     <ion-router-outlet id="main" />
@@ -30,6 +33,7 @@ import {
   IonContent,
   IonList,
   IonItem,
+  IonFooter,
   menuController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
@@ -41,6 +45,8 @@ import { config } from "@/config.js";
 import $axios from "@/helper/axios.js";
 
 import { Plugins } from "@capacitor/core";
+import { isPlatform } from '@ionic/vue';
+import { AppVersion } from '@ionic-native/app-version';
 
 
 const { App } = Plugins;
@@ -67,6 +73,16 @@ export default defineComponent({
     IonContent,
     IonList,
     IonItem,
+    IonFooter
+  },
+   data() {
+    return {
+      version: ""
+    };
+  },
+  created() {
+    if (isPlatform('ios') || isPlatform('android')) 
+     AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
   },
   methods: {
     logout: function () {
