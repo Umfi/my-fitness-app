@@ -12,9 +12,14 @@
 
     <ion-row v-show="renderContent">
       <ion-col size="12">
-        <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)"></ion-searchbar>
+        <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)" @ionInput="suggest($event.target.value)"></ion-searchbar>
       </ion-col>
-        <ion-col size="12">
+      <ion-col size="12">
+        <ion-card class="suggestions-card" v-if="filteredSuggestions.length">
+          <ion-item v-for="suggestion in filteredSuggestions.slice(0, 10)" :key="suggestion.id" @click="selectSuggestion(suggestion.name)">{{suggestion.name}}</ion-item>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12">
          <ion-segment @ionChange="searchFilterChanged($event.target.value)" :value="searchFilter">
           <ion-segment-button value="all">
             <ion-label>Search Results</ion-label>
@@ -223,6 +228,7 @@ import {
   IonGrid,
   IonCol,
   IonRow,
+  IonCard,
   IonLabel,
   IonChip,
   IonThumbnail,
@@ -274,6 +280,7 @@ export default defineComponent({
     IonButtons,
     IonMenuButton,
     IonGrid,
+    IonCard,
     IonCol,
     IonRow,
     IonLabel,
@@ -291,6 +298,8 @@ export default defineComponent({
   },
   data() {
     return {
+      suggestions: [],
+      filteredSuggestions: [],
       searchResult: [],
       today: [],
       searchTerm: "",
@@ -348,6 +357,24 @@ export default defineComponent({
         }
       }, 500);
     },
+    suggest(input) {
+      if (input == "") {
+        this.filteredSuggestions = [];
+      } else {
+        this.filteredSuggestions = this.suggestions.filter(function(suggestion) {
+            return suggestion.name.toLowerCase().includes(input.toLowerCase());
+        });
+      }
+    },
+    selectSuggestion(suggestion) {
+      this.searchTerm = suggestion;
+      this.filteredSuggestions = [];
+      var that = this;
+      setTimeout(function(){
+          that.search(suggestion, 1);
+      }, 200);
+      
+    },
     async search(searchTerm, page) {
 
       if (Capacitor.isPluginAvailable('Keyboard')) {
@@ -360,6 +387,9 @@ export default defineComponent({
       
       const results = await searchProduct(searchTerm, page);
       if (results != null) {
+          this.suggestions = results.searchHistory;
+          this.filteredSuggestions = [];
+
           if (page > 1) {
             this.searchResult.push(...results.searchResult);
           } else {
@@ -503,5 +533,13 @@ export default defineComponent({
 <style scoped>
 .chip-font {
   font-size: 11px;
+}
+
+.suggestions-card {
+  margin-top: 0;
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  z-index: 10;
 }
 </style>
