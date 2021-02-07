@@ -9,10 +9,15 @@
         <ion-title>My Fitness App</ion-title>
       </ion-toolbar>
     </ion-header>
-
+    
     <ion-row v-show="renderContent">
-      <ion-col size="12">
-        <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)" @ionInput="suggest($event.target.value)"></ion-searchbar>
+      <ion-col size="10">
+        <ion-searchbar v-model="searchTerm" @change="search($event.target.value, 1)" @ionInput="suggest($event.target.value)" @ionClear="searchResult = []"></ion-searchbar>
+      </ion-col>
+       <ion-col size="2">
+          <ion-button class="ion-float-end" style="margin-top: 11px;" @click="scanBarcode()">
+            <ion-icon slot="icon-only" :icon="barcodeOutline"></ion-icon>
+          </ion-button>
       </ion-col>
       <ion-col size="12">
         <ion-card class="suggestions-card" v-if="filteredSuggestions.length">
@@ -30,8 +35,6 @@
         </ion-segment>
         </ion-col>
     </ion-row>
-
- 
 
     <ion-content class="ion-padding" v-show="renderContent">
 
@@ -57,6 +60,7 @@
                       <ion-col size="1">
                         <ion-icon v-if="item.editable && item.deletable" :icon="personCircleOutline"></ion-icon>
                         <ion-icon v-if="!item.editable && item.deletable" :icon="timeOutline"></ion-icon>
+                        <ion-icon v-if="item.scanned" :icon="barcodeOutline"></ion-icon>
                       </ion-col>
                     </ion-row>
                     <ion-row>
@@ -220,6 +224,7 @@ import {
   IonSearchbar,
   IonList,
   IonItem,
+  IonButton,
   IonFab,
   IonFabButton,
   IonIcon,
@@ -247,16 +252,18 @@ import {
   toastController
 } from "@ionic/vue";
 
-import { add, create, trash, timeOutline, personCircleOutline } from "ionicons/icons";
+import { add, create, trash, timeOutline, personCircleOutline, barcodeOutline } from "ionicons/icons";
 
 import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
 
+
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Capacitor, Plugins } from '@capacitor/core';
 
 const { Keyboard } = Plugins;
 
-import { searchProduct, removeProduct, untrackCalories } from "@/service/ProductService.js";
+import { searchProduct, searchProductByBarcode, removeProduct, untrackCalories } from "@/service/ProductService.js";
 
 import  Donut  from 'vue-css-donut-chart/src/components/Donut';
 //import 'vue-css-donut-chart/dist/vcdonut.css';
@@ -274,6 +281,7 @@ export default defineComponent({
     IonItem,
     IonFab,
     IonChip,
+    IonButton,
     IonThumbnail,
     IonFabButton,
     IonIcon,
@@ -323,7 +331,8 @@ export default defineComponent({
       create,
       trash,
       timeOutline,
-      personCircleOutline
+      personCircleOutline,
+      barcodeOutline
     };
   },
   created() {
@@ -423,6 +432,26 @@ export default defineComponent({
           return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
         });
       }
+    },
+    async scanBarcode() {
+      try {
+        const scanResult = await BarcodeScanner.scan();
+        if (scanResult) {
+          const scannedProduct = await searchProductByBarcode(scanResult.text);
+          if (scannedProduct != null) {
+            this.searchTerm = scannedProduct.name;
+            await this.search(scannedProduct.name, 1);
+            if (scannedProduct.show) {
+              this.searchResult.unshift(scannedProduct);
+            }
+          } else {
+            this.showToast("No product found.");
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
     },
     async addCalories(itm) {
       const modal = await modalController

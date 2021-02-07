@@ -18,6 +18,25 @@ export async function searchProduct(searchTerm, page) {
         return data;
 }
 
+
+export async function searchProductByBarcode(barcode) {
+    const data = await $axios(config.API_BASE_URL + "barcode?barcode=" + barcode)
+        .then(resp => {
+            if (resp.data.product && resp.data.product != "") {
+                return resp.data.product;
+            }
+
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
+
 export async function createProduct(product) {
     const data = await $axios({ url: config.API_BASE_URL + 'createProduct', data: product, method: 'POST' })
         .then(response => {
