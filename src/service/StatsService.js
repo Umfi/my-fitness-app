@@ -30,6 +30,23 @@ export async function getDailyCalories() {
         return data;
 }
 
+export async function getWaterConsumption() {
+    const data = await $axios(config.API_BASE_URL + 'dailyWaterConsumption')
+        .then(response => {
+            if (response.data) { 
+                return response.data;
+            }
+            
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
 export async function getMonthlyWorkoutSummary() {
     const data = await $axios(config.API_BASE_URL + 'monthlyWorkoutSummary')
         .then(response => {

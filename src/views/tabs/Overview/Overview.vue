@@ -139,6 +139,37 @@
         </ion-card-content>
       </ion-card>
 
+     <!-- Water Consume Card -->
+      <ion-card v-show="!loading">
+        <ion-card-header>
+          <ion-card-title>
+            Water Consumption
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+         <apexchart
+            width="100%"
+            height="300"
+            type="radialBar"
+            :options="waterChartOptions"
+            :series="waterSeries"
+          ></apexchart>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card v-if="loading">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-thumbnail style="width: 100%;">
+          <ion-skeleton-text animated></ion-skeleton-text>
+          </ion-thumbnail>
+        </ion-card-content>
+      </ion-card>
+
       <!-- Workout Card -->
       <ion-card v-show="!loading">
         <ion-card-header>
@@ -210,10 +241,13 @@
         <ion-fab-list side="top">
           <ion-fab-button @click="trackWeight">
             <ion-icon :icon="man"></ion-icon>
-           </ion-fab-button>
-           <ion-fab-button @click="trackWorkout">
+          </ion-fab-button>
+          <ion-fab-button @click="trackWorkout">
              <ion-icon :icon="barbell"></ion-icon>
-             </ion-fab-button>
+          </ion-fab-button>
+          <ion-fab-button @click="trackWater">
+            <ion-icon :icon="water"></ion-icon>
+           </ion-fab-button>
         </ion-fab-list>
       </ion-fab>
 
@@ -252,14 +286,16 @@ import {
   IonFabButton,
   IonIcon,
   modalController,
+  toastController,
 } from "@ionic/vue";
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, man, barbell } from "ionicons/icons";
+import { add, man, barbell, water } from "ionicons/icons";
 
+import { trackWaterConsumption } from "@/service/UserService.js";
 
-import { getDailyCalories, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
+import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 
@@ -296,7 +332,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, man, barbell
+      add, man, barbell, water
     };
   },
   data() {
@@ -379,6 +415,60 @@ export default defineComponent({
         },
       ],
       ///
+      waterChartOptions: {
+          chart: {
+            type: 'radialBar',
+            offsetY: -20,
+            sparkline: {
+              enabled: true
+            }
+          },
+          plotOptions: {
+            radialBar: {
+              startAngle: -90,
+              endAngle: 90,
+              track: {
+                background: "#e7e7e7",
+                strokeWidth: '97%',
+                margin: 5, // margin is in pixels
+                dropShadow: {
+                  enabled: true,
+                  top: 2,
+                  left: 0,
+                  color: '#999',
+                  opacity: 1,
+                  blur: 2
+                }
+              },
+              dataLabels: {
+                name: {
+                  show: false
+                },
+                value: {
+                  offsetY: -2,
+                  fontSize: '22px'
+                }
+              }
+            }
+          },
+          grid: {
+            padding: {
+              top: -10
+            }
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'light',
+              shadeIntensity: 0.4,
+              inverseColors: false,
+              opacityFrom: 1,
+              opacityTo: 1,
+              stops: [0, 50, 53, 91]
+            },
+          },
+      },
+      waterSeries: [0],
       loading: false,
       reloadAttempt: 0
     };
@@ -398,10 +488,11 @@ export default defineComponent({
         this.loading = true;
 
         const loadCalories = await this.loadCaloriesSummary();
+        const loadDailyWaterConsumption = await this.loadDailyWaterConsumption();
         const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
         const loadMonthlyWeight = await this.loadMonthlyWeightSummary();
 
-        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight)) {
+        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight || !loadDailyWaterConsumption)) {
           this.reloadAttempt++;
           setTimeout(() => {
             this.doRefresh(event);
@@ -413,6 +504,13 @@ export default defineComponent({
           if (event) 
             event.target.complete();
         }
+    },
+    async showToast(msg) {
+      const toast = await toastController.create({
+        message: msg,
+        duration: 2000,
+      });
+      toast.present();
     },
     async loadCaloriesSummary() {
 
@@ -428,6 +526,18 @@ export default defineComponent({
         this.proteinValue = data.proteinValue;
         this.carbohydrateValue = data.carbohydrateValue;
         this.fatValue = data.fatValue;
+
+        return true;
+      }
+
+      return false;
+    },
+    async loadDailyWaterConsumption() {
+
+      const data = await getWaterConsumption();
+      
+      if (data != null) {
+        this.waterSeries = [data.waterConsumption];
 
         return true;
       }
@@ -497,6 +607,20 @@ export default defineComponent({
         })
       return modal.present();
     },
+    async trackWater() {
+ 
+      var tracked = await trackWaterConsumption({
+        ml: 250, // one glass
+      });
+
+      if (tracked) {
+        this.loadDailyWaterConsumption();
+        this.showToast("Glass of water tracked.");
+      } else {
+        this.showToast("Couldn't track water consumption.");
+      }
+
+    }
   }
 })
 </script>

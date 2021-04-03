@@ -96,12 +96,10 @@ export default defineComponent({
   },
   ionViewDidEnter() {
     this.renderContent = true;
+    this.doRefresh(false);
   },
   ionViewWillLeave() {
     this.renderContent = false;
-  },
-  ionViewWillEnter() {
-    this.doRefresh(false);
   },
   methods: {
     async doRefresh(event) {

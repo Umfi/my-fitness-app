@@ -65,3 +65,20 @@ export async function trackWeight(weight) {
 
         return data;
 }
+
+export async function trackWaterConsumption(ml) {
+    const data = await $axios({ url: config.API_BASE_URL + 'trackWaterConsumption', data: ml, method: 'POST' })
+        .then(response => {
+            if (response.data.waterConsumption) {
+                return true;
+            } 
+            
+            return false;
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}
