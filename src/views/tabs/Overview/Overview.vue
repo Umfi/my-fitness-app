@@ -170,6 +170,47 @@
         </ion-card-content>
       </ion-card>
 
+      <!-- BMI Card -->
+      <ion-card v-bind:color="bmi_style" v-show="!loading">
+        <ion-card-header>
+          <ion-card-title>
+            BMI
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+           <ion-grid>
+            <ion-row>
+              <ion-col class="ion-text-center">
+                <ion-label v-text="bmi_value" style="font-size: 25px; font-weight: bold;"></ion-label>
+              </ion-col>
+              <ion-col class="ion-text-center">
+                    <ion-icon v-show="bmi_icon == 'sad'" style="font-size: 25px; font-weight: bold;" :icon="sadOutline"></ion-icon>
+                    <ion-icon v-show="bmi_icon == 'happy'" style="font-size: 25px; font-weight: bold;" :icon="happyOutline"></ion-icon>
+              </ion-col>
+            </ion-row>
+             <ion-row>
+                  <ion-col class="ion-text-center">
+                    <ion-label v-text="bmi_text"></ion-label>
+                  </ion-col>
+                </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card v-if="loading">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-thumbnail style="width: 100%;">
+          <ion-skeleton-text animated></ion-skeleton-text>
+          </ion-thumbnail>
+        </ion-card-content>
+      </ion-card>
+     
+     
       <!-- Workout Card -->
       <ion-card v-show="!loading">
         <ion-card-header>
@@ -291,9 +332,9 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, man, barbell, water } from "ionicons/icons";
+import { add, man, barbell, water, sadOutline, happyOutline } from "ionicons/icons";
 
-import { trackWaterConsumption } from "@/service/UserService.js";
+import { trackWaterConsumption, getUserData } from "@/service/UserService.js";
 
 import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
@@ -332,7 +373,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, man, barbell, water
+      add, man, barbell, water, sadOutline, happyOutline
     };
   },
   data() {
@@ -469,6 +510,11 @@ export default defineComponent({
           },
       },
       waterSeries: [0],
+      ////
+      bmi_text: "",
+      bmi_icon: "happy",
+      bmi_value: 0,
+      bmi_style: "success",
       loading: false,
       reloadAttempt: 0
     };
@@ -491,8 +537,9 @@ export default defineComponent({
         const loadDailyWaterConsumption = await this.loadDailyWaterConsumption();
         const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
         const loadMonthlyWeight = await this.loadMonthlyWeightSummary();
+        const loadBMI = await this.calculateBMI();
 
-        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight || !loadDailyWaterConsumption)) {
+        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight || !loadDailyWaterConsumption || !loadBMI)) {
           this.reloadAttempt++;
           setTimeout(() => {
             this.doRefresh(event);
@@ -620,6 +667,48 @@ export default defineComponent({
         this.showToast("Couldn't track water consumption.");
       }
 
+    },
+    async calculateBMI() {
+        
+        const userData = await getUserData();
+
+        if (userData != null) {
+          var weight = userData.details.weight;
+          var height = userData.details.height;
+          var bmi = weight / (height * height) * 10000;
+          bmi = bmi.toFixed(2);
+
+          this.bmi_value = bmi;
+
+          if (bmi < 18.5) {
+            this.bmi_style = "warning";
+            this.bmi_icon = "sad";
+            this.bmi_text = "underweight";
+          } else if (bmi >= 18.5 && bmi < 25) {
+            this.bmi_style = "success";
+            this.bmi_icon = "happy";
+            this.bmi_text = "normal weight";
+          } else if (bmi >= 25 && bmi < 30) {
+            this.bmi_style = "warning";
+            this.bmi_icon = "sad";
+            this.bmi_text = "slight overweight";
+          } else if (bmi >= 30 && bmi < 35) {
+            this.bmi_style = "danger";
+            this.bmi_icon = "sad";
+            this.bmi_text = "overweight";
+          } else if (bmi >= 35 && bmi < 40) {
+            this.bmi_style = "danger";
+            this.bmi_icon = "sad";
+            this.bmi_text = "strong overweight";
+          } else {
+            this.bmi_style = "danger";
+            this.bmi_icon = "sad";
+            this.bmi_text = "very strong overweight";
+          }
+
+          return true;
+        }
+      return false;
     }
   }
 })
