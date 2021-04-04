@@ -178,22 +178,18 @@
           </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-           <ion-grid>
             <ion-row>
-              <ion-col class="ion-text-center">
+              <ion-col>
                 <ion-label v-text="bmi_value" style="font-size: 25px; font-weight: bold;"></ion-label>
               </ion-col>
-              <ion-col class="ion-text-center">
-                    <ion-icon v-show="bmi_icon == 'sad'" style="font-size: 25px; font-weight: bold;" :icon="sadOutline"></ion-icon>
-                    <ion-icon v-show="bmi_icon == 'happy'" style="font-size: 25px; font-weight: bold;" :icon="happyOutline"></ion-icon>
+              <ion-col class="ion-text-end ion-align-self-center">
+                    <ion-icon v-if="bmi_icon == 'sad'" style="font-size: 25px; font-weight: bold;" :icon="sadOutline"></ion-icon>
+                    <ion-icon v-if="bmi_icon == 'happy'" style="font-size: 25px; font-weight: bold;" :icon="happyOutline"></ion-icon>
+              </ion-col>
+              <ion-col class="ion-align-self-center">
+                <ion-label v-text="bmi_text"></ion-label>
               </ion-col>
             </ion-row>
-             <ion-row>
-                  <ion-col class="ion-text-center">
-                    <ion-label v-text="bmi_text"></ion-label>
-                  </ion-col>
-                </ion-row>
-          </ion-grid>
         </ion-card-content>
       </ion-card>
 
