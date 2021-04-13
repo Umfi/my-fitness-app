@@ -5,7 +5,7 @@ export async function getAllWorkouts() {
     const data = await $axios(config.API_BASE_URL + 'trainings')
         .then(response => {
             if (response.data) { 
-                return response.data;
+                return response.data.sort((a, b) => a.title.localeCompare(b.title));
             }
 
             return null;
