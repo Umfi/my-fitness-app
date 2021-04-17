@@ -14,7 +14,7 @@
       </ion-refresher>
 
       <!-- Calories Card-->
-      <ion-card v-if="!loading">
+      <ion-card v-if="!loading && isCardVisible(1)" @click="showCardActionMenu(1, 'Calories Overview Card')">
         <ion-card-header>
           <ion-card-title>
             Hey, {{ user.name }}!
@@ -140,7 +140,7 @@
       </ion-card>
 
      <!-- Water Consume Card -->
-      <ion-card v-show="!loading">
+      <ion-card v-show="!loading && isCardVisible(2)" @click="showCardActionMenu(2, 'Water Consumption Card')">
         <ion-card-header>
           <ion-card-title>
             Water Consumption
@@ -171,7 +171,7 @@
       </ion-card>
 
       <!-- BMI Card -->
-      <ion-card v-bind:color="bmi_style" v-show="!loading">
+      <ion-card v-bind:color="bmi_style" v-show="!loading && isCardVisible(3)" @click="showCardActionMenu(3, 'BMI Card')">
         <ion-card-header>
           <ion-card-title>
             BMI
@@ -208,7 +208,7 @@
      
      
       <!-- Workout Card -->
-      <ion-card v-show="!loading">
+      <ion-card v-show="!loading && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Workout Summary
@@ -240,7 +240,7 @@
 
 
       <!-- Weight Card -->
-      <ion-card v-show="!loading">
+      <ion-card v-show="!loading && isCardVisible(5)" @click="showCardActionMenu(5, 'Monthly Weight Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Weight Summary
@@ -324,13 +324,14 @@ import {
   IonIcon,
   modalController,
   toastController,
+  actionSheetController
 } from "@ionic/vue";
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, man, barbell, water, sadOutline, happyOutline } from "ionicons/icons";
+import { add, man, barbell, water, sadOutline, happyOutline, eyeOff, close } from "ionicons/icons";
 
-import { trackWaterConsumption, getUserData } from "@/service/UserService.js";
+import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService.js";
 
 import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
@@ -369,12 +370,13 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, man, barbell, water, sadOutline, happyOutline
+      add, man, barbell, water, sadOutline, happyOutline, eyeOff, close
     };
   },
   data() {
     return {
       renderContent: false,
+      settings: null,
       user: null,
       calories: 0,
       protein: 0,
@@ -529,6 +531,10 @@ export default defineComponent({
     async doRefresh(event) {
         this.loading = true;
 
+        const userData = await getUserData();
+        if (userData != null && userData.details != null) {
+            this.settings = JSON.parse(userData.details.settings);
+        }
         const loadCalories = await this.loadCaloriesSummary();
         const loadDailyWaterConsumption = await this.loadDailyWaterConsumption();
         const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
@@ -705,6 +711,53 @@ export default defineComponent({
           return true;
         }
       return false;
+    },
+    async showCardActionMenu(cardID, cardTitle) {
+     
+      const actionSheet = await actionSheetController
+        .create({
+          header: cardTitle,
+          buttons: [
+            {
+              text: 'Hide',
+              role: 'destructive',
+              icon: eyeOff,
+              handler: async () => {
+                 var data = { 
+                    "key": "showCard" + cardID, 
+                    "value": false 
+                };
+                const result = await updateUserSetting(data);
+            
+                if (!result) {
+                    this.showToast("Something went wrong. Could not hide card.")
+                } else {
+                  this.doRefresh(false);
+                  this.showToast("You can show this card again. Just enable it in the settings.");
+                }
+              },
+            },
+            {
+              text: 'Cancel',
+              icon: close,
+              role: 'cancel'
+            },
+          ],
+        });
+      await actionSheet.present();
+    },
+    isCardVisible(cardID) {
+      if (this.settings != null) {
+          if ("showCard" + cardID in this.settings) {
+              var returnVal = this.settings["showCard" + cardID];
+              if (returnVal === true) {
+                  return true;
+              } else {
+                  return false;
+              }
+          }
+      }
+      return true;
     }
   }
 })

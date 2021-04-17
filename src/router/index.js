@@ -11,6 +11,7 @@ import Calories from '../views/tabs/Calories/Calories.vue'
 import Overview from '../views/tabs/Overview/Overview.vue'
 import Workouts from '../views/tabs/Workouts/Workouts.vue'
 import Profile from '../views/User/Profile.vue'
+import Settings from '../views/User/Settings.vue'
 import Setup from '../views/User/Setup.vue'
 
 const routes = [
@@ -79,6 +80,14 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile,
+    meta: {
+      requiresAuth: true
+    },
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings,
     meta: {
       requiresAuth: true
     },

@@ -49,6 +49,23 @@ export async function getUserData() {
         return data;
 }
 
+export async function updateUserSetting(setting) {
+    const data = await $axios({ url: config.API_BASE_URL + 'updateSettings', data: setting, method: 'POST' })
+        .then(resp => {
+            if (resp.data.status) {
+                return true;
+            } else {
+                return false;
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}
+
 export async function trackWeight(weight) {
     const data = await $axios({ url: config.API_BASE_URL + 'trackWeight', data: weight, method: 'POST' })
         .then(response => {

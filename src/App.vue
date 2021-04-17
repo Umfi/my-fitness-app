@@ -9,7 +9,7 @@
       <ion-content>
         <ion-list>
           <ion-item detail @click="profile">Profile</ion-item>
-          <ion-item disabled>Settings</ion-item>
+          <ion-item detail @click="settings">Settings</ion-item>
           <ion-item @click="logout">Logout</ion-item>
         </ion-list>
       </ion-content>
@@ -96,6 +96,10 @@ export default defineComponent({
     profile: function () {
       menuController.close();
       this.$router.push("/profile");
+    },
+    settings: function () {
+      menuController.close();
+      this.$router.push("/settings");
     },
   },
 });
