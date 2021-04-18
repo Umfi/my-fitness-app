@@ -112,3 +112,16 @@ export async function resetPassword(cred) {
 
     return data;
 }
+
+export async function storeFCMToken(token) {
+    const data = await $axios({url: config.API_BASE_URL + 'fcmtoken', data: token, method: 'POST' })
+    .then(() => {
+        return true;
+    })
+    .catch(err => {
+      console.log(err);
+      return false;
+    })
+
+    return data;
+}

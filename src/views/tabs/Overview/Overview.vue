@@ -337,6 +337,8 @@ import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWei
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 
+import { useRoute } from 'vue-router';
+
 export default defineComponent({
   name: "Overview",
   components: {
@@ -519,6 +521,14 @@ export default defineComponent({
   },
   ionViewDidEnter() {
     this.renderContent = true;
+
+    const route = useRoute();
+    if (route && route.query.action) {
+      if (route.query.action == "trackWeight") {
+        this.trackWeight();
+      }
+    }
+
   },
   ionViewWillLeave() {
     this.renderContent = false;

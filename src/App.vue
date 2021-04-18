@@ -38,7 +38,7 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { logout, isLoggedIn } from "@/service/AuthService.js";
+import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
 
 
 import { config } from "@/config.js";
@@ -47,9 +47,10 @@ import $axios from "@/helper/axios.js";
 import { Plugins } from "@capacitor/core";
 import { isPlatform } from '@ionic/vue';
 import { AppVersion } from '@ionic-native/app-version';
+import { FCM } from '@capacitor-community/fcm';
 
+const { App, PushNotifications } = Plugins;
 
-const { App } = Plugins;
 
 App.addListener("appStateChange", (state) => {
   if (state.isActive) {
@@ -81,8 +82,43 @@ export default defineComponent({
     };
   },
   created() {
-    if (isPlatform('ios') || isPlatform('android')) 
-     AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
+    if (isPlatform('ios') || isPlatform('android')) {
+
+      AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
+
+      const fcm = new FCM();
+      try {
+        
+        PushNotifications.addListener("registrationError", (error) => {
+          console.log(`error on register ${JSON.stringify(error)}`);
+        });
+
+        PushNotifications.addListener("pushNotificationReceived", (notification) => {
+            console.log(`notification ${JSON.stringify(notification)}`);
+        });
+
+        PushNotifications.addListener("pushNotificationActionPerformed", async (notificationaction) => {
+            console.log(`notificationaction  ${JSON.stringify(notificationaction)}`);
+            var data = notificationaction.notification.data;
+            this.$router.push(data.url);
+        });
+
+        PushNotifications.register();
+  
+        fcm.getToken().then(r => {
+          isLoggedIn().then((res) => {
+            if (res) {
+              console.log(`FCM-Token ${r.token}`)
+              storeFCMToken({"token": r.token});
+            }
+          });
+        })
+  
+      } catch (e) {
+        console.log(e);
+      }
+    }
+     
   },
   methods: {
     logout: function () {
