@@ -32,9 +32,6 @@ jobs:
       - name: Build the app
         run: npm run build
 
-      - name: Add Android platform
-        run: npx cap add android
-
       - name: Sync with source
         run: npx cap sync
 
