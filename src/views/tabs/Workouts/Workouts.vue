@@ -26,6 +26,7 @@
         :cell-click-hold="false"
         :on-event-click="onEventClick"
         @cell-click="onDateClick"
+        @view-change="doRefresh(false)"
       >
       </vue-cal>
 
@@ -103,8 +104,10 @@ export default defineComponent({
   },
   methods: {
     async doRefresh(event) {
+      var startDate = this.$refs.vuecal.view.startDate;
+      var endDate = this.$refs.vuecal.view.endDate;
 
-      const workouts = await getAllWorkouts();
+      const workouts = await getAllWorkouts(startDate, endDate);
 
       if ((this.reloadAttempt < 5) && workouts == null) {
         this.reloadAttempt++;

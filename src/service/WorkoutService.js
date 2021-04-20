@@ -1,8 +1,8 @@
 import $axios from "../helper/axios.js";
 import { config } from "../config.js"
 
-export async function getAllWorkouts() {
-    const data = await $axios(config.API_BASE_URL + 'trainings')
+export async function getAllWorkouts(startDate, endDate) {
+    const data = await $axios({ url: config.API_BASE_URL + 'trainings', data: { "from": startDate, "to": endDate}, method: 'POST' })
         .then(response => {
             if (response.data) { 
                 return response.data.sort((a, b) => a.title.localeCompare(b.title));
