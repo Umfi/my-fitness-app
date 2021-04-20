@@ -1,0 +1,49 @@
+name: Build Android
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Setup java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Install Ionic
+        run: npm install -g @ionic/cli
+
+      - name: Install app dependencies
+        run: npm install
+
+      - name: Build the app
+        run: npm run build
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync with source
+        run: npx cap sync
+
+      - name: Build Android Dev APK
+        working-directory: ./android/
+        run: ./gradlew assembleDebug
+
+      - name: Upload Android Dev APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-dev
+          path: android/app/build/outputs/apk/debug/app-debug.apk
