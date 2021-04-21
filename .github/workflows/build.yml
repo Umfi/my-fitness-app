@@ -35,12 +35,21 @@ jobs:
       - name: Sync with source
         run: npx cap sync
 
-      - name: Build Android Dev APK
+      - name: Build Android APK
         working-directory: ./android/
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleRelease
 
-      - name: Upload Android Dev APK
-        uses: actions/upload-artifact@v1
+      - name: Sign app APK 
+        uses: r0adkll/sign-android-release@v1
         with:
-          name: app-dev
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-release
+          path: android/app/build/outputs/apk/release/app-release.apk
