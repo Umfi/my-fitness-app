@@ -117,6 +117,19 @@
               </ion-col>
             </ion-row>
           </form>
+
+          <ion-item-divider>
+            <ion-label>
+              Danger Zone
+            </ion-label>
+          </ion-item-divider>
+
+          <ion-row responsive-sm>
+            <ion-col>
+              <ion-button color="danger" expand="block" @click="presentAlertDeleteAccount()">Delete Account</ion-button>
+            </ion-col>
+          </ion-row>
+
         </ion-card-content>
       </ion-card>
     </ion-content>
@@ -146,12 +159,14 @@ import {
   IonSelect,
   IonSelectOption,
   IonDatetime,
+  IonItemDivider,
   toastController,
   loadingController,
+  alertController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { updateUserData, getUserData } from "@/service/UserService.js";
+import { updateUserData, getUserData, deleteAccount } from "@/service/UserService.js";
 
 export default defineComponent({
   name: "Profile",
@@ -177,6 +192,7 @@ export default defineComponent({
     IonSelect,
     IonSelectOption,
     IonDatetime,
+    IonItemDivider
   },
   data() {
     return {
@@ -214,6 +230,35 @@ export default defineComponent({
       });
 
       await loading.present();
+    },
+    async presentAlertDeleteAccount() {
+      const alert = await alertController
+        .create({
+          header: 'Delete Account?',
+          message: "Do you really want to delete your account? This can't be undone.",
+          buttons: [
+            {
+              text: 'No',
+              role: 'cancel',
+              cssClass: 'secondary',
+            },
+            {
+              text: 'Yes, delete Account!',
+              handler: async () => {
+                
+                const deleted = await deleteAccount();
+
+                if (deleted) {
+                  this.$router.push("/login");
+                  this.showToast("Account has been deleted!");
+                } else {
+                  this.showToast("Couldn't delete account.");
+                }
+              },
+            },
+          ],
+        });
+      return alert.present();
     },
     async updateProfile() {
       await this.showLoading();

@@ -1,4 +1,4 @@
-import { get, set } from "../helper/storage.js";
+import { get, set, remove } from "../helper/storage.js";
 import $axios from "../helper/axios.js";
 import { config } from "../config.js"
 
@@ -91,6 +91,26 @@ export async function trackWaterConsumption(ml) {
             } 
             
             return false;
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}
+
+export async function deleteAccount() {
+    const data = await $axios({ url: config.API_BASE_URL + 'deleteAccount', method: 'DELETE' })
+        .then(resp => {
+            if (resp.data.status) {
+                remove("access_token")
+                remove("is_setup")
+                delete $axios.defaults.headers.common['Authorization']
+                return true;
+            } else {
+                return false;
+            }
         })
         .catch(err => {
             console.log(err);
