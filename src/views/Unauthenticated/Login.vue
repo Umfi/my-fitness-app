@@ -17,6 +17,7 @@
               <ion-item>
                 <ion-label position="stacked" color="primary">E-Mail</ion-label>
                 <ion-input
+                  id="email"
                   v-model="email"
                   name="email"
                   type="email"
@@ -26,7 +27,7 @@
                 ></ion-input>
               </ion-item>
 
-              <ion-text color="danger">
+              <ion-text id="emailValidationText" color="danger">
                 <p v-show="!emailValid()" v-text="errorEmail" padding-left></p>
               </ion-text>
 
@@ -35,6 +36,7 @@
                   >Password</ion-label
                 >
                 <ion-input
+                  id="password"
                   v-model="password"
                   name="password"
                   type="password"
@@ -44,7 +46,7 @@
                 ></ion-input>
               </ion-item>
 
-              <ion-text color="danger">
+              <ion-text id="passwordValidationText" color="danger">
                 <p
                   v-show="!passwordValid()"
                   v-text="errorPassword"
@@ -55,7 +57,7 @@
 
             <ion-row responsive-sm>
               <ion-col>
-                <ion-button type="submit" expand="block" :disabled="disableSend">Login</ion-button>
+                <ion-button id="loginBtn" type="submit" expand="block" :disabled="disableSend">Login</ion-button>
               </ion-col>
             </ion-row>
 
@@ -135,7 +137,7 @@ export default defineComponent({
     emailValid() {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-      if (this.email == null || this.email == "") {
+      if (this.email == null || this.email == "" || !this.email.trim()) {
         if (this.onceSubmitted) {
           this.errorEmail = "E-Mail is required";
           return false;

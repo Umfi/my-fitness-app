@@ -25,7 +25,7 @@
                   required
                 ></ion-input>
               </ion-item>
-              <ion-text color="danger">
+              <ion-text id="nameValidationText" color="danger">
                 <p v-show="!nameValid()" padding-left v-text="errorName"></p>
               </ion-text>
 
@@ -41,7 +41,7 @@
                 ></ion-input>
               </ion-item>
 
-              <ion-text color="danger">
+              <ion-text id="emailValidationText" color="danger">
                 <p v-show="!emailValid()" padding-left v-text="errorEmail"></p>
               </ion-text>
 
@@ -57,7 +57,7 @@
                 ></ion-input>
               </ion-item>
 
-              <ion-text color="danger">
+              <ion-text id="passwordValidationText" color="danger">
                 <p
                   v-show="!passwordValid()"
                   padding-left
@@ -77,7 +77,7 @@
                 ></ion-input>
               </ion-item>
 
-              <ion-text color="danger">
+              <ion-text id="passwordConfirmValidationText" color="danger">
                 <p
                   v-show="!passwordconfirmValid()"
                   padding-left
@@ -88,7 +88,7 @@
 
             <ion-row responsive-sm>
               <ion-col>
-                <ion-button type="submit" expand="block">Register</ion-button>
+                <ion-button id="registerBtn" type="submit" expand="block">Register</ion-button>
               </ion-col>
             </ion-row>
 
@@ -171,7 +171,7 @@ export default defineComponent({
       var re = /^([a-zA-Z ]){2,30}$/;
 
       if (this.onceSubmitted) {
-        if (this.name == null || this.name == "") {
+        if (this.name == null || this.name == "" || !this.name.trim()) {
           this.errorName = "Name is required";
           return false;
         } else if (!re.test(this.name)) {
@@ -187,7 +187,7 @@ export default defineComponent({
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
       if (this.onceSubmitted) {
-        if (this.email == null || this.email == "") {
+        if (this.email == null || this.email == "" || !this.email.trim()) {
           this.errorEmail = "E-Mail is required";
           return false;
         } else if (!re.test(this.email)) {
