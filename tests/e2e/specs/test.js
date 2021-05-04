@@ -1,6 +1,14 @@
 // https://docs.cypress.io/api/introduction/api.html
 
-describe('Login Tests', () => {
+describe('Login/Register Tests', () => {
+
+  before(() => {
+    cy.request('DELETE', Cypress.env('API_BASE_URL') + 'test/deleteTestAccount', {
+      email: Cypress.env('TEST_USER_EMAIL'),
+      password: Cypress.env('TEST_USER_PW')
+    })
+  })
+
   it('Visits the app login page', () => {
     cy.visit('/')
     cy.get('#loginBtn').should('contain', 'Login')
@@ -136,9 +144,9 @@ describe('Login Tests', () => {
   it('Register an account with valid data', () => {
     cy.visit('/register')
     cy.get('input[name="name"]').type('EndToEndTest User')
-    cy.get('input[name="email"]').type('endtoendtestuser@test.com')
-    cy.get('input[name="password"]').type('secret')
-    cy.get('input[name="passwordconfirm"]').type('secret')
+    cy.get('input[name="email"]').type(Cypress.env('TEST_USER_EMAIL'))
+    cy.get('input[name="password"]').type(Cypress.env('TEST_USER_PW'))
+    cy.get('input[name="passwordconfirm"]').type(Cypress.env('TEST_USER_PW'))
 
     cy.get('#nameValidationText').should('not.be.visible')
     cy.get('#emailValidationText').should('not.be.visible')
@@ -153,9 +161,9 @@ describe('Login Tests', () => {
   it('Register an account with an existing email', () => {
     cy.visit('/register')
     cy.get('input[name="name"]').type('EndToEndTest User')
-    cy.get('input[name="email"]').type('endtoendtestuser@test.com')
-    cy.get('input[name="password"]').type('secret')
-    cy.get('input[name="passwordconfirm"]').type('secret')
+    cy.get('input[name="email"]').type(Cypress.env('TEST_USER_EMAIL'))
+    cy.get('input[name="password"]').type(Cypress.env('TEST_USER_PW'))
+    cy.get('input[name="passwordconfirm"]').type(Cypress.env('TEST_USER_PW'))
 
     cy.get('#nameValidationText').should('not.be.visible')
     cy.get('#emailValidationText').should('not.be.visible')
@@ -169,8 +177,8 @@ describe('Login Tests', () => {
 
   it('Login with existing account', () => {
     cy.visit('/login')
-    cy.get('#email').type('endtoendtestuser@test.com')
-    cy.get('#password').type('secret')
+    cy.get('#email').type(Cypress.env('TEST_USER_EMAIL'))
+    cy.get('#password').type(Cypress.env('TEST_USER_PW'))
     cy.get('#emailValidationText').should('not.be.visible')
     cy.get('#passwordValidationText').should('not.be.visible')
     cy.get('#loginBtn').click()
