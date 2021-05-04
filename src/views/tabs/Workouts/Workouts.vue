@@ -104,8 +104,8 @@ export default defineComponent({
   },
   methods: {
     async doRefresh(event) {
-      var startDate = this.$refs.vuecal.view.startDate;
-      var endDate = this.$refs.vuecal.view.endDate;
+      var startDate = this.$refs.vuecal.view.firstCellDate;
+      var endDate = this.$refs.vuecal.view.lastCellDate;
 
       const workouts = await getAllWorkouts(startDate, endDate);
 
