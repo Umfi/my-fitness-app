@@ -1,5 +1,6 @@
 {
   "pluginsFile": "tests/e2e/plugins/index.js",
+  "video": false,
   "env": {
     "API_BASE_URL": "https://myfitnessapp-api.umfahrer.dev/api/",
     "TEST_USER_EMAIL": "endtoendtestuser@umfahrer.dev",
