@@ -8,7 +8,7 @@ describe('Overview Tests', () => {
 
   it('Visits the app home screen', () => {
     cy.visit('/tabs/overview')
-    cy.wait(6000)
+    cy.wait(10000)
     cy.get(':nth-child(2) > ion-card-header.ion-inherit-color > .ion-inherit-color').should('contain', 'Hey')
   })
 

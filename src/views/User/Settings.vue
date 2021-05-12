@@ -65,8 +65,11 @@
                 <ion-label>Push Notifications</ion-label>
               </ion-item-divider>
               <ion-item>
-                <ion-label>Weekly Weight Tracking Reminder</ion-label>
-                <ion-toggle disabled slot="start"></ion-toggle>
+                <ion-label>Daily Weight Tracking Reminder</ion-label>
+                <ion-toggle slot="start"
+                    @ionChange="updateSetting('weightTrackingReminder', $event.target.checked)"
+                    :checked="getSetting('weightTrackingReminder')"
+                ></ion-toggle>
               </ion-item>
 
            
@@ -160,7 +163,7 @@ export default defineComponent({
             }
         }
 
-        return true;
+        return false;
     },
     async updateSetting(key, value) {
         var data = { 
