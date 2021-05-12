@@ -20,5 +20,5 @@ MyFitnessApp is a hybrid app build with Ionic Vue.
     <img src="https://github.com/Umfi/my-fitness-app/blob/master/resources/workout.gif?raw=true"  height="400" />
 </p>
 
-# Lates Build
+# Latest Build
 <a href="https://github.com/Umfi/my-fitness-app/releases/download/latest-build/myfitnessapp-latest.apk" target="_blank">Download (APK)</a>
