@@ -56,3 +56,14 @@ jobs:
         with:
           name: app-release
           path: android/app/build/outputs/apk/release/app-release-unsigned-signed.apk
+      
+      - name: Create release
+        uses: WebFreak001/deploy-nightly@v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: https://uploads.github.com/repos/Umfi/my-fitness-app/releases/42846272/assets{?name,label}
+          release_id: 42846272 
+          asset_path: android/app/build/outputs/apk/release/app-release-unsigned-signed.apk
+          asset_name: myfitnessapp-latest-$$.apk
+          asset_content_type: application/zip
