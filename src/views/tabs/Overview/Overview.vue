@@ -277,7 +277,7 @@
         </ion-fab-button>
         <ion-fab-list side="top">
           <ion-fab-button @click="trackWeight">
-            <ion-icon :icon="man"></ion-icon>
+            <ion-icon :icon="scale"></ion-icon>
           </ion-fab-button>
           <ion-fab-button @click="trackWorkout">
              <ion-icon :icon="barbell"></ion-icon>
@@ -329,15 +329,13 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, man, barbell, water, sadOutline, happyOutline, eyeOff, close } from "ionicons/icons";
+import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close } from "ionicons/icons";
 
 import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService.js";
 
 import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
-
-import { useRoute } from 'vue-router';
 
 export default defineComponent({
   name: "Overview",
@@ -372,7 +370,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, man, barbell, water, sadOutline, happyOutline, eyeOff, close
+      add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close
     };
   },
   data() {
@@ -521,14 +519,6 @@ export default defineComponent({
   },
   ionViewDidEnter() {
     this.renderContent = true;
-
-    const route = useRoute();
-    if (route && route.query.action) {
-      if (route.query.action == "trackWeight") {
-        this.trackWeight();
-      }
-    }
-
   },
   ionViewWillLeave() {
     this.renderContent = false;

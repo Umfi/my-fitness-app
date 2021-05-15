@@ -100,7 +100,7 @@ export default defineComponent({
         PushNotifications.addListener("pushNotificationActionPerformed", async (notificationaction) => {
             console.log(`notificationaction  ${JSON.stringify(notificationaction)}`);
             var data = notificationaction.notification.data;
-            this.$router.push(data.url);
+            await App.openUrl({ url: 'dev.umfahrer.myfitnessapp://' + data.url });
         });
 
         PushNotifications.register();
@@ -117,6 +117,14 @@ export default defineComponent({
       } catch (e) {
         console.log(e);
       }
+
+
+      App.addListener('appUrlOpen', (data) => {
+        console.log('App opened with URL: ' +  data.url);
+        var targetUrl = data.url.replace('dev.umfahrer.myfitnessapp://','');
+        this.$router.push( "/" + targetUrl);
+      });
+
     }
      
   },
