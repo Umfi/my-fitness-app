@@ -26,7 +26,7 @@
     "cordova-plugin-app-version": "^0.1.12",
     "cordova-res": "^0.15.3",
     "core-js": "^3.12.1",
-    "integrator-cordova-plugin-downloader": "git+https://github.com/Umfi/integrator-cordova-plugin-downloader.git",
+    "integrator-cordova-plugin-downloader": "^1.1.0",
     "phonegap-plugin-barcodescanner": "^8.1.0",
     "vue": "^3.0.11",
     "vue-cal": "^4.2.0",

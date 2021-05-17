@@ -170,7 +170,7 @@ export default defineComponent({
           notificationVisibility: 1,
           mimeType: '',
           destinationInExternalPublicDir: {
-              dirType: 'DIRECTORY_DOWNLOADS',
+              dirType: 'Download',
               subPath: 'myfitnessapp-latest.apk'
           }
       };
