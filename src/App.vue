@@ -14,7 +14,10 @@
         </ion-list>
       </ion-content>
       <ion-footer class="bar-stable">
-          <ion-item>{{ version }}</ion-item>
+          <ion-item>
+            <ion-label>{{ version }}</ion-label>
+            <ion-icon :icon="cloudDownloadOutline" slot="end" @click="updateApp"></ion-icon>
+          </ion-item>
       </ion-footer>
     </ion-menu>
 
@@ -34,9 +37,12 @@ import {
   IonList,
   IonItem,
   IonFooter,
+  IonIcon,
   menuController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
+
+import { cloudDownloadOutline } from 'ionicons/icons';
 
 import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
 
@@ -48,6 +54,7 @@ import { Plugins } from "@capacitor/core";
 import { isPlatform } from '@ionic/vue';
 import { AppVersion } from '@ionic-native/app-version';
 import { FCM } from '@capacitor-community/fcm';
+import { Downloader } from '@ionic-native/downloader';
 
 const { App, PushNotifications } = Plugins;
 
@@ -74,12 +81,18 @@ export default defineComponent({
     IonContent,
     IonList,
     IonItem,
-    IonFooter
+    IonFooter,
+    IonIcon
   },
    data() {
     return {
       version: ""
     };
+  },
+   setup() {
+    return {
+      cloudDownloadOutline
+    }
   },
   created() {
     if (isPlatform('ios') || isPlatform('android')) {
@@ -145,6 +158,27 @@ export default defineComponent({
       menuController.close();
       this.$router.push("/settings");
     },
+    updateApp: function() {
+
+      menuController.close();
+
+      var request = {
+          uri: "https://github.com/Umfi/my-fitness-app/releases/download/latest-build/myfitnessapp-latest.apk",
+          title: 'MyFitnessApp.apk',
+          description: 'Latest version of MyFitnessApp',
+          visibleInDownloadsUi: true,
+          notificationVisibility: 1,
+          mimeType: '',
+          destinationInExternalPublicDir: {
+              dirType: 'DIRECTORY_DOWNLOADS',
+              subPath: 'myfitnessapp-latest.apk'
+          }
+      };
+
+      Downloader.download(request)
+      .then((location) => console.log('File downloaded at:'+location))
+      .catch((error) => console.error(error));
+    }
   },
 });
 </script>
