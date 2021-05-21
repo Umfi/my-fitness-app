@@ -70,6 +70,7 @@ import {
 
 import TimerComponent from "./TimerComponent";
 
+import { Brightness } from '@ionic-native/brightness';
 
 export default defineComponent({
   name: "Timer",
@@ -101,8 +102,11 @@ export default defineComponent({
     };
   },
   ionViewDidEnter() {
+    Brightness.setKeepScreenOn(true);
   },
   ionViewWillLeave() {
+    this.stopTimer();
+    Brightness.setKeepScreenOn(false);
   },
   methods: {
    startTimer() {

@@ -6,6 +6,10 @@
     <param name="android-package" value="uk.co.whiteoctober.cordova.AppVersion"/>
   </feature>
 
+  <feature name="Brightness">
+    <param name="android-package" value="org.apache.cordova.plugin.Brightness.BrightnessPlugin"/>
+  </feature>
+
   <feature name="File">
     <param name="android-package" value="org.apache.cordova.file.FileUtils"/>
     <param name="onload" value="true"/>
