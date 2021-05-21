@@ -14,6 +14,7 @@ import Profile from '../views/User/Profile.vue'
 import TrackWeight from '../views/User/TrackWeight.vue'
 import Settings from '../views/User/Settings.vue'
 import Setup from '../views/User/Setup.vue'
+import Timer from '../views/IntervalTimer/Timer.vue'
 
 const routes = [
   {
@@ -39,6 +40,14 @@ const routes = [
     path: '/resetPassword',
     name: 'ResetPassword',
     component: ResetPassword
+  },
+  {
+    path: '/intervalTimer',
+    name: 'Timer',
+    component: Timer,
+    meta: {
+      requiresAuth: true
+    },
   },
   {
     path: "/tabs/",

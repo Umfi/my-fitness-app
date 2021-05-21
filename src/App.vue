@@ -10,6 +10,7 @@
         <ion-list>
           <ion-item detail @click="profile">Profile</ion-item>
           <ion-item detail @click="settings">Settings</ion-item>
+          <ion-item detail @click="intervalTimer">Interval Timer</ion-item>
           <ion-item @click="logout">Logout</ion-item>
         </ion-list>
       </ion-content>
@@ -38,6 +39,7 @@ import {
   IonItem,
   IonFooter,
   IonIcon,
+  IonLabel,
   menuController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
@@ -82,7 +84,8 @@ export default defineComponent({
     IonList,
     IonItem,
     IonFooter,
-    IonIcon
+    IonIcon,
+    IonLabel
   },
    data() {
     return {
@@ -157,6 +160,10 @@ export default defineComponent({
     settings: function () {
       menuController.close();
       this.$router.push("/settings");
+    },
+    intervalTimer: function () {
+      menuController.close();
+      this.$router.push("/intervalTimer");
     },
     updateApp: function() {
 
