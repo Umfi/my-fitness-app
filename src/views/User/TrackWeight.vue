@@ -2,10 +2,6 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button></ion-back-button>
-        </ion-buttons>
-
         <ion-title>Track weight</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -36,7 +32,7 @@ export default defineComponent({
     IonHeader,
     IonPage,
     IonTitle,
-    IonToolbar,
+    IonToolbar
   },
   created() {
     this.trackWeight();

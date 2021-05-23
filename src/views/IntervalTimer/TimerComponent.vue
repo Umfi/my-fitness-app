@@ -127,14 +127,20 @@ export default defineComponent({
       this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
     },
     pauseTimer() {
-      clearInterval(this.timerInterval);
+      if (this.currentMode != "DONE") {
+        clearInterval(this.timerInterval);
+      }
     },
     resumeTimer() {
-      this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
+      if (this.currentMode != "DONE") {
+        this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
+      }
     },
     stopTimer() {
       clearInterval(this.timerInterval);
-      this.sound.release();
+      if (this.sound != null) {
+        this.sound.release();
+      }
     }
   }
 });

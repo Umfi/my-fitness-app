@@ -38,8 +38,8 @@
         <ion-row>
           <ion-col>
             <ion-button type="submit" expand="block" @click="startTimer" v-show="!showTimer">Start</ion-button>
-            <ion-button type="submit" color="warning" expand="block" @click="pauseTimer" v-show="showTimer && !resumeBtnVis">Pause</ion-button>
-            <ion-button type="submit" color="success" expand="block" @click="resumeTimer" v-show="showTimer && resumeBtnVis">Resume</ion-button>
+            <ion-button type="submit" color="warning" expand="block" @click="pauseTimer" v-show="showTimer && !resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Pause</ion-button>
+            <ion-button type="submit" color="success" expand="block" @click="resumeTimer" v-show="showTimer && resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Resume</ion-button>
             <ion-button type="submit" color="danger" expand="block" @click="stopTimer" v-show="showTimer">Stop</ion-button>
           </ion-col>
         </ion-row>
