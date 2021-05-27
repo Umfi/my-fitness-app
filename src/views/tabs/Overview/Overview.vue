@@ -213,6 +213,9 @@
           <ion-card-title>
             Monthly Workout Summary
           </ion-card-title>
+          <ion-card-subtitle>
+            {{ workoutSeriesTitle }}
+          </ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
          <apexchart
@@ -245,6 +248,9 @@
           <ion-card-title>
             Monthly Weight Summary
           </ion-card-title>
+          <ion-card-subtitle>
+            {{ weightSeriesTitle }}
+          </ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
          <apexchart
@@ -316,6 +322,7 @@ import {
   IonCardHeader,
   IonCardContent,
   IonCardTitle,
+  IonCardSubtitle,
   IonSkeletonText,
   IonThumbnail,
   IonFab,
@@ -329,7 +336,7 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close } from "ionicons/icons";
+import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowBack, arrowForward } from "ionicons/icons";
 
 import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService.js";
 
@@ -360,6 +367,7 @@ export default defineComponent({
     IonCardHeader,
     IonCardContent,
     IonCardTitle,
+    IonCardSubtitle,
     IonSkeletonText,
     IonThumbnail,
     IonFab,
@@ -370,7 +378,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close
+      add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowForward, arrowBack
     };
   },
   data() {
@@ -417,6 +425,8 @@ export default defineComponent({
         },
       
       },
+      currentWorkoutDate: new Date(),
+      workoutSeriesTitle: "Month Year",
       series: [
         {
           name: "Workouts",
@@ -447,6 +457,8 @@ export default defineComponent({
         },
       
       },
+      currentWeightDate: new Date(),
+      weightSeriesTitle: "Month Year",
       weightSeries: [
         {
           name: "Weight",
@@ -537,8 +549,12 @@ export default defineComponent({
         }
         const loadCalories = await this.loadCaloriesSummary();
         const loadDailyWaterConsumption = await this.loadDailyWaterConsumption();
-        const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary();
-        const loadMonthlyWeight = await this.loadMonthlyWeightSummary();
+
+        const current = new Date();
+        this.currentWorkoutDate = new Date();
+        this.currentWeightDate = new Date();
+        const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary(current.getMonth() + 1, current.getFullYear());
+        const loadMonthlyWeight = await this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
         const loadBMI = await this.calculateBMI();
 
         if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight || !loadDailyWaterConsumption || !loadBMI)) {
@@ -593,20 +609,24 @@ export default defineComponent({
 
       return false;
     },
-    async loadMonthlyWorkoutSummary() {
+    async loadMonthlyWorkoutSummary(month, year) {
 
-      const data = await getMonthlyWorkoutSummary();
+      const data = await getMonthlyWorkoutSummary(month, year);
 
       if (data != null) {
+        const current = new Date();
+        current.setMonth(month-1);
+
+        this.workoutSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.series[0].data = data;
         return true;
       }
 
       return false;
     },
-    async loadMonthlyWeightSummary() {
+    async loadMonthlyWeightSummary(month, year) {
 
-      const data = await getWeightSummary();
+      const data = await getWeightSummary(month, year);
 
       if (data != null) {
 
@@ -620,7 +640,11 @@ export default defineComponent({
             arr.push(data.fallback);
           }
         }
-        
+
+        const current = new Date();
+        current.setMonth(month-1);
+
+        this.weightSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.weightSeries[0].data = arr;
         return true;
       }
@@ -714,35 +738,69 @@ export default defineComponent({
     },
     async showCardActionMenu(cardID, cardTitle) {
      
+      var actions = [
+        {
+          text: 'Hide',
+          role: 'destructive',
+          icon: eyeOff,
+          handler: async () => {
+              var data = { 
+                "key": "showCard" + cardID, 
+                "value": false 
+            };
+            const result = await updateUserSetting(data);
+        
+            if (!result) {
+                this.showToast("Something went wrong. Could not hide card.")
+            } else {
+              this.doRefresh(false);
+              this.showToast("You can show this card again. Just enable it in the settings.");
+            }
+          },
+        },
+        {
+          text: 'Previous month data',
+          icon: arrowBack,
+          role: 'previous',
+          handler: async () => {
+            if (cardID == 4) {
+              this.currentWorkoutDate.setMonth(this.currentWorkoutDate.getMonth()-1);
+              this.loadMonthlyWorkoutSummary(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
+            } else if (cardID == 5) {
+              this.currentWeightDate.setMonth(this.currentWeightDate.getMonth()-1);
+              this.loadMonthlyWeightSummary(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
+            }
+          },
+        },
+        {
+          text: 'Next month data',
+          icon: arrowForward,
+          role: 'next',
+          handler: async () => {
+            if (cardID == 4) {
+              this.currentWorkoutDate.setMonth(this.currentWorkoutDate.getMonth()+1);
+              this.loadMonthlyWorkoutSummary(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
+            } else if (cardID == 5) {
+              this.currentWeightDate.setMonth(this.currentWeightDate.getMonth()+1);
+              this.loadMonthlyWeightSummary(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
+            }
+          },
+        },
+        {
+          text: 'Cancel',
+          icon: close,
+          role: 'cancel'
+        },
+      ];
+
+      if (cardID < 4) {
+          actions.splice(1, 2);
+      }
+
       const actionSheet = await actionSheetController
         .create({
           header: cardTitle,
-          buttons: [
-            {
-              text: 'Hide',
-              role: 'destructive',
-              icon: eyeOff,
-              handler: async () => {
-                 var data = { 
-                    "key": "showCard" + cardID, 
-                    "value": false 
-                };
-                const result = await updateUserSetting(data);
-            
-                if (!result) {
-                    this.showToast("Something went wrong. Could not hide card.")
-                } else {
-                  this.doRefresh(false);
-                  this.showToast("You can show this card again. Just enable it in the settings.");
-                }
-              },
-            },
-            {
-              text: 'Cancel',
-              icon: close,
-              role: 'cancel'
-            },
-          ],
+          buttons: actions
         });
       await actionSheet.present();
     },

@@ -47,8 +47,8 @@ export async function getWaterConsumption() {
         return data;
 }
 
-export async function getMonthlyWorkoutSummary() {
-    const data = await $axios(config.API_BASE_URL + 'monthlyWorkoutSummary')
+export async function getMonthlyWorkoutSummary(month, year) {
+    const data = await $axios(config.API_BASE_URL + 'monthlyWorkoutSummary?month=' + month + '&year=' + year)
         .then(response => {
             if (response.data) { 
                 return response.data.asArray;
@@ -64,8 +64,8 @@ export async function getMonthlyWorkoutSummary() {
         return data;
 }
 
-export async function getWeightSummary() {
-    const data = await $axios(config.API_BASE_URL + 'weightSummary')
+export async function getWeightSummary(month, year) {
+    const data = await $axios(config.API_BASE_URL + 'weightSummary?month=' + month + '&year=' + year)
         .then(response => {
             if (response.data) { 
                 return response.data;
