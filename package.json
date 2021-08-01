@@ -23,6 +23,7 @@
     "@ionic-native/app-version": "^5.34.0",
     "@ionic-native/barcode-scanner": "^5.34.0",
     "@ionic-native/brightness": "^5.34.0",
+    "@ionic-native/core": "^5.34.0",
     "@ionic-native/downloader": "^5.34.0",
     "@ionic-native/media": "^5.34.0",
     "@ionic/vue": "^5.4.0",
