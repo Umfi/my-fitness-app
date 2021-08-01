@@ -24,22 +24,28 @@ $axios.interceptors.request.use(
 $axios.interceptors.response.use(undefined, err => {
     const res = err.response;
     if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
-        return new Promise((resolve, reject) => {
-            refreshToken().then(async (res) => {
-                if (res) {
-                    // Perform previous request again
-                    const accessToken = await get("access_token");
-                    err.config.__isRetryRequest = true;
-                    err.config.headers.Authorization = 'Bearer ' + accessToken
-                    resolve(axios(err.config))
-                } else {
-                    logout().then(() => {
-                        router.push('/login');
-                    })
-                    reject(err)
-                }
+        if (res.config.url.includes("refresh") || res.config.url.includes("logout") || res.config.url.includes("login")) {
+            logout(true).then(() => {
+                 router.push('/login');
+             })
+         } else {
+            return new Promise((resolve, reject) => {
+                refreshToken().then(async (res) => {
+                    if (res) {
+                        // Perform previous request again
+                        const accessToken = await get("access_token");
+                        err.config.__isRetryRequest = true;
+                        err.config.headers.Authorization = 'Bearer ' + accessToken
+                        resolve(axios(err.config))
+                    } else {
+                        logout().then(() => {
+                            router.push('/login');
+                        })
+                        reject(err)
+                    }
+                });
             });
-        });
+        }
     }
 })
 
