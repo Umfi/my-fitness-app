@@ -259,9 +259,8 @@ import ModalManageProduct from "./ModalManageProduct.vue";
 
 
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
-import { Capacitor, Plugins } from '@capacitor/core';
-
-const { Keyboard } = Plugins;
+import { Keyboard } from '@capacitor/keyboard';
+import { Capacitor } from '@capacitor/core';
 
 import { searchProduct, searchProductByBarcode, removeProduct, untrackCalories } from "@/service/ProductService.js";
 

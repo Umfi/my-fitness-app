@@ -1,18 +1,18 @@
 {
-  "appId": "dev.umfahrer.myfitnessapp",
-  "appName": "myfitnessapp",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "dist",
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 3000,
-      "launchAutoHide": true,
-      "showSpinner": true,
-      "splashFullScreen": false,
-      "splashImmersive": false
-    }
-  },
-  "cordova": {},
-  "linuxAndroidStudioPath": "/home/mu/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882/bin/studio.sh"
+	"appId": "dev.umfahrer.myfitnessapp",
+	"appName": "myfitnessapp",
+	"bundledWebRuntime": false,
+	"npmClient": "npm",
+	"webDir": "dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 3000,
+			"launchAutoHide": true,
+			"showSpinner": true,
+			"splashFullScreen": false,
+			"splashImmersive": false
+		}
+	},
+	"cordova": {},
+	"linuxAndroidStudioPath": "/home/mu/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882/bin/studio.sh"
 }

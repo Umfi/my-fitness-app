@@ -1,6 +1,7 @@
 <template>
   <ion-page>
     <ion-tabs>
+      <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
         <ion-tab-button tab="calories" href="/tabs/calories">
           <ion-icon :icon="restaurant"></ion-icon>
@@ -29,13 +30,14 @@ import {
   IonPage,
   IonTabBar, 
   IonTabButton, 
-  IonTabs
+  IonTabs,
+  IonRouterOutlet
 } from '@ionic/vue';
 import { restaurant, man, barbell } from 'ionicons/icons';
 
 export default defineComponent({
   name: "Home",
-  components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs },
+  components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs, IonRouterOutlet },
   setup() {
     return {
       restaurant,

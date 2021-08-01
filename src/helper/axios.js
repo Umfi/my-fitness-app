@@ -4,7 +4,6 @@ import { logout, refreshToken } from "../service/AuthService.js";
 import { get } from "./storage.js";
 
 const $axios = axios.create();
-var isRefreshingToken = false;
 
 $axios.interceptors.request.use(
     async config => {
@@ -22,41 +21,26 @@ $axios.interceptors.request.use(
     }
 );
 
-
-$axios.interceptors.response.use((response) => {
-    return response;
-}, function (error) {
-    if (error.response.status === 401) {
-        if (error.config.url.includes("refresh") || error.config.url.includes("logout") || error.config.url.includes("login")) {
-           logout(true).then(() => {
-                router.push('/login');
-            })
-        } else {
-            if (!isRefreshingToken) {
-                isRefreshingToken = true;
-                
-                refreshToken().then((res) => {
-                    isRefreshingToken = false;
-
-                    if (res) {
-                        // Perform previous request again
-                        return $axios({
-                            method: error.config.method,
-                            url: error.config.url,
-                            data: error.config.data
-                        });
-                    } else {
-                        logout().then(() => {
-                            router.push('/login');
-                        })
-                    }
-                });
-            }
-        }
+$axios.interceptors.response.use(undefined, err => {
+    const res = err.response;
+    if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
+        return new Promise((resolve, reject) => {
+            refreshToken().then(async (res) => {
+                if (res) {
+                    // Perform previous request again
+                    const accessToken = await get("access_token");
+                    err.config.__isRetryRequest = true;
+                    err.config.headers.Authorization = 'Bearer ' + accessToken
+                    resolve(axios(err.config))
+                } else {
+                    logout().then(() => {
+                        router.push('/login');
+                    })
+                    reject(err)
+                }
+            });
+        });
     }
-    return Promise.reject(error.response);
-});
-
-
+})
 
 export default $axios;

@@ -48,28 +48,13 @@ import { cloudDownloadOutline } from 'ionicons/icons';
 
 import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
 
-
-import { config } from "@/config.js";
-import $axios from "@/helper/axios.js";
-
-import { Plugins } from "@capacitor/core";
 import { isPlatform } from '@ionic/vue';
+
+import { PushNotifications } from '@capacitor/push-notifications';
+import { Capacitor } from '@capacitor/core';
+
 import { AppVersion } from '@ionic-native/app-version';
-import { FCM } from '@capacitor-community/fcm';
 import { Downloader } from '@ionic-native/downloader';
-
-const { App, PushNotifications } = Plugins;
-
-
-App.addListener("appStateChange", (state) => {
-  if (state.isActive) {
-    isLoggedIn().then((res) => {
-      if (res) {
-        $axios.get(config.API_BASE_URL + "heartbeat");
-      }
-    });
-  }
-});
 
 export default defineComponent({
   name: "App",
@@ -99,50 +84,36 @@ export default defineComponent({
   },
   created() {
     if (isPlatform('ios') || isPlatform('android')) {
-
       AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
-
-      const fcm = new FCM();
-      try {
-        
-        PushNotifications.addListener("registrationError", (error) => {
-          console.log(`error on register ${JSON.stringify(error)}`);
+    }
+  },
+  mounted() {
+    if (Capacitor.isPluginAvailable('PushNotifications')) {
+      PushNotifications.requestPermissions().then(result => {
+          console.log('pushNotificationReceived permission:' + JSON.stringify(result));
+          // Initialize the registration with FCM Token
+          PushNotifications.register();
         });
 
-        PushNotifications.addListener("pushNotificationReceived", (notification) => {
-            console.log(`notification ${JSON.stringify(notification)}`);
-        });
-
-        PushNotifications.addListener("pushNotificationActionPerformed", async (notificationaction) => {
-            console.log(`notificationaction  ${JSON.stringify(notificationaction)}`);
-            var data = notificationaction.notification.data;
-            await App.openUrl({ url: 'dev.umfahrer.myfitnessapp://' + data.url });
-        });
-
-        PushNotifications.register();
-  
-        fcm.getToken().then(r => {
+        // On succcess, we should be able to receive notifications
+        PushNotifications.addListener('registration', (token) => {
+          console.log('pushNotification registration, token: ' + token.value);
           isLoggedIn().then((res) => {
             if (res) {
-              console.log(`FCM-Token ${r.token}`)
-              storeFCMToken({"token": r.token});
+              storeFCMToken({"token": token.value});
             }
           });
-        })
-  
-      } catch (e) {
-        console.log(e);
-      }
+        });
 
-
-      App.addListener('appUrlOpen', (data) => {
-        console.log('App opened with URL: ' +  data.url);
-        var targetUrl = data.url.replace('dev.umfahrer.myfitnessapp://','');
-        this.$router.push( "/" + targetUrl);
-      });
-
+        // Method called when tapping on a notification
+        PushNotifications.addListener('pushNotificationActionPerformed', async (notificationaction) => {
+          console.log(`pushNotificationActionPerformed  ${JSON.stringify(notificationaction)}`);
+          const data = notificationaction.notification.data;
+          if (data.url) {
+            this.$router.push("/" + data.url);
+          }
+        });
     }
-     
   },
   methods: {
     logout: function () {

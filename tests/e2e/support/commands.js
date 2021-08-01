@@ -23,10 +23,7 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
-import { Plugins } from "@capacitor/core";
-
-const { Storage } = Plugins;
-
+import { Storage } from "@capacitor/storage";
 
 Cypress.Commands.add("login", (isSetup) => {
     cy.request("POST", Cypress.env('API_BASE_URL')  + 'login', {
