@@ -67,7 +67,7 @@ export async function refreshToken() {
       const access_token = resp.data.access_token
       set("access_token", access_token)
 
-      return true;
+      return resp.data.access_token;
     })
     .catch((err) => {
       console.log(err);

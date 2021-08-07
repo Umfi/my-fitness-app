@@ -4,6 +4,7 @@ import { logout, refreshToken } from "../service/AuthService.js";
 import { get } from "./storage.js";
 
 const $axios = axios.create();
+var isRefreshingToken = false;
 
 $axios.interceptors.request.use(
     async config => {
@@ -29,22 +30,31 @@ $axios.interceptors.response.use(undefined, err => {
                  router.push('/login');
              })
          } else {
-            return new Promise((resolve, reject) => {
-                refreshToken().then(async (res) => {
-                    if (res) {
-                        // Perform previous request again
-                        const accessToken = await get("access_token");
-                        err.config.__isRetryRequest = true;
-                        err.config.headers.Authorization = 'Bearer ' + accessToken
-                        resolve(axios(err.config))
-                    } else {
-                        logout().then(() => {
-                            router.push('/login');
-                        })
-                        reject(err)
-                    }
+
+            if (!isRefreshingToken) {
+                isRefreshingToken = true;
+
+                return new Promise((resolve, reject) => {
+                    refreshToken().then(async (accessToken) => {
+
+                        isRefreshingToken = false;
+                        
+                        if (accessToken) {
+                            // Perform previous request again
+                            err.config.__isRetryRequest = true;
+                            err.config.headers.Authorization = 'Bearer ' + accessToken
+                            resolve(axios(err.config))
+                        } else {
+                            logout().then(() => {
+                                router.push('/login');
+                            })
+                            reject(err)
+                        }
+                    });
                 });
-            });
+            }
+
+            
         }
     }
 })
