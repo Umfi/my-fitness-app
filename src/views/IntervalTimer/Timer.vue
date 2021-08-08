@@ -36,11 +36,15 @@
           </ion-col>
         </ion-row>
         <ion-row>
+          <ion-col size="12">
+            <ion-button type="submit" expand="block"  size="large"  @click="startTimer" v-show="!showTimer">Start</ion-button>
+          </ion-col>
           <ion-col>
-            <ion-button type="submit" expand="block" @click="startTimer" v-show="!showTimer">Start</ion-button>
-            <ion-button type="submit" color="warning" expand="block" @click="pauseTimer" v-show="showTimer && !resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Pause</ion-button>
-            <ion-button type="submit" color="success" expand="block" @click="resumeTimer" v-show="showTimer && resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Resume</ion-button>
-            <ion-button type="submit" color="danger" expand="block" @click="stopTimer" v-show="showTimer">Stop</ion-button>
+              <ion-button type="submit" color="warning" size="large" expand="block" @click="pauseTimer" v-show="showTimer && !resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Pause</ion-button>
+              <ion-button type="submit" color="success" size="large" expand="block" @click="resumeTimer" v-show="showTimer && resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Resume</ion-button>
+          </ion-col>
+          <ion-col>
+             <ion-button type="submit" color="danger"  size="large" expand="block" @click="stopTimer" v-show="showTimer">Stop</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>

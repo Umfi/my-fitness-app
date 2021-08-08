@@ -43,6 +43,7 @@ export default defineComponent({
       setsLeft: 0,
       currentMode: "SETUP",
       sound: null,
+      finishSound: null
     };
   },
   computed: {
@@ -103,6 +104,8 @@ export default defineComponent({
           this.startTimer();
          } else {
            this.currentMode = "DONE";
+           this.finishSound.setVolume(1);
+           this.finishSound.play();
          }
       } else {
         this.currentMode = "TRAINING";
@@ -121,6 +124,7 @@ export default defineComponent({
     initialTimerStart() {
       this.timeLimit = 5;
       this.sound = Media.create("cdvfile://localhost/assets/public/assets/sounds/timer.wav"); 
+      this.finishSound = Media.create("cdvfile://localhost/assets/public/assets/sounds/success.wav"); 
       this.currentMode = "SETUP";
       this.setsLeft = this.sets;
       this.timePassed = 0;
@@ -140,6 +144,9 @@ export default defineComponent({
       clearInterval(this.timerInterval);
       if (this.sound != null) {
         this.sound.release();
+      }
+      if (this.finishSound != null) {
+        this.finishSound.release();
       }
     }
   }
