@@ -39,7 +39,7 @@
           <ion-col size="12">
             <ion-button type="submit" expand="block"  size="large"  @click="startTimer" v-show="!showTimer">Start</ion-button>
           </ion-col>
-          <ion-col>
+          <ion-col v-show="showTimer && this.$refs.timer.currentMode != 'DONE'">
               <ion-button type="submit" color="warning" size="large" expand="block" @click="pauseTimer" v-show="showTimer && !resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Pause</ion-button>
               <ion-button type="submit" color="success" size="large" expand="block" @click="resumeTimer" v-show="showTimer && resumeBtnVis && this.$refs.timer.currentMode != 'DONE'">Resume</ion-button>
           </ion-col>
@@ -69,7 +69,8 @@ import {
   IonItem,
   IonLabel,
   IonInput,
-  IonButton
+  IonButton,
+  toastController
 } from "@ionic/vue";
 
 import TimerComponent from "./TimerComponent";
@@ -113,7 +114,30 @@ export default defineComponent({
     Brightness.setKeepScreenOn(false);
   },
   methods: {
+    async showToast(msg) {
+      const toast = await toastController.create({
+        message: msg,
+        duration: 2000,
+      });
+      toast.present();
+   },
    startTimer() {
+
+     if (this.sets <= 0) {
+        this.showToast("Number of sets must be at least 1");
+        return;
+     }
+
+    if (this.trainingtime <= 0) {
+        this.showToast("Training time must be at least 1");
+        return;
+     }
+
+     if (this.breaktime <= 0) {
+        this.showToast("Break time must be at least 1");
+        return;
+     }
+     
      this.showTimer = true;
      this.resumeBtnVis = false;
      this.$refs.timer.initialTimerStart();

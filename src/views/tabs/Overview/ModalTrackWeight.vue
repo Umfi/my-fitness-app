@@ -104,7 +104,7 @@ export default defineComponent({
       counter: 0
     };
   },
-  async created() {
+  async mounted() {
     const userData = await getUserData();
     if (userData != null) {
       this.amount = userData.details.weight;
