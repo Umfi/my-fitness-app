@@ -128,26 +128,7 @@ export default defineComponent({
     async onEventClick(event, e) {
       // Prevent navigating to narrower view (default vue-cal behavior).
       e.stopPropagation();
-
-      const modal = await modalController.create({
-        component: ModalManageWorkout,
-        componentProps: {
-          item: {
-            id: event.id,
-            shoulders: event.shoulders,
-            chest: event.chest,
-            back: event.back,
-            arms: event.arms,
-            legs: event.legs,
-            abs: event.abs,
-            cardio: event.cardio,
-          },
-          title: "Edit a workout",
-          mode: "edit",
-          parent: this,
-        },
-      });
-      return modal.present();
+      this.onDateClick(new Date(event.date))
     },
     async onDateClick(event) {
       this.selectedDate = event;
@@ -159,7 +140,6 @@ export default defineComponent({
             date: this.selectedDate.format(),
           },
           title: "Track workout",
-          mode: "create",
           parent: this,
         },
       });

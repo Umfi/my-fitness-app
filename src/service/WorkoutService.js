@@ -18,6 +18,23 @@ export async function getAllWorkouts(startDate, endDate) {
         return data;
 }
 
+export async function getAllWorkoutsFromDay(date) {
+    const data = await $axios({ url: config.API_BASE_URL + 'trainingsFromDay', data: { "date": date }, method: 'POST' })
+        .then(response => {
+            if (response.data) { 
+                return response.data.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
 export async function storeWorkout(workout) {
     const data = await $axios({ url: config.API_BASE_URL + 'createTraining', data: workout, method: 'POST' })
         .then(response => {
@@ -45,40 +62,6 @@ export async function storeWorkout(workout) {
         .catch(err => {
             console.log(err);
             return null;
-        })
-
-        return data;
-}
-
-export async function updateWorkout(workout) {
-    const data = await $axios({ url: config.API_BASE_URL + 'editTraining', data: workout, method: 'POST' })
-        .then(response => {
-            if (response.data) {
-                return response.data[0];
-            } 
-            
-            return null;
-        })
-        .catch(err => {
-            console.log(err);
-            return null;
-        })
-
-        return data;
-}
-
-export async function removeWorkout(deleteID) {
-    const data = await $axios({ url: config.API_BASE_URL + 'deleteTraining/' + deleteID, method: 'POST' })
-        .then(response => {
-            if (response.data) {
-                return true;
-            } 
-            
-            return false;
-        })
-        .catch(err => {
-            console.log(err);
-            return false;
         })
 
         return data;

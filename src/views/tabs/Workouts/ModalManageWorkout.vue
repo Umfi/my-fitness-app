@@ -220,20 +220,14 @@
         <ion-checkbox slot="end" v-model="cardio"></ion-checkbox>
       </ion-item>
     </ion-list>
-
+  </ion-content>
+  <ion-footer>
     <ion-row responsive-sm>
-      <ion-col v-if="this.$props.mode == 'create'">
+      <ion-col>
         <ion-button type="submit" @click="trackWorkout" expand="block">Track it</ion-button>
       </ion-col>
-
-      <ion-col v-if="this.$props.mode == 'edit'" size="6">
-        <ion-button type="submit" expand="block" @click="editWorkout" >Update</ion-button>
-      </ion-col>
-      <ion-col v-if="this.$props.mode == 'edit'" size="6">
-        <ion-button type="submit" expand="block" color="danger" @click="deleteWorkout" >Delete</ion-button>
-      </ion-col>
     </ion-row>
-  </ion-content>
+  </ion-footer>
 </template>
 
 <script>
@@ -252,13 +246,14 @@ import {
   IonCheckbox,
   modalController,
   toastController,
+  loadingController,
   IonLabel,
   IonIcon,
-  alertController,
+  IonFooter
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { storeWorkout, updateWorkout, removeWorkout } from "@/service/WorkoutService.js";
+import { storeWorkout, getAllWorkoutsFromDay } from "@/service/WorkoutService.js";
 import { close } from "ionicons/icons";
 
 
@@ -267,7 +262,6 @@ export default defineComponent({
   props: {
     item: { type: Object, default: null },
     title: { type: String },
-    mode: { type: String, default: "create" },
     parent: { type: Object, default: null },
   },
   data() {
@@ -282,18 +276,43 @@ export default defineComponent({
       cardio: null,
     };
   },
-  mounted() {
-    if (this.$props.mode == "edit") {
-        var item = this.$props.item;
-        this.id = item.id;
-        this.shoulders = item.shoulders;
-        this.chest = item.chest;
-        this.back = item.back;
-        this.arms = item.arms;
-        this.legs = item.legs;
-        this.abs = item.abs;
-        this.cardio = item.cardio;
-    }
+  async mounted() {
+    await this.showLoading();
+
+    getAllWorkoutsFromDay(this.$props.item.date).then(result => {
+      for (var i = 0; i < result.length; i++) {
+        if (result[i].shoulders == 1) {
+          this.shoulders = 1;
+        }
+
+        if (result[i].chest == 1) {
+          this.chest = 1;
+        }
+
+        if (result[i].back == 1) {
+          this.back = 1;
+        }
+
+        if (result[i].arms == 1) {
+          this.arms = 1;
+        }
+
+        if (result[i].legs == 1) {
+          this.legs = 1;
+        }
+
+        if (result[i].abs == 1) {
+          this.abs = 1;
+        }
+
+        if (result[i].cardio == 1) {
+          this.cardio = 1;
+        }
+
+      }
+
+      loadingController.dismiss()
+    });
   },
   setup() {
     return {
@@ -312,13 +331,16 @@ export default defineComponent({
       });
       toast.present();
     },
+    async showLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+        });
+
+      await loading.present();
+    },
     async trackWorkout() {
       var item = this.$props.item;
-
-      if (!this.shoulders && !this.chest && !this.back && !this.arms && !this.abs && !this.legs && !this.cardio) {
-        this.showToast("No muscle group selected.");
-        return;
-      }
 
       const newEvent = await storeWorkout({
           date: item.date,
@@ -338,82 +360,6 @@ export default defineComponent({
       } else {
         this.showToast("Couldn't track workout.");
       }
-    },
-    async editWorkout() {
-      if (!this.shoulders && !this.chest && !this.back && !this.arms && !this.abs && !this.legs && !this.cardio) {
-        this.showToast("No muscle group selected.");
-        return;
-      }
-
-      const updateEvent = await updateWorkout({
-        id: this.id,
-        shoulders: (this.shoulders ? 1 : 0),
-        chest: (this.chest ? 1 : 0),
-        back: (this.back ? 1 : 0),
-        arms: (this.arms ? 1 : 0),
-        abs: (this.abs ? 1 : 0),
-        legs: (this.legs ? 1 : 0),
-        cardio: (this.cardio ? 1 : 0),
-      });
-      
-      if (updateEvent != null) {
-        
-        for (var i=0; i<this.$props.parent.events.length; i++) {
-          if (this.$props.parent.events[i].id == this.id) {
-            this.$props.parent.events[i].title = updateEvent.title;
-            this.$props.parent.events[i].class = updateEvent.class;
-            this.$props.parent.events[i].shoulders = updateEvent.shoulders;
-            this.$props.parent.events[i].chest = updateEvent.chest;
-            this.$props.parent.events[i].back = updateEvent.back;
-            this.$props.parent.events[i].arms = updateEvent.arms;
-            this.$props.parent.events[i].legs = updateEvent.legs;
-            this.$props.parent.events[i].abs = updateEvent.abs;
-            this.$props.parent.events[i].cardio = updateEvent.cardio;
-          }
-        }
-
-        this.showToast("Workout updated.");
-        this.dismissModal();
-
-      } else {
-        this.showToast("Couldn't update workout.");
-      }
-    },
-    async deleteWorkout() {
-
-      var deleteID = this.id;
-
-      const alert = await alertController
-        .create({
-          header: 'Delete Workout!',
-          message: 'Do you really want to delete this item from your history?',
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel',
-              cssClass: 'secondary',
-            },
-            {
-              text: 'Okay',
-              handler: async () => {
-                
-                const removed = await removeWorkout(deleteID);
-
-                if (removed) {
-                  this.$props.parent.events = this.$props.parent.events.filter(function( obj ) {
-                      return obj.id !== deleteID;
-                  });
-
-                  this.showToast("Workout deleted.");
-                  this.dismissModal();
-                } else {
-                  this.showToast("Couldn't delete workout.");
-                }
-              },
-            },
-          ],
-        });
-      return alert.present();
     },
     updateMuscleImage(el, val) {
       if (val == true) {
@@ -479,7 +425,8 @@ export default defineComponent({
     IonItem,
     IonCheckbox,
     IonLabel,
-    IonIcon
+    IonIcon,
+    IonFooter
   },
 });
 </script>

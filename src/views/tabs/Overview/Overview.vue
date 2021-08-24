@@ -681,7 +681,6 @@ export default defineComponent({
               date: today.format(),
             },
             title: "Track workout",
-            mode: "create",
             parent: this,
           },
         })
