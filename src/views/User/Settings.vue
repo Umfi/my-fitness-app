@@ -65,7 +65,7 @@
                 <ion-label>Push Notifications</ion-label>
               </ion-item-divider>
               <ion-item>
-                <ion-label>Daily Weight Tracking Reminder</ion-label>
+                <ion-label>Weekly Weight Tracking Reminder</ion-label>
                 <ion-toggle slot="start"
                     @ionChange="updateSetting('weightTrackingReminder', $event.target.checked)"
                     :checked="getSetting('weightTrackingReminder')"

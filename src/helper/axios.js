@@ -4,15 +4,14 @@ import { logout, refreshToken } from "../service/AuthService.js";
 import { get } from "./storage.js";
 
 const $axios = axios.create();
-var isRefreshingToken = false;
 
 $axios.interceptors.request.use(
     async config => {
 
-        const access_token = await get("access_token");
+        const accessToken = await get("access_token");
 
-        if (access_token) {
-            config.headers['Authorization'] = `Bearer ${access_token}`;
+        if (accessToken) {
+            config.headers['Authorization'] = `Bearer ${accessToken}`;
         }
 
         return config;
@@ -22,41 +21,76 @@ $axios.interceptors.request.use(
     }
 );
 
-$axios.interceptors.response.use(undefined, err => {
-    const res = err.response;
-    if (res.status === 401 && res.config && !res.config.__isRetryRequest) {
-        if (res.config.url.includes("refresh") || res.config.url.includes("logout") || res.config.url.includes("login")) {
-            logout(true).then(() => {
-                 router.push('/login');
-             })
-         } else {
 
-            if (!isRefreshingToken) {
-                isRefreshingToken = true;
+let isRefreshing = false;
+let failedQueue = [];
 
-                return new Promise((resolve, reject) => {
-                    refreshToken().then(async (accessToken) => {
+const processQueue = (error, token = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
+        }
+    });
 
-                        isRefreshingToken = false;
-                        
-                        if (accessToken) {
+    failedQueue = [];
+};
+
+$axios.interceptors.response.use(
+    response => {
+        return response;
+    }, err => {
+        const originalRequest = err.config;
+
+        if (err.response.status === 401 && !originalRequest._retry) {
+
+            if (originalRequest.url.includes("refresh") || originalRequest.url.includes("logout") || originalRequest.url.includes("login")) {
+                logout(true).then(() => {
+                     router.push('/login');
+                 })
+             } else {      
+                if (isRefreshing) {
+                    return new Promise(function(resolve, reject) {
+                        failedQueue.push({ resolve, reject });
+                    }).then(token => {
+                        originalRequest.headers['Authorization'] = 'Bearer ' + token;
+                        return axios(originalRequest);
+                    }).catch(err => {
+                        return Promise.reject(err);
+                    });
+                }
+
+                originalRequest._retry = true;
+                isRefreshing = true;
+
+                return new Promise(function(resolve, reject) {
+
+                    refreshToken().then(async (res) => {
+                        if (res) {
                             // Perform previous request again
-                            err.config.__isRetryRequest = true;
-                            err.config.headers.Authorization = 'Bearer ' + accessToken
-                            resolve(axios(err.config))
+                            const accessToken = await get("access_token");
+                            $axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken;
+                            originalRequest.headers['Authorization'] = 'Bearer ' + accessToken;
+                            processQueue(null, accessToken);
+                            resolve(axios(originalRequest));
                         } else {
+                            processQueue(err, null);
+
                             logout().then(() => {
                                 router.push('/login');
                             })
                             reject(err)
                         }
+
+                        isRefreshing = false;
                     });
                 });
             }
-
-            
         }
+
+        return Promise.reject(err);
     }
-})
+);
 
 export default $axios;

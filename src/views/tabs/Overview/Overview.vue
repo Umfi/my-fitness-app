@@ -14,7 +14,7 @@
       </ion-refresher>
 
       <!-- Calories Card-->
-      <ion-card v-if="!loading && isCardVisible(1)" @click="showCardActionMenu(1, 'Calories Overview Card')">
+      <ion-card v-if="!loadingCard1 && isCardVisible(1)" @click="showCardActionMenu(1, 'Calories Overview Card')">
         <ion-card-header>
           <ion-card-title>
             Hey, {{ user.name }}!
@@ -106,7 +106,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card v-if="loading">
+      <ion-card v-if="loadingCard1">
         <ion-card-header>
           <ion-card-title>
             <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
@@ -140,7 +140,7 @@
       </ion-card>
 
      <!-- Water Consume Card -->
-      <ion-card v-show="!loading && isCardVisible(2)" @click="showCardActionMenu(2, 'Water Consumption Card')">
+      <ion-card v-show="!loadingCard2 && isCardVisible(2)" @click="showCardActionMenu(2, 'Water Consumption Card')">
         <ion-card-header>
           <ion-card-title>
             Water Consumption
@@ -157,7 +157,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card v-if="loading">
+      <ion-card v-if="loadingCard2">
         <ion-card-header>
           <ion-card-title>
             <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
@@ -171,7 +171,7 @@
       </ion-card>
 
       <!-- BMI Card -->
-      <ion-card v-bind:color="bmi_style" v-show="!loading && isCardVisible(3)" @click="showCardActionMenu(3, 'BMI Card')">
+      <ion-card v-bind:color="bmi_style" v-show="!loadingCard3 && isCardVisible(3)" @click="showCardActionMenu(3, 'BMI Card')">
         <ion-card-header>
           <ion-card-title>
             BMI
@@ -193,7 +193,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card v-if="loading">
+      <ion-card v-if="loadingCard3">
         <ion-card-header>
           <ion-card-title>
             <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
@@ -208,7 +208,7 @@
      
      
       <!-- Workout Card -->
-      <ion-card v-show="!loading && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
+      <ion-card v-show="!loadingCard4 && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Workout Summary
@@ -228,7 +228,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card v-if="loading">
+      <ion-card v-if="loadingCard4">
         <ion-card-header>
           <ion-card-title>
             <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
@@ -243,7 +243,7 @@
 
 
       <!-- Weight Card -->
-      <ion-card v-show="!loading && isCardVisible(5)" @click="showCardActionMenu(5, 'Monthly Weight Summary Card')">
+      <ion-card v-show="!loadingCard5 && isCardVisible(5)" @click="showCardActionMenu(5, 'Monthly Weight Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Weight Summary
@@ -263,7 +263,7 @@
         </ion-card-content>
       </ion-card>
 
-      <ion-card v-if="loading">
+      <ion-card v-if="loadingCard5">
         <ion-card-header>
           <ion-card-title>
             <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
@@ -525,8 +525,11 @@ export default defineComponent({
       bmi_icon: "happy",
       bmi_value: 0,
       bmi_style: "success",
-      loading: false,
-      reloadAttempt: 0
+      loadingCard1: false,
+      loadingCard2: false,
+      loadingCard3: false,
+      loadingCard4: false,
+      loadingCard5: false
     };
   },
   ionViewDidEnter() {
@@ -541,34 +544,36 @@ export default defineComponent({
   methods: 
   {
     async doRefresh(event) {
-        this.loading = true;
+        this.loadingCard1 = true;
+        this.loadingCard2 = true;
+        this.loadingCard3 = true;
+        this.loadingCard4 = true;
+        this.loadingCard5 = true;
 
         const userData = await getUserData();
         if (userData != null && userData.details != null) {
             this.settings = JSON.parse(userData.details.settings);
         }
-        const loadCalories = await this.loadCaloriesSummary();
-        const loadDailyWaterConsumption = await this.loadDailyWaterConsumption();
+        
+        this.loadCaloriesSummary();
+        
+        this.loadDailyWaterConsumption();
 
         const current = new Date();
         this.currentWorkoutDate = new Date();
         this.currentWeightDate = new Date();
-        const loadMonthlyWorkout = await this.loadMonthlyWorkoutSummary(current.getMonth() + 1, current.getFullYear());
-        const loadMonthlyWeight = await this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
-        const loadBMI = await this.calculateBMI();
+        this.loadMonthlyWorkoutSummary(current.getMonth() + 1, current.getFullYear());
+    
+        this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
 
-        if ((this.reloadAttempt < 5) && (!loadCalories || !loadMonthlyWorkout || !loadMonthlyWeight || !loadDailyWaterConsumption || !loadBMI)) {
-          this.reloadAttempt++;
-          setTimeout(() => {
-            this.doRefresh(event);
-          }, 1000);
-        } else {
-          this.reloadAttempt = 0;
-          window.dispatchEvent(new Event('resize'));
-          this.loading = false;
-          if (event) 
-            event.target.complete();
-        }
+        this.calculateBMI();
+
+
+        window.dispatchEvent(new Event('resize'));
+        
+        if (event) 
+          event.target.complete();
+        
     },
     async showToast(msg) {
       const toast = await toastController.create({
@@ -591,7 +596,7 @@ export default defineComponent({
         this.proteinValue = data.proteinValue;
         this.carbohydrateValue = data.carbohydrateValue;
         this.fatValue = data.fatValue;
-
+        this.loadingCard1 = false;
         return true;
       }
 
@@ -603,7 +608,7 @@ export default defineComponent({
       
       if (data != null) {
         this.waterSeries = [data.waterConsumption];
-
+        this.loadingCard2 = false;
         return true;
       }
 
@@ -619,6 +624,7 @@ export default defineComponent({
 
         this.workoutSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.series[0].data = data;
+        this.loadingCard3 = false;
         return true;
       }
 
@@ -646,6 +652,7 @@ export default defineComponent({
 
         this.weightSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.weightSeries[0].data = arr;
+        this.loadingCard4 = false;
         return true;
       }
 
@@ -732,6 +739,7 @@ export default defineComponent({
             this.bmi_text = "very strong overweight";
           }
 
+          this.loadingCard5 = false;
           return true;
         }
       return false;
