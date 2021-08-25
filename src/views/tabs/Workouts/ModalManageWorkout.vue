@@ -280,6 +280,23 @@ export default defineComponent({
     await this.showLoading();
 
     getAllWorkoutsFromDay(this.$props.item.date).then(result => {
+
+      // Reset image
+      this.updateMuscleImage(document.getElementById("Deltoids"), 0);
+      this.updateMuscleImage(document.getElementById("Pectorals"), 0);
+      this.updateMuscleImage(document.getElementById("Trapezius"), 0);
+      this.updateMuscleImage(document.getElementById("Lats"), 0);
+      this.updateMuscleImage(document.getElementById("Biceps"), 0);
+      this.updateMuscleImage(document.getElementById("Triceps"), 0);
+      this.updateMuscleImage(document.getElementById("Forearms"), 0);
+      this.updateMuscleImage(document.getElementById("Abs"), 0);
+      this.updateMuscleImage(document.getElementById("Obliques"), 0);
+      this.updateMuscleImage(document.getElementById("Quads"), 0);
+      this.updateMuscleImage(document.getElementById("Adductors"), 0);
+      this.updateMuscleImage(document.getElementById("Glutes"), 0);
+      this.updateMuscleImage(document.getElementById("Hamstrings"), 0);
+      this.updateMuscleImage(document.getElementById("Calves"), 0);
+
       for (var i = 0; i < result.length; i++) {
         if (result[i].shoulders == 1) {
           this.shoulders = 1;

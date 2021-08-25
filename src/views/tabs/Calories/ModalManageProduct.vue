@@ -62,13 +62,14 @@
         ></ion-input>
       </ion-item>
     </ion-list>
-
+  </ion-content>
+  <ion-footer>
     <ion-row responsive-sm>
       <ion-col>
         <ion-button type="submit" @click="submitProductAction" expand="block">Submit</ion-button>
       </ion-col>
     </ion-row>
-  </ion-content>
+  </ion-footer>
 </template>
 
 <script>
@@ -86,6 +87,7 @@ import {
   IonInput,
   IonLabel,
   IonIcon,
+  IonFooter,
   modalController,
   toastController,
 } from "@ionic/vue";
@@ -109,7 +111,8 @@ export default defineComponent({
     IonItem,
     IonInput,
     IonLabel,
-    IonIcon
+    IonIcon,
+    IonFooter
   },
   props: {
     item: { type: Object, default: null },

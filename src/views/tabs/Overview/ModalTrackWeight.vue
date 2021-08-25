@@ -38,12 +38,14 @@
         </ion-grid>
       </ion-item>
     </ion-list>
+  </ion-content>
+  <ion-footer>
     <ion-row responsive-sm>
       <ion-col>
         <ion-button type="submit" @click="trackItem" expand="block">Track it</ion-button>
       </ion-col>
     </ion-row>
-  </ion-content>
+  </ion-footer>
 </template>
 
 <script>
@@ -61,6 +63,7 @@ import {
   IonIcon,
   IonGrid,
   IonList,
+  IonFooter,
   modalController,
   toastController,
 } from "@ionic/vue";
@@ -86,7 +89,8 @@ export default defineComponent({
     IonInput,
     IonIcon,
     IonGrid,
-    IonList
+    IonList,
+    IonFooter
   },
   props: {
     parent: { type: Object, default: null },

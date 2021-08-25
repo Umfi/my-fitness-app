@@ -47,12 +47,14 @@
         </ion-grid>
       </ion-item>
     </ion-list>
+  </ion-content>
+  <ion-footer>
     <ion-row responsive-sm>
       <ion-col>
         <ion-button type="submit" @click="trackItem" expand="block">Track it</ion-button>
       </ion-col>
     </ion-row>
-  </ion-content>
+  </ion-footer>
 </template>
 
 <script>
@@ -70,6 +72,7 @@ import {
   IonItem,
   IonInput,
   IonIcon,
+  IonFooter,
   modalController,
   toastController,
 } from "@ionic/vue";
@@ -99,6 +102,7 @@ export default defineComponent({
     IonItem,
     IonInput,
     IonIcon,
+    IonFooter,
     apexchart: VueApexCharts
   },
   props: {
