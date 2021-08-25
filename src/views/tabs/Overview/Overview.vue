@@ -12,12 +12,11 @@
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
-
       <!-- Calories Card-->
       <ion-card v-if="!loadingCard1 && isCardVisible(1)" @click="showCardActionMenu(1, 'Calories Overview Card')">
         <ion-card-header>
           <ion-card-title>
-            Hey, {{ user.name }}!
+            Calories Overview
           </ion-card-title>
         </ion-card-header>
         <ion-card-content>
@@ -397,7 +396,7 @@ export default defineComponent({
       ////
       chartOptions: {
         chart: {
-          id: 'vuechart-example',
+          id: 'vuechart-workouts',
           toolbar: {
             show: false
           },
@@ -423,6 +422,15 @@ export default defineComponent({
             show: true
           }
         },
+        yaxis: [
+        {
+          labels: {
+            formatter: function(val) {
+              return val.toFixed(0);
+            }
+          }
+        }
+      ]
       
       },
       currentWorkoutDate: new Date(),
@@ -559,6 +567,8 @@ export default defineComponent({
         
         this.loadDailyWaterConsumption();
 
+        this.calculateBMI();
+
         const current = new Date();
         this.currentWorkoutDate = new Date();
         this.currentWeightDate = new Date();
@@ -566,7 +576,7 @@ export default defineComponent({
     
         this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
 
-        this.calculateBMI();
+        
 
 
         window.dispatchEvent(new Event('resize'));
@@ -624,7 +634,7 @@ export default defineComponent({
 
         this.workoutSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.series[0].data = data;
-        this.loadingCard3 = false;
+        this.loadingCard4 = false;
         return true;
       }
 
@@ -652,7 +662,7 @@ export default defineComponent({
 
         this.weightSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.weightSeries[0].data = arr;
-        this.loadingCard4 = false;
+        this.loadingCard5 = false;
         return true;
       }
 
@@ -738,7 +748,7 @@ export default defineComponent({
             this.bmi_text = "very strong overweight";
           }
 
-          this.loadingCard5 = false;
+          this.loadingCard3 = false;
           return true;
         }
       return false;

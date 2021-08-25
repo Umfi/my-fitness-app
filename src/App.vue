@@ -41,6 +41,7 @@ import {
   IonIcon,
   IonLabel,
   menuController,
+  toastController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
@@ -116,6 +117,13 @@ export default defineComponent({
     }
   },
   methods: {
+    async showToast(msg) {
+      const toast = await toastController.create({
+        message: msg,
+        duration: 2000,
+      });
+      toast.present();
+    },
     logout: function () {
       logout()
         .then(() => {
@@ -139,6 +147,7 @@ export default defineComponent({
     updateApp: function() {
 
       menuController.close();
+      this.showToast("The latest version is being downloaded. However, you need to install it manually.");
 
       var request = {
           uri: "https://github.com/Umfi/my-fitness-app/releases/download/latest-build/myfitnessapp-latest.apk",
