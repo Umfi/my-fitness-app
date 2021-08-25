@@ -60,6 +60,14 @@
                     :checked="getSetting('showCard5')"
                 ></ion-toggle>
               </ion-item>
+              <ion-item>
+                <ion-label>Personal Records Card</ion-label>
+                <ion-toggle 
+                    slot="start"
+                    @ionChange="updateSetting('showCard6', $event.target.checked)"
+                    :checked="getSetting('showCard6')"
+                ></ion-toggle>
+              </ion-item>
             </ion-list>
             <ion-item-divider>
                 <ion-label>Push Notifications</ion-label>

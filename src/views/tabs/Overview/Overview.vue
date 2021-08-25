@@ -277,6 +277,39 @@
           </ion-thumbnail>
         </ion-card-content>
       </ion-card>
+
+      <!-- Personal Records Card -->
+      <ion-card v-show="!loadingCard6 && isCardVisible(6)" @click="showCardActionMenu(6, 'Personal Records Card')">
+        <ion-card-header>
+          <ion-card-title>
+            Personal Records
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-row>
+              <ion-col size="4" class="ion-text-center ion-align-self-center">
+                <ion-icon color="warning" style="font-size: 25px; font-weight: bold;" :icon="trophy"></ion-icon>
+              </ion-col>
+              <ion-col class="ion-text-end ion-align-self-center">
+                     <ion-row v-for="record in personalRecords" v-bind:key="record.id">{{ record.description}}: {{ record.value }} kg </ion-row>
+                     <ion-row v-if="personalRecords.length == 0">No records set yet</ion-row>
+              </ion-col>
+            </ion-row>
+        </ion-card-content>
+      </ion-card>
+      
+      <ion-card v-if="loadingCard6">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-thumbnail style="width: 100%;">
+          <ion-skeleton-text animated></ion-skeleton-text>
+          </ion-thumbnail>
+        </ion-card-content>
+      </ion-card>
      
 
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
@@ -284,6 +317,9 @@
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
         <ion-fab-list side="top">
+          <ion-fab-button @click="trackRecord">
+            <ion-icon :icon="trophy"></ion-icon>
+          </ion-fab-button>
           <ion-fab-button @click="trackWeight">
             <ion-icon :icon="scale"></ion-icon>
           </ion-fab-button>
@@ -338,13 +374,14 @@ import {
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowBack, arrowForward } from "ionicons/icons";
+import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowBack, arrowForward, trophy } from "ionicons/icons";
 
 import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService.js";
 
-import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary } from "@/service/StatsService.js";
+import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary, getPersonalRecords } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
+import ModalTrackRecord from "./ModalTrackRecord.vue";
 
 export default defineComponent({
   name: "Overview",
@@ -380,7 +417,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowForward, arrowBack
+      add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowForward, arrowBack, trophy
     };
   },
   data() {
@@ -536,11 +573,15 @@ export default defineComponent({
       bmi_icon: "happy",
       bmi_value: 0,
       bmi_style: "success",
+      ///
+      personalRecords: [],
+      ///
       loadingCard1: false,
       loadingCard2: false,
       loadingCard3: false,
       loadingCard4: false,
-      loadingCard5: false
+      loadingCard5: false,
+      loadingCard6: false,
     };
   },
   ionViewDidEnter() {
@@ -560,6 +601,7 @@ export default defineComponent({
         this.loadingCard3 = true;
         this.loadingCard4 = true;
         this.loadingCard5 = true;
+        this.loadingCard6 = true;
 
         const userData = await getUserData();
         if (userData != null && userData.details != null) {
@@ -579,8 +621,7 @@ export default defineComponent({
     
         this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
 
-        
-
+        this.loadPersonalRecords();
 
         window.dispatchEvent(new Event('resize'));
         
@@ -690,6 +731,17 @@ export default defineComponent({
 
       return false;
     },
+    async loadPersonalRecords() {
+      const data = await getPersonalRecords();
+  
+      if (data != null) {
+        this.personalRecords = data;
+        this.loadingCard6 = false;
+        return true;
+      }
+
+      return false;
+    },
     async trackWeight() {
 
       const modal = await modalController
@@ -731,6 +783,17 @@ export default defineComponent({
         this.showToast("Couldn't track water consumption.");
       }
 
+    },
+    async trackRecord() {
+
+      const modal = await modalController
+        .create({
+          component: ModalTrackRecord,
+           componentProps: {
+            parent: this
+          },
+        })
+      return modal.present();
     },
     async calculateBMI() {
         
@@ -832,7 +895,7 @@ export default defineComponent({
         },
       ];
 
-      if (cardID < 4) {
+      if (cardID < 4 || cardID == 6) {
           actions.splice(1, 2);
       }
 

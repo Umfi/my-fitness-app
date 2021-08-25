@@ -81,3 +81,36 @@ export async function getWeightSummary(month, year) {
         return data;
 }
 
+export async function getPersonalRecords() {
+    const data = await $axios(config.API_BASE_URL + 'getPersonalRecords')
+        .then(response => {
+            if (response.data.all) { 
+                return response.data.all;
+            }
+            
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
+export async function storePersonalRecords(records) {
+    const data = await $axios({ url: config.API_BASE_URL + 'storePersonalRecords', data: records, method: 'POST' })
+        .then(resp => {
+            if (resp.data.result) {
+                return true;
+            } else {
+                return false;
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}
