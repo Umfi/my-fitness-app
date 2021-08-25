@@ -147,6 +147,7 @@
         </ion-card-header>
         <ion-card-content>
          <apexchart
+            ref="waterChart"
             width="100%"
             height="300"
             type="radialBar"
@@ -218,6 +219,7 @@
         </ion-card-header>
         <ion-card-content>
          <apexchart
+            ref="workoutChart"
             width="100%"
             height="300"
             type="bar"
@@ -253,6 +255,7 @@
         </ion-card-header>
         <ion-card-content>
          <apexchart
+            ref="weightChart"
             width="100%"
             height="300"
             type="line"
@@ -619,6 +622,9 @@ export default defineComponent({
       if (data != null) {
         this.waterSeries = [data.waterConsumption];
         this.loadingCard2 = false;
+        this.$refs.waterChart.updateSeries([{
+          data: this.waterSeries,
+        }], false, true);
         return true;
       }
 
@@ -634,7 +640,15 @@ export default defineComponent({
 
         this.workoutSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.series[0].data = data;
+
         this.loadingCard4 = false;
+        setTimeout(() => {
+           this.$refs.workoutChart.updateSeries([{
+            data: this.series[0].data,
+          }], false, true);
+        }, 500);
+       
+
         return true;
       }
 
@@ -662,7 +676,15 @@ export default defineComponent({
 
         this.weightSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
         this.weightSeries[0].data = arr;
+        
         this.loadingCard5 = false;
+           setTimeout(() => {
+           this.$refs.weightChart.updateSeries([{
+            data: this.weightSeries[0].data,
+           }], false, true);
+        }, 500);
+        
+
         return true;
       }
 
