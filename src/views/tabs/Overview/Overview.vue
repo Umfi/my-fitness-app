@@ -317,7 +317,7 @@
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
         <ion-fab-list side="top">
-          <ion-fab-button @click="trackRecord">
+          <ion-fab-button @click="trackRecord" v-if="isCardVisible(6)">
             <ion-icon :icon="trophy"></ion-icon>
           </ion-fab-button>
           <ion-fab-button @click="trackWeight">
@@ -326,7 +326,7 @@
           <ion-fab-button @click="trackWorkout">
              <ion-icon :icon="barbell"></ion-icon>
           </ion-fab-button>
-          <ion-fab-button @click="trackWater">
+          <ion-fab-button @click="trackWater" v-if="isCardVisible(2)">
             <ion-icon :icon="water"></ion-icon>
            </ion-fab-button>
         </ion-fab-list>
