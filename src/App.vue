@@ -130,7 +130,13 @@ export default defineComponent({
           menuController.close();
           this.$router.push("/login");
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          console.log(err);
+          logout(true).then(() => {
+            menuController.close();
+            this.$router.push("/login");
+          })
+        });
     },
     profile: function () {
       menuController.close();
