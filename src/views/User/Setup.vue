@@ -35,8 +35,7 @@
                 <ion-datetime
                   v-model="dob"
                   name="dob"
-                  display-format="DD.MM.YYYY"
-                  placeholder="Select Date"
+                  presentation="date"
                   required
                 ></ion-datetime>
               </ion-item>

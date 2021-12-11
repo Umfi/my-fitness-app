@@ -11,7 +11,7 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <ion-card>
+      <ion-card v-if="loaded">
         <ion-card-header>
           <ion-card-title>Profile</ion-card-title>
         </ion-card-header>
@@ -38,8 +38,7 @@
                 <ion-datetime
                   v-model="dob"
                   name="dob"
-                  display-format="DD.MM.YYYY"
-                  placeholder="Select Date"
+                  presentation="date"
                   required
                 ></ion-datetime>
               </ion-item>
@@ -196,6 +195,7 @@ export default defineComponent({
   },
   data() {
     return {
+      loaded: false,
       gender: null,
       dob: null,
       weight: null,
@@ -205,16 +205,21 @@ export default defineComponent({
     };
   },
   async created() {
+    await this.showLoading();
     const userData = await getUserData();
 
     if (userData != null) {
       this.gender = userData.details.gender.toString();
-      this.dob = userData.details.birthday;
+      this.dob = userData.details.birthday.substring(0,10);
+      console.log(this.dob);
       this.weight = userData.details.weight;
       this.height = userData.details.height;
       this.activity = userData.details.activity.toString();
       this.goal = userData.details.goal.toString();
     }
+
+    loadingController.dismiss();
+    this.loaded = true;
   },
   methods: {
     async showToast(msg) {
