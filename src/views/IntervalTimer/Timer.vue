@@ -76,6 +76,7 @@ import {
 import TimerComponent from "./TimerComponent";
 
 import { Brightness } from '@ionic-native/brightness';
+import { get, set } from "../../helper/storage.js";
 
 export default defineComponent({
   name: "Timer",
@@ -108,6 +109,7 @@ export default defineComponent({
   },
   ionViewDidEnter() {
     Brightness.setKeepScreenOn(true);
+    this.loadStoresValues();
   },
   ionViewWillLeave() {
     this.stopTimer();
@@ -120,6 +122,24 @@ export default defineComponent({
         duration: 2000,
       });
       toast.present();
+   },
+   async loadStoresValues() {
+
+    const iSets = await get("intervaltimer_sets")
+    if (iSets) {
+        this.sets = iSets;
+    }
+
+    const iTrainingtime = await get("intervaltimer_trainingtime")
+    if (iTrainingtime) {
+        this.trainingtime = iTrainingtime;
+    }
+
+    const iBreaktime = await get("intervaltimer_breaktime")
+    if (iBreaktime) {
+        this.breaktime = iBreaktime;
+    }
+
    },
    startTimer() {
 
@@ -138,6 +158,10 @@ export default defineComponent({
         return;
      }
      
+     set("intervaltimer_sets", this.sets);
+     set("intervaltimer_trainingtime", this.trainingtime);
+     set("intervaltimer_breaktime", this.breaktime);
+
      this.showTimer = true;
      this.resumeBtnVis = false;
      this.$refs.timer.initialTimerStart();
