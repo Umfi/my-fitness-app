@@ -190,10 +190,8 @@ describe('Login/Register Tests', () => {
   it('Setup account invalid data', () => {
     cy.login('false');
     cy.visit('/')
-
     cy.contains('Submit').click()
     cy.get('ion-card-header').should('contain', 'Setup')
-
   })
 
   

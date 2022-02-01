@@ -211,7 +211,6 @@ export default defineComponent({
     if (userData != null) {
       this.gender = userData.details.gender.toString();
       this.dob = userData.details.birthday.substring(0,10);
-      console.log(this.dob);
       this.weight = userData.details.weight;
       this.height = userData.details.height;
       this.activity = userData.details.activity.toString();

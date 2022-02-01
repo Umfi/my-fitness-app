@@ -29,16 +29,8 @@ Cypress.Commands.add("login", (isSetup) => {
     cy.request("POST", Cypress.env('API_BASE_URL')  + 'login', {
         email: Cypress.env('TEST_USER_EMAIL'),
         password: Cypress.env('TEST_USER_PW')
-        }).its("body.access_token").should("exist").then(token => {
-
-            Storage.set({
-                key: "access_token",
-                value: JSON.stringify(token)
-            })
-
-            Storage.set({
-                key: "is_setup",
-                value: JSON.stringify(isSetup)
-            });
+        }).its("body.access_token").should("exist").then(async token => {
+            localStorage.setItem('CapacitorStorage.access_token', JSON.stringify(token));
+            localStorage.setItem('CapacitorStorage.is_setup', JSON.stringify(isSetup));
         });
 });
