@@ -35,7 +35,7 @@
     "cordova-plugin-brightness": "^0.2.0",
     "cordova-plugin-file": "^6.0.2",
     "cordova-plugin-media": "^5.0.3",
-    "core-js": "^3.20.3",
+    "core-js": "^3.6.5",
     "integrator-cordova-plugin-downloader": "^1.1.0",
     "phonegap-plugin-barcodescanner": "^8.1.0",
     "v-viewer": "^3.0.9",
