@@ -31,3 +31,4 @@ npm-debug.log*
 /www
 
 tests/e2e/videos/*.mp4
+android/.idea

@@ -24,12 +24,21 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 import { SplashScreen } from '@capacitor/splash-screen';
+import { get } from "@/helper/storage.js";
 
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
 
-router.isReady().then(() => {
+router.isReady().then(async () => {
   app.mount('#app');
+
+  let selectedTheme = await get("theme");
+  if (selectedTheme == "dark") {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
+  }
+
   SplashScreen.hide();
 });

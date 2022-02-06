@@ -57,8 +57,6 @@ import { cloudDownloadOutline, moon } from 'ionicons/icons';
 
 import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
 
-import { isPlatform } from '@ionic/vue';
-
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 
@@ -66,8 +64,6 @@ import { AppVersion } from '@ionic-native/app-version';
 import { Downloader } from '@ionic-native/downloader';
 
 import { get, set } from "@/helper/storage.js";
-
-
 
 export default defineComponent({
   name: "App",
@@ -98,20 +94,12 @@ export default defineComponent({
     }
   },
   async created() {
-    
-    let selectedTheme = await get("theme");
-    if (selectedTheme == "dark") {
-      this.theme = "dark";
-      document.body.classList.add("dark");
-    } else {
-      this.theme = "light";
-      document.body.classList.remove("dark");
-    }
 
-    if (Capacitor.isPluginAvailable('AppVersion')) {
-      if (isPlatform('ios') || isPlatform('android')) {
-        AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
-      }
+     let selectedTheme = await get("theme");
+     this.theme = selectedTheme;
+
+    if (Capacitor.isNativePlatform()) {
+      AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
     }
   },
   mounted() {
@@ -198,16 +186,15 @@ export default defineComponent({
       .then((location) => console.log('File downloaded at:'+location))
       .catch((error) => console.error(error));
     },
-    changeTheme(darkThemeOn) {
-      if (darkThemeOn) {
-        set("theme", "dark");
+    changeTheme(isDarkMode) {
+      if (isDarkMode) {
         this.theme = "dark";
         document.body.classList.add('dark');
       } else {
-        set("theme", "light");
         this.theme = "light";
         document.body.classList.remove('dark');
       }
+      set("theme", this.theme);
     },
   },
 });
