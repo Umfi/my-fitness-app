@@ -103,6 +103,9 @@ export default defineComponent({
     if (selectedTheme == "dark") {
       this.theme = "dark";
       document.body.classList.add("dark");
+    } else {
+      this.theme = "light";
+      document.body.classList.remove("dark");
     }
 
     if (Capacitor.isPluginAvailable('AppVersion')) {
@@ -199,11 +202,12 @@ export default defineComponent({
       if (darkThemeOn) {
         set("theme", "dark");
         this.theme = "dark";
+        document.body.classList.add('dark');
       } else {
         set("theme", "light");
         this.theme = "light";
+        document.body.classList.remove('dark');
       }
-      document.body.classList.toggle('dark', darkThemeOn);
     },
   },
 });
