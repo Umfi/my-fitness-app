@@ -57,11 +57,14 @@ import {
   modalController,
 } from "@ionic/vue";
 
-import { getAllWorkouts } from "@/service/WorkoutService.js";
+import { getAllWorkouts, getAllAdvancedWorkouts } from "@/service/WorkoutService.js";
+import { get } from "@/helper/storage.js";
+
 
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
 import ModalManageWorkout from "./ModalManageWorkout.vue";
+import ModalDetailedWorkout from "./ModalDetailedWorkout.vue";
 
 import { add } from "ionicons/icons";
 
@@ -89,6 +92,7 @@ export default defineComponent({
   },
   data() {
     return {
+      settings: null,
       renderContent: false,
       selectedDate: null,
       events: [],
@@ -103,11 +107,18 @@ export default defineComponent({
     this.renderContent = false;
   },
   methods: {
+
     async doRefresh(event) {
       var startDate = this.$refs.vuecal.view.firstCellDate;
       var endDate = this.$refs.vuecal.view.lastCellDate;
 
-      const workouts = await getAllWorkouts(startDate, endDate);
+      let workouts = null;
+      const isAdvancedTrainignsModeEnabled = await get("advancedTrainigMode");
+      if (isAdvancedTrainignsModeEnabled) {
+        workouts = await getAllAdvancedWorkouts(startDate, endDate);
+      } else {
+        workouts = await getAllWorkouts(startDate, endDate);
+      }
 
       if ((this.reloadAttempt < 5) && workouts == null) {
         this.reloadAttempt++;
@@ -132,9 +143,17 @@ export default defineComponent({
     },
     async onDateClick(event) {
       this.selectedDate = event;
+      let selectedModal = null;
+      
+      const isAdvancedTrainignsModeEnabled = await get("advancedTrainigMode");
+      if (isAdvancedTrainignsModeEnabled) {
+        selectedModal = ModalDetailedWorkout;
+      } else {
+        selectedModal = ModalManageWorkout;
+      }
 
       const modal = await modalController.create({
-        component: ModalManageWorkout,
+        component: selectedModal,
         componentProps: {
           item: {
             date: this.selectedDate.format(),

@@ -18,6 +18,17 @@
         <ion-card-content>
             <ion-list>
               <ion-item-divider>
+                <ion-label>Workout Settings</ion-label>
+              </ion-item-divider>
+              <ion-item>
+                <ion-label>Advanced Training Mode</ion-label>
+                <ion-toggle 
+                    slot="start"
+                    @ionChange="updateSetting('advancedTrainigMode', $event.target.checked)"
+                    :checked="getSetting('advancedTrainigMode')"
+                ></ion-toggle>
+              </ion-item>
+              <ion-item-divider>
                 <ion-label>Overview Settings</ion-label>
               </ion-item-divider>
               <ion-item>
@@ -111,9 +122,10 @@ import {
 import { defineComponent } from "vue";
 
 import { getUserData, updateUserSetting } from "@/service/UserService.js";
+import {  set } from "@/helper/storage.js";
 
 export default defineComponent({
-  name: "Profile",
+  name: "Settings",
   components: {
     IonContent,
     IonHeader,
@@ -179,7 +191,7 @@ export default defineComponent({
             "value": value 
         };
         const result = await updateUserSetting(data);
-    
+        set(key, value);
         if (!result) {
             this.showToast("Something went wrong. Could not update setting.")
         }

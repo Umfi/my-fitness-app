@@ -66,3 +66,73 @@ export async function storeWorkout(workout) {
 
         return data;
 }
+
+
+export async function getAllExercises() {
+    const data = await $axios({ url: config.API_BASE_URL + 'exercises', method: 'GET' })
+        .then(response => {
+            if (response.data) { 
+                return response.data.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            return [];
+        })
+        .catch(err => {
+            console.log(err);
+            return [];
+        })
+
+        return data;
+}
+
+export async function getAllAdvancedWorkouts(startDate, endDate) {
+    const data = await $axios({ url: config.API_BASE_URL + 'advancedTrainings', data: { "from": startDate, "to": endDate}, method: 'POST' })
+        .then(response => {
+            if (response.data) { 
+                return response.data.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
+export async function getAllAdvancedWorkoutsFromDay(date) {
+    const data = await $axios({ url: config.API_BASE_URL + 'advancedTrainingsFromDay', data: { "date": date }, method: 'POST' })
+        .then(response => {
+            if (response.data) { 
+                return response.data;
+            }
+
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}
+
+
+export async function storeAdvancedWorkout(workout) {
+    const data = await $axios({ url: config.API_BASE_URL + 'createAdvancedTraining', data: workout, method: 'POST' })
+        .then(response => {
+            if (response.data) {
+                return response.data;
+            } 
+            
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
+}

@@ -15,6 +15,13 @@
         </ion-list>
       </ion-content>
       <ion-footer class="bar-stable">
+          <ion-item lines="full">
+            <ion-icon slot="start" :icon="moon"></ion-icon>
+            <ion-label>
+              Toggle Dark Theme
+            </ion-label>
+            <ion-toggle @ionChange="changeTheme($event.detail.checked)" :checked="theme == 'dark'" slot="end"></ion-toggle>
+          </ion-item>
           <ion-item>
             <ion-label>{{ version }}</ion-label>
             <ion-icon :icon="cloudDownloadOutline" slot="end" @click="updateApp"></ion-icon>
@@ -40,12 +47,13 @@ import {
   IonFooter,
   IonIcon,
   IonLabel,
+  IonToggle,
   menuController,
   toastController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { cloudDownloadOutline } from 'ionicons/icons';
+import { cloudDownloadOutline, moon } from 'ionicons/icons';
 
 import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
 
@@ -56,6 +64,10 @@ import { Capacitor } from '@capacitor/core';
 
 import { AppVersion } from '@ionic-native/app-version';
 import { Downloader } from '@ionic-native/downloader';
+
+import { get, set } from "@/helper/storage.js";
+
+
 
 export default defineComponent({
   name: "App",
@@ -71,21 +83,32 @@ export default defineComponent({
     IonItem,
     IonFooter,
     IonIcon,
-    IonLabel
+    IonLabel,
+    IonToggle
   },
    data() {
     return {
-      version: ""
+      version: "",
+      theme: "light"
     };
   },
    setup() {
     return {
-      cloudDownloadOutline
+      cloudDownloadOutline, moon
     }
   },
-  created() {
-    if (isPlatform('ios') || isPlatform('android')) {
-      AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
+  async created() {
+    
+    let selectedTheme = await get("theme");
+    if (selectedTheme == "dark") {
+      this.theme = "dark";
+      document.body.classList.add("dark");
+    }
+
+    if (Capacitor.isPluginAvailable('AppVersion')) {
+      if (isPlatform('ios') || isPlatform('android')) {
+        AppVersion.getVersionNumber().then(data => this.version = "Version " + data);
+      }
     }
   },
   mounted() {
@@ -171,7 +194,17 @@ export default defineComponent({
       Downloader.download(request)
       .then((location) => console.log('File downloaded at:'+location))
       .catch((error) => console.error(error));
-    }
+    },
+    changeTheme(darkThemeOn) {
+      if (darkThemeOn) {
+        set("theme", "dark");
+        this.theme = "dark";
+      } else {
+        set("theme", "light");
+        this.theme = "light";
+      }
+      document.body.classList.toggle('dark', darkThemeOn);
+    },
   },
 });
 </script>

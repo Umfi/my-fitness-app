@@ -208,7 +208,7 @@
      
      
       <!-- Workout Card -->
-      <ion-card v-show="!loadingCard4 && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
+      <ion-card v-show="!loadingCard4 && isCardVisible(4) && !isAdvancedTrainignsModeEnabled()" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Workout Summary
@@ -381,7 +381,10 @@ import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service
 import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary, getPersonalRecords } from "@/service/StatsService.js";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
+import ModalDetailedWorkout from "../Workouts/ModalDetailedWorkout.vue";
 import ModalTrackRecord from "./ModalTrackRecord.vue";
+
+import { set } from "@/helper/storage.js";
 
 export default defineComponent({
   name: "Overview",
@@ -441,6 +444,9 @@ export default defineComponent({
             show: false
           },
         },
+        theme: {
+          mode: document.body.classList.contains("dark") ? 'dark' : 'light',
+        }, 
         dataLabels: {
             enabled: true
         },
@@ -489,6 +495,9 @@ export default defineComponent({
             show: false
           },
         },
+        theme: {
+          mode: document.body.classList.contains("dark") ? 'dark' : 'light',
+        },
         dataLabels: {
             enabled: false
         },
@@ -502,8 +511,7 @@ export default defineComponent({
           labels: {
             show: false
           }
-        },
-      
+        }
       },
       currentWeightDate: new Date(),
       weightSeriesTitle: "Month Year",
@@ -757,9 +765,17 @@ export default defineComponent({
 
       var today = new Date();
       
+      let selectedModal = null;
+      
+      if (this.isAdvancedTrainignsModeEnabled()) {
+        selectedModal = ModalDetailedWorkout;
+      } else {
+        selectedModal = ModalManageWorkout;
+      }
+
       const modal = await modalController
         .create({
-          component: ModalManageWorkout,
+          component: selectedModal,
            componentProps: {
             item: {
               date: today.format(),
@@ -918,7 +934,23 @@ export default defineComponent({
           }
       }
       return true;
-    }
+    },
+    isAdvancedTrainignsModeEnabled() {
+      if (this.settings != null) {
+          if ("advancedTrainigMode" in this.settings) {
+              var returnVal = this.settings["advancedTrainigMode"];
+              if (returnVal === true) {
+                  set("advancedTrainigMode", true);
+                  return true;
+              } else {
+                  set("advancedTrainigMode", false);
+                  return false;
+              }
+          }
+      }
+      set("advancedTrainigMode", false);
+      return false;
+    },
   }
 })
 </script>
