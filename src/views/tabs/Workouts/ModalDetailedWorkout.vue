@@ -26,6 +26,7 @@
         <ion-text color="primary"><h1 class="ion-no-margin">Summary</h1></ion-text>
         <div class="circle">{{ totalWeight }} kg</div>
       </div>
+
       <ion-accordion-group>
         <ion-accordion v-for="(exercise, index) in exercises" :key="index">
           <ion-item slot="header">
@@ -50,6 +51,25 @@
           </ion-list>
         </ion-accordion>
       </ion-accordion-group>
+
+      <ion-card v-if="personalRecords.length > 0">
+        <ion-card-header>
+          <ion-card-title>
+            New Personal Records
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-row>
+              <ion-col size="4" class="ion-text-center ion-align-self-center">
+                <ion-icon color="warning" style="font-size: 25px; font-weight: bold;" :icon="trophy"></ion-icon>
+              </ion-col>
+              <ion-col class="ion-text-end ion-align-self-center">
+                     <ion-row v-for="record in personalRecords" :key="record.id">{{ record.description}}: {{ record.value }} kg </ion-row>
+              </ion-col>
+            </ion-row>
+        </ion-card-content>
+      </ion-card>
+
     </div>
   </ion-content>
   <ion-footer>
@@ -85,12 +105,16 @@ import {
   IonText,
   IonAccordion,
   IonAccordionGroup,
-  IonGrid
+  IonGrid,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { getAllAdvancedWorkoutsFromDay, storeAdvancedWorkout } from "@/service/WorkoutService.js";
-import { close } from "ionicons/icons";
+import { close, trophy } from "ionicons/icons";
 
 import ModalAddExercise from "./ModalAddExercise.vue";
 
@@ -105,6 +129,7 @@ export default defineComponent({
   data() {
     return {
       exercises: [],
+      personalRecords: [],
       workoutFinished: false
     };
   },
@@ -152,7 +177,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      close
+      close, trophy
     };
   },
   methods: {
@@ -243,11 +268,12 @@ export default defineComponent({
         const newEvent = await storeAdvancedWorkout({
             date: item.date,
             exercises: this.exercises
-          });
+        });
         
         if (newEvent != null) {
           this.$props.parent.doRefresh(false);
           this.showToast("Workout tracked.");
+          this.personalRecords = newEvent.new_personal_records;
           this.workoutFinished = true;
         } else {
           this.showToast("Couldn't track workout.");
@@ -272,7 +298,11 @@ export default defineComponent({
     IonText,
     IonAccordion,
     IonAccordionGroup,
-    IonGrid
+    IonGrid,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent
   },
 });
 </script>
