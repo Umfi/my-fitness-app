@@ -208,7 +208,7 @@
      
      
       <!-- Workout Card -->
-      <ion-card v-show="!loadingCard4 && isCardVisible(4) && !isAdvancedTrainignsModeEnabled()" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
+      <ion-card v-show="!loadingCard4 && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
         <ion-card-header>
           <ion-card-title>
             Monthly Workout Summary
@@ -444,9 +444,6 @@ export default defineComponent({
             show: false
           },
         },
-        theme: {
-          mode: document.body.classList.contains("dark") ? 'dark' : 'light',
-        }, 
         dataLabels: {
             enabled: true
         },
@@ -494,9 +491,6 @@ export default defineComponent({
           toolbar: {
             show: false
           },
-        },
-        theme: {
-          mode: document.body.classList.contains("dark") ? 'dark' : 'light',
         },
         dataLabels: {
             enabled: false
@@ -671,9 +665,18 @@ export default defineComponent({
       if (data != null) {
         this.waterSeries = [data.waterConsumption];
         this.loadingCard2 = false;
+
         this.$refs.waterChart.updateSeries([{
-          data: this.waterSeries,
-        }], false, true);
+            data: this.waterSeries,
+        }], true);
+
+        setTimeout(() => {
+          this.waterChartOptions = {
+            theme: {
+              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
+            }
+          };
+        }, 500);
         return true;
       }
 
@@ -692,11 +695,18 @@ export default defineComponent({
 
         this.loadingCard4 = false;
         setTimeout(() => {
-           this.$refs.workoutChart.updateSeries([{
+          this.chartOptions = {
+            theme: {
+              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
+            }
+          };
+
+          this.$refs.workoutChart.updateSeries([{
             data: this.series[0].data,
-          }], false, true);
+          }], true);
+
+
         }, 500);
-       
 
         return true;
       }
@@ -727,10 +737,18 @@ export default defineComponent({
         this.weightSeries[0].data = arr;
         
         this.loadingCard5 = false;
-           setTimeout(() => {
-           this.$refs.weightChart.updateSeries([{
+        setTimeout(() => {
+
+          this.weightChartOptions = {
+            theme: {
+              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
+            }
+          };
+
+          this.$refs.weightChart.updateSeries([{
             data: this.weightSeries[0].data,
-           }], false, true);
+          }], true);
+
         }, 500);
         
 

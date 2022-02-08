@@ -57,7 +57,7 @@ import {
   modalController,
 } from "@ionic/vue";
 
-import { getAllWorkouts, getAllAdvancedWorkouts } from "@/service/WorkoutService.js";
+import { getAllWorkouts } from "@/service/WorkoutService.js";
 import { get } from "@/helper/storage.js";
 
 
@@ -112,14 +112,8 @@ export default defineComponent({
       var startDate = this.$refs.vuecal.view.firstCellDate;
       var endDate = this.$refs.vuecal.view.lastCellDate;
 
-      let workouts = null;
-      const isAdvancedTrainignsModeEnabled = await get("advancedTrainigMode");
-      if (isAdvancedTrainignsModeEnabled) {
-        workouts = await getAllAdvancedWorkouts(startDate, endDate);
-      } else {
-        workouts = await getAllWorkouts(startDate, endDate);
-      }
-
+      let workouts = await getAllWorkouts(startDate, endDate);
+   
       if ((this.reloadAttempt < 5) && workouts == null) {
         this.reloadAttempt++;
 
