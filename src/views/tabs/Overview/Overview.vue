@@ -665,18 +665,19 @@ export default defineComponent({
       if (data != null) {
         this.waterSeries = [data.waterConsumption];
         this.loadingCard2 = false;
-
-        this.$refs.waterChart.updateSeries([{
-            data: this.waterSeries,
-        }], true);
-
         setTimeout(() => {
+      
+          setTimeout(() => {
+             this.$refs.waterChart.updateSeries(this.waterSeries, true);
+          }, 500);
+
           this.waterChartOptions = {
             theme: {
               mode: document.body.classList.contains("dark") ? 'dark' : 'light'
             }
           };
         }, 500);
+
         return true;
       }
 
