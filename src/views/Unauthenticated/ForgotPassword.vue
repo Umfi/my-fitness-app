@@ -55,7 +55,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -73,12 +73,12 @@ import {
   IonText,
   IonButton,
   IonCol,
-  IonRow,
-  toastController
+  IonRow
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { forgotPassword } from "@/service/AuthService.js";
+import { forgotPassword } from "@/service/AuthService";
+import { showToast } from "@/utils";
 
 
 export default defineComponent({
@@ -111,13 +111,6 @@ export default defineComponent({
     };
   },
   methods: {
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     emailValid() {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -151,7 +144,7 @@ export default defineComponent({
       if (resetSuccess) {
           this.$router.push("/resetPassword?email=" + encodeURIComponent(this.email));
       } else {
-          this.showToast("Couldn't sent password reset email!");
+          showToast("Couldn't sent password reset email!");
       }
     },
   },

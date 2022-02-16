@@ -15,7 +15,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustWeight('-')">
+              <ion-button ref="decBtn" expand="block" class="decBtn" color="medium" fill="outline" @click="adjustWeight('-')">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -30,7 +30,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustWeight('+')">
+              <ion-button ref="incBtn" expand="block" class="incBtn" color="medium" fill="outline" @click="adjustWeight('+')">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -48,7 +48,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -65,14 +65,15 @@ import {
   IonList,
   IonFooter,
   modalController,
-  toastController,
+  GestureDetail,
 } from "@ionic/vue";
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 
-import { trackWeight, getUserData } from "@/service/UserService.js";
+import { trackWeight, getUserData } from "@/service/UserService";
 import { add, remove, close } from "ionicons/icons";
 import { createGesture } from '@ionic/vue';
 
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "ModalTrackWeight",
@@ -95,145 +96,150 @@ export default defineComponent({
   props: {
     parent: { type: Object, default: null },
   },
-  setup() {
-    return {
-      add, remove, close
-    };
-  },
-  data() {
-    return {
-      amount: null,
-      increment: 0.1,
-      multiplier: 1,
-      counter: 0
-    };
-  },
-  async mounted() {
-    const userData = await getUserData();
-    if (userData != null) {
-      this.amount = userData.details.weight;
-    }
+  setup(props) {
+    const decBtn = ref();
+    const incBtn = ref();
 
-    let timer;
-    let that = this;
-    const gestureDec = createGesture({
-      el: document.querySelector('.decBtn'),
-      threshold: 0,
-        onStart: () => { 
-            that.increment = 0.1;
-            that.multiplier = 1;
-            that.counter = 0;
+    let amount = ref(100);
 
-            timer = setInterval(function(){ 
-              that.adjustWeight('-');
-            }, 100);
-        },
-        onMove: (detail) => { 
-           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
-              return;
-            }
-
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        },
-        onEnd: () => {                
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        }
-    });
-
-    gestureDec.enable(true);
-
-
-    const gestureInc = createGesture({
-      el: document.querySelector('.incBtn'),
-      threshold: 0,
-        onStart: () => {   
-            that.increment = 0.1;
-            that.multiplier = 1;
-            that.counter = 0;
-
-            timer = setInterval(function(){ 
-              that.adjustWeight('+');
-            }, 100);
-        },
-        onMove: (detail) => { 
-           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
-              return;
-           }
-           
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        },
-        onEnd: () => {                
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        }
-    });
-
-    gestureInc.enable(true);
-  },
-  methods: {
-    async dismissModal() {
+    let increment = 1;
+    let multiplier = 1;
+    let counter = 0;
+    let timer: number | undefined;
+    
+    async function dismissModal() {
       const modal = await modalController.getTop();
       modal.dismiss();
-    },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
-    adjustWeight(mode) {
-      let tmp = parseFloat(this.amount) 
+    }
 
-      this.counter++;
+    function adjustWeight(mode: string) {
+      let tmp: number;
+      tmp = amount.value;
+      tmp = parseFloat("" + tmp);
 
-      if (this.counter >= 10 && this.multiplier < 4) {
-        this.multiplier++;
-        this.increment = this.increment * this.multiplier;
-        this.counter = 0;
+      if (tmp) {
+        counter++;
+
+        if (counter >= 10 && multiplier < 4) {
+          multiplier++;
+          increment = increment * multiplier;
+          counter = 0;
+        }
+
+        if (mode == "+") {
+          tmp += increment;
+        } else {
+          tmp -= increment;
+        }
+        
+        if (tmp < 0) 
+          tmp = 0;
+
+        tmp = Math.round( tmp * 1e1 ) / 1e1
+
+        amount.value = tmp;
       }
-      
-      if (mode == "+") {
-        tmp += this.increment;
-      } else {
-        tmp -= this.increment;
-      }
-      
-      if (tmp < 0) 
-        tmp = 0;
+    }
 
-      this.amount = tmp.toFixed(1);
-    },
-    async trackItem() {
+
+    async function trackItem() {
  
-      if (this.amount == "" || this.amount <= 0 || this.amount >= 200) {
-        this.showToast("Couldn't track weight. Invalid input.");
+      if (amount.value <= 0 || amount.value >= 200) {
+        showToast("Couldn't track weight. Invalid input.");
         return;
       } 
 
       var tracked = await trackWeight({
-        weight: this.amount,
+        weight: amount.value,
       });
 
       if (tracked) {
-        this.$props.parent.doRefresh(false);
-        this.showToast("Weight tracked.");
-        this.dismissModal();
+        props.parent.doRefresh();
+        showToast("Weight tracked.");
+        dismissModal();
       } else {
-        this.showToast("Couldn't track weight.");
+        showToast("Couldn't track weight.");
       }
-    },
+    }
+
+
+    let longPressActive = false;
+    let timer2: number | undefined;
+
+    function gestureStart(mode: string) {
+      longPressActive = true;
+
+      timer2 = setTimeout(function () {
+          if (longPressActive === true) {
+            increment = 0.1;
+            multiplier = 1;
+            counter = 0;
+            timer = setInterval(function(){ 
+              if (longPressActive === true) {
+                adjustWeight(mode);
+              }
+            }, 100);
+          }
+      }, 600);
+    }
+
+    function gestureMove(detail: GestureDetail) {
+      if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+        return;
+      }
+
+      longPressActive = false;
+    }
+
+    function gestureEnd() {
+
+      longPressActive = false;
+      if (timer2) {
+        clearInterval(timer2);
+        timer2 = undefined;
+      }
+
+      increment = 0.1;
+      multiplier = 1;
+      counter = 0;
+      if (timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    }
+
+    onMounted(async () => {
+
+      const userData = await getUserData();
+      if (userData != null) {
+        amount.value = userData.details.weight;
+      }
+
+      const gestureDec = createGesture({
+        gestureName: 'decrease-longpress',
+        el: decBtn.value.$el,
+        threshold: 0,
+          onStart: () => { gestureStart("-") },
+          onMove: (detail) => { gestureMove(detail) },
+          onEnd: () => { gestureEnd() }
+      });
+      gestureDec.enable(true);
+
+      const gestureInc = createGesture({
+        gestureName: 'increase-longpress',
+        el: incBtn.value.$el,
+        threshold: 0,
+        onStart: () => { gestureStart("+") },
+        onMove: (detail) => { gestureMove(detail) },
+        onEnd: () => { gestureEnd() }
+      });
+      gestureInc.enable(true);
+
+     });
+
+    return {
+      add, remove, close, decBtn, incBtn, amount, dismissModal, trackItem, adjustWeight
+    };
   }
 });
 </script>

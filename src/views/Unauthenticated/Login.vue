@@ -76,7 +76,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -95,12 +95,13 @@ import {
   IonButton,
   IonCol,
   IonRow,
-  toastController,
   loadingController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { login } from "@/service/AuthService.js";
+import { showToast } from "@/utils";
+
+import { login } from "@/service/AuthService";
 
 export default defineComponent({
   name: "Login",
@@ -161,13 +162,6 @@ export default defineComponent({
       this.errorPassword = "";
       return true;
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController
         .create({
@@ -196,13 +190,13 @@ export default defineComponent({
 
       if (loginSuccessful) {
           this.$router.push("/tabs/overview");
-          this.showToast("Login succesful!");
+          showToast("Login succesful!");
           this.onceSubmitted = false;
           this.email = "";
           this.password = "";
       } else {
           this.password = "";
-          this.showToast("Login failed!");
+          showToast("Login failed!");
       }  
 
     },

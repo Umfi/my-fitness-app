@@ -27,7 +27,7 @@
         <ion-grid>
           <ion-row>
             <ion-col size="2">
-              <ion-button expand="block" class="decBtn" color="medium" fill="outline" @click="adjustAmount('+')">
+              <ion-button ref="decBtn" expand="block" class="decBtn" color="medium" fill="outline" @click="adjustAmount('-')">
                 <ion-icon slot="icon-only" :icon="remove"></ion-icon>
               </ion-button>
             </ion-col>
@@ -39,7 +39,7 @@
               />
             </ion-col>
             <ion-col size="2">
-              <ion-button expand="block" class="incBtn" color="medium" fill="outline" @click="adjustAmount('+')">
+              <ion-button ref="incBtn" expand="block" class="incBtn" color="medium" fill="outline" @click="adjustAmount('+')">
                 <ion-icon slot="icon-only" :icon="add"></ion-icon>
               </ion-button>
             </ion-col>
@@ -57,7 +57,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -74,16 +74,17 @@ import {
   IonIcon,
   IonFooter,
   modalController,
-  toastController,
+  GestureDetail,
 } from "@ionic/vue";
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref, watch } from "vue";
 
 import VueApexCharts from "vue3-apexcharts";
 
-import { getDailyCalories } from "@/service/StatsService.js";
-import { trackCalories } from "@/service/ProductService.js";
+import { DailyCaloriesModel, getDailyCalories } from "@/service/StatsService";
+import { SearchResultModel, trackCalories } from "@/service/ProductService";
 import { add, remove, close } from "ionicons/icons";
 
+import { showToast } from "@/utils";
 import { createGesture } from '@ionic/vue';
 
 export default defineComponent({
@@ -111,15 +112,9 @@ export default defineComponent({
   },
   data() {
     return {
-      amount: 100,
-      increment: 1,
-      multiplier: 1,
-      counter: 0,
-      userData: null,
-      series: [0, 0, 0, 0],
       chartOptions: {
         chart: {
-          id: 'vuechart-example',
+          id: 'calories-consumtion-chart',
           toolbar: {
             show: false
           },
@@ -164,112 +159,68 @@ export default defineComponent({
         },
         colors: ['#3880ff', '#2dd36f', '#ffc409', '#eb445a'],
         labels: ['Calories', 'Protein', 'Carbs', 'Fat'],
-      
       },
     };
   },
-  setup() {
-    return {
-      add, remove, close
-    };
-  },
-  async created() {
+  setup(props) {
+    const decBtn = ref();
+    const incBtn = ref();
 
-    const data = await getDailyCalories();
+    let amount = ref(100);
+    let userData = null as DailyCaloriesModel | null;
+    let series = ref([0, 0, 0, 0]);
+
+    let increment = 1;
+    let multiplier = 1;
+    let counter = 0;
+    let timer: number | undefined;
     
-    if (data != null) {
-      this.userData = data;
-      this.updatePreviewData();
-    }
+    watch(amount, function(newVal) {
+      if (newVal < 0) {
+        amount.value = 0;
+      }
+      updatePreviewData();
+    })
 
-
-    let timer;
-    let that = this;
-    const gestureDec = createGesture({
-      el: document.querySelector('.decBtn'),
-      threshold: 0,
-        onStart: () => {  
-            that.increment = 1;
-            that.multiplier = 1;
-            that.counter = 0;
-
-            timer = setInterval(function(){ 
-              that.adjustAmount('-');
-            }, 100);
-        },
-        onMove: (detail) => { 
-           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
-              return;
-           }
-           
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        },
-        onEnd: () => {                
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        }
-    });
-
-    gestureDec.enable(true);
-
-
-    const gestureInc = createGesture({
-      el: document.querySelector('.incBtn'),
-      threshold: 0,
-        onStart: () => {  
-            that.increment = 1;
-            that.multiplier = 1;
-            that.counter = 0;
-
-            timer = setInterval(function(){ 
-              that.adjustAmount('+');
-            }, 100);
-        },
-        onMove: (detail) => { 
-           if (detail.deltaX <= 10 && detail.deltaY <= 10) {
-              return;
-           }
-           
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        },
-        onEnd: () => {                
-            if (timer) {
-              clearInterval(timer);
-              timer = undefined;
-            }
-        }
-    });
-
-    gestureInc.enable(true);
-
-  },
-  methods: {
-    async dismissModal() {
+    async function dismissModal() {
       const modal = await modalController.getTop();
       modal.dismiss();
-    },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
-    updatePreviewData() {
+    }
 
-        if (this.amount < 0) {
+    function adjustAmount(mode: string) {
+      let tmp: number;
+      tmp = amount.value;
+      tmp = parseInt("" + tmp);
+
+      if (tmp) {
+        counter++;
+
+        if (counter >= 10 && multiplier < 4) {
+          multiplier++;
+          increment = increment * multiplier;
+          counter = 0;
+        }
+
+        if (mode == "+") {
+          tmp += increment;
+        } else {
+          tmp -= increment;
+        }
+        
+        if (tmp < 0) 
+          tmp = 0;
+
+        amount.value = tmp;
+      }
+    }
+
+    function updatePreviewData() {
+
+        if (amount.value < 0 || userData === null) {
           return;
         }
 
-        var valueToPercent = function (value, max) {
+        var valueToPercent = function (value: number, max: number) {
           let tmp = (value * 100) / max;
           if (tmp > 100) {
             return 100;
@@ -280,45 +231,25 @@ export default defineComponent({
           }
         }
 
-        var item = this.$props.item;
+        var item = props.item as SearchResultModel;
 
-        let calculatedCalories = item.calories * this.amount / 100;
-        let calculatedCarbohydrate = item.carbohydrate * this.amount / 100;
-        let calculatedFat = item.fat * this.amount / 100;
-        let calculatedProtein = item.protein * this.amount / 100;
+        let calculatedCalories = item.calories * amount.value / 100;
+        let calculatedCarbohydrate = item.carbohydrate * amount.value / 100;
+        let calculatedFat = item.fat * amount.value / 100;
+        let calculatedProtein = item.protein * amount.value / 100;
 
-        this.series = [ valueToPercent(this.userData.calories + calculatedCalories, this.userData.user.calories),
-                        valueToPercent(this.userData.protein +calculatedProtein, this.userData.user.protein),
-                        valueToPercent(this.userData.carbohydrate +calculatedCarbohydrate, this.userData.user.carbohydrate),
-                        valueToPercent(this.userData.fat +calculatedFat, this.userData.user.fat) ]
-    }, 
-    adjustAmount(mode) {
-      let tmp = parseFloat(this.amount) 
+        series.value = [ valueToPercent(userData.calories + calculatedCalories, userData.user.calories),
+                        valueToPercent(userData.protein + calculatedProtein, userData.user.protein),
+                        valueToPercent(userData.carbohydrate + calculatedCarbohydrate, userData.user.carbohydrate),
+                        valueToPercent(userData.fat + calculatedFat, userData.user.fat) ]
+                        
+    }
 
-      this.counter++;
+    async function trackItem() {
+     var item = props.item as SearchResultModel;
 
-      if (this.counter >= 10 && this.multiplier < 4) {
-        this.multiplier++;
-        this.increment = this.increment * this.multiplier;
-        this.counter = 0;
-      }
-
-      if (mode == "+") {
-        tmp += this.increment;
-      } else {
-        tmp -= this.increment;
-      }
-      
-      if (tmp < 0) 
-        tmp = 0;
-
-      this.amount = tmp.toFixed(0);
-    },
-    async trackItem() {
-      var item = this.$props.item;
-
-      if (this.amount == "" || this.amount <= 0 || item == null) {
-        this.showToast("Couldn't track item. Invalid input.");
+      if (amount.value <= 0 || item == null) {
+        showToast("Couldn't track item. Invalid input.");
         return;
       } 
 
@@ -329,25 +260,97 @@ export default defineComponent({
         carbohydrate: item.carbohydrate,
         fat: item.fat,
         protein: item.protein,
-        gramm: parseInt(this.amount),
+        gramm: amount.value,
       });
 
       if (tracked) {
-        this.showToast("Item tracked.");
-        this.$props.parent.doRefresh(false);
-        this.dismissModal();
+        showToast("Item tracked.");
+        props.parent.doRefresh();
+        dismissModal();
       } else {
-        this.showToast("Couldn't track item.");
+        showToast("Couldn't track item.");
       }
-    },
-  },
-   watch: {
-    amount(newVal) {
-      if (newVal < 0) {
-        this.amount = 0;
-      }
-      this.updatePreviewData();
     }
-   }
+
+    let longPressActive = false;
+    let timer2: number | undefined;
+
+    function gestureStart(mode: string) {
+      longPressActive = true;
+
+      timer2 = setTimeout(function () {
+          if (longPressActive === true) {
+            increment = 1;
+            multiplier = 1;
+            counter = 0;
+            timer = setInterval(function(){ 
+              if (longPressActive === true) {
+                adjustAmount(mode);
+              }
+            }, 100);
+          }
+      }, 600);
+    }
+
+    function gestureMove(detail: GestureDetail) {
+      if (detail.deltaX <= 10 && detail.deltaY <= 10) {
+        return;
+      }
+
+      longPressActive = false;
+    }
+
+    function gestureEnd() {
+
+      longPressActive = false;
+      if (timer2) {
+        clearInterval(timer2);
+        timer2 = undefined;
+      }
+
+      increment = 1;
+      multiplier = 1;
+      counter = 0;
+      if (timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    }
+
+    onMounted(async () => {
+
+      const data = await getDailyCalories();
+    
+      if (data !== null) {
+          userData = data;
+          updatePreviewData();
+       }
+
+      const gestureDec = createGesture({
+        gestureName: 'decrease-longpress',
+        el: decBtn.value.$el,
+        threshold: 0,
+          onStart: () => { gestureStart("-") },
+          onMove: (detail) => { gestureMove(detail) },
+          onEnd: () => { gestureEnd() }
+      });
+      gestureDec.enable(true);
+
+      const gestureInc = createGesture({
+        gestureName: 'increase-longpress',
+        el: incBtn.value.$el,
+        threshold: 0,
+        onStart: () => { gestureStart("+") },
+        onMove: (detail) => { gestureMove(detail) },
+        onEnd: () => { gestureEnd() }
+      });
+      gestureInc.enable(true);
+
+     });
+
+    return {
+      add, remove, close, decBtn, incBtn, amount, series, dismissModal, trackItem, adjustAmount
+    };
+  }
 });
 </script>

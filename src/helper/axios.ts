@@ -1,16 +1,16 @@
-import axios from 'axios'
-import router from '../router/index.js'
-import { logout, refreshToken } from "../service/AuthService.js";
-import { get } from "./storage.js";
+import axios, { AxiosInstance } from 'axios'
+import router from '../router/index'
+import { logout, refreshToken } from "../service/AuthService";
+import { get } from "./storage";
 
-const $axios = axios.create();
+const $axios : AxiosInstance = axios.create();
 
 $axios.interceptors.request.use(
     async config => {
 
         const accessToken = await get("access_token");
 
-        if (accessToken) {
+        if (config.headers && accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
         }
 
@@ -23,9 +23,9 @@ $axios.interceptors.request.use(
 
 
 let isRefreshing = false;
-let failedQueue = [];
+let failedQueue: Array<any> = [];
 
-const processQueue = (error, token = null) => {
+const processQueue = (error, token : string | null = null) => {
     failedQueue.forEach(prom => {
         if (error) {
             prom.reject(error);

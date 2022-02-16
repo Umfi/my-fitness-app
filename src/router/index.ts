@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
-import { isLoggedIn } from "../service/AuthService.js";
-import { isSetup } from "../service/UserService.js";
+import { RouteRecordRaw } from 'vue-router';
+
+import { isLoggedIn } from "../service/AuthService";
+import { isSetup } from "../service/UserService";
 
 import Home from '../views/tabs/Home.vue'
 import Login from '../views/Unauthenticated/Login.vue'
@@ -16,7 +18,7 @@ import Settings from '../views/User/Settings.vue'
 import Setup from '../views/User/Setup.vue'
 import Timer from '../views/IntervalTimer/Timer.vue'
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     redirect: '/tabs/overview'

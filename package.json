@@ -42,7 +42,7 @@
     "v-viewer": "^3.0.9",
     "vue": "^3.2.24",
     "vue-cal": "^4.2.0",
-    "vue-css-donut-chart": "github:Umfi/vue-css-donut-chart",
+    "vue-css-donut-chart": "^2.0.0",
     "vue-router": "^4.0.12",
     "vue3-apexcharts": "^1.4.1"
   },

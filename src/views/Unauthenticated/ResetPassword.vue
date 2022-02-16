@@ -100,7 +100,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -119,13 +119,12 @@ import {
   IonButton,
   IonCol,
   IonRow,
-  toastController,
   loadingController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { resetPassword } from "@/service/AuthService.js";
-
+import { resetPassword } from "@/service/AuthService";
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "ResetPassword",
@@ -160,16 +159,9 @@ export default defineComponent({
     };
   },
   created() {
-    this.email = decodeURIComponent(this.$route.query.email);
+    this.email = decodeURIComponent(this.$route.query.email as string);
   },
   methods: {
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController.create({
         message: "Please wait...",
@@ -182,15 +174,12 @@ export default defineComponent({
 
       if (this.email == null || this.email == "") {
         if (this.onceSubmitted) {
-          this.errorEmail = "E-Mail is required";
           return false;
         }
       } else if (!re.test(this.email)) {
-        this.errorEmail = "Please enter a valid E-Mail";
         return false;
       }
 
-      this.errorEmail = "";
       return true;
     },
     passwordValid() {
@@ -237,9 +226,9 @@ export default defineComponent({
 
       if (resetSuccess) {
           this.$router.push("/login");
-          this.showToast("Your password has been reset!");
+          showToast("Your password has been reset!");
       } else {
-          this.showToast("Couldn't reset password! Please try again.");
+          showToast("Couldn't reset password! Please try again.");
       }
     },
   },

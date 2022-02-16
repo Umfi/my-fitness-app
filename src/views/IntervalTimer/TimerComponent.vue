@@ -22,9 +22,9 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 
-import { Media } from '@ionic-native/media';
+import { Media, MediaObject } from '@ionic-native/media';
 
 import { defineComponent } from "vue";
 
@@ -39,11 +39,11 @@ export default defineComponent({
     return {
       timeLimit: 0,
       timePassed: 0,
-      timerInterval: null,
+      timerInterval: 0,
       setsLeft: 0,
       currentMode: "SETUP",
-      sound: null,
-      finishSound: null
+      sound: {} as MediaObject,
+      finishSound: {} as MediaObject
     };
   },
   computed: {
@@ -54,16 +54,18 @@ export default defineComponent({
       const timeLeft = this.timeLeft;
       let minutes = Math.floor(timeLeft / 60);
       let seconds = timeLeft % 60;
+      let minutesString = minutes.toString(); 
+      let secondsString = seconds.toString();
 
       if (minutes < 10) {
-        minutes = `0${minutes}`;
+        minutesString = `0${minutes}`;
       }
 
       if (seconds < 10) {
-        seconds = `0${seconds}`;
+        secondsString = `0${seconds}`;
       }
 
-      return `${minutes}:${seconds}`;
+      return `${minutesString}:${secondsString}`;
     },
     timeLeft() {
       return this.timeLimit - this.timePassed;
@@ -142,10 +144,10 @@ export default defineComponent({
     },
     stopTimer() {
       clearInterval(this.timerInterval);
-      if (this.sound != null) {
+      if (this.sound instanceof MediaObject) {
         this.sound.release();
       }
-      if (this.finishSound != null) {
+      if (this.finishSound instanceof MediaObject) {
         this.finishSound.release();
       }
     }

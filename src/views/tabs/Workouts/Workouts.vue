@@ -26,7 +26,7 @@
         :cell-click-hold="false"
         :on-event-click="onEventClick"
         @cell-click="onDateClick"
-        @view-change="doRefresh(false)"
+        @view-change="doRefresh()"
       >
       </vue-cal>
 
@@ -39,7 +39,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import {
   IonContent,
@@ -55,10 +55,11 @@ import {
   IonFabButton,
   IonIcon,
   modalController,
+  RefresherCustomEvent,
 } from "@ionic/vue";
 
-import { getAllWorkouts } from "@/service/WorkoutService.js";
-import { get } from "@/helper/storage.js";
+import { WorkoutModel, getAllWorkouts } from "@/service/WorkoutService";
+import { get } from "@/helper/storage";
 
 
 import VueCal from "vue-cal";
@@ -94,27 +95,26 @@ export default defineComponent({
     return {
       settings: null,
       renderContent: false,
-      selectedDate: null,
-      events: [],
+      selectedDate: new Date(),
+      events: [] as Array<WorkoutModel>,
       reloadAttempt: 0
     };
   },
   ionViewDidEnter() {
     this.renderContent = true;
-    this.doRefresh(false);
+    this.doRefresh();
   },
   ionViewWillLeave() {
     this.renderContent = false;
   },
   methods: {
-
-    async doRefresh(event) {
-      var startDate = this.$refs.vuecal.view.firstCellDate;
-      var endDate = this.$refs.vuecal.view.lastCellDate;
+    async doRefresh(event?: RefresherCustomEvent) {
+      var startDate = (this.$refs.vuecal as any).view.firstCellDate;
+      var endDate = (this.$refs.vuecal as any).view.lastCellDate;
 
       let workouts = await getAllWorkouts(startDate, endDate);
    
-      if ((this.reloadAttempt < 5) && workouts == null) {
+      if ((this.reloadAttempt < 5) && workouts === null) {
         this.reloadAttempt++;
 
         setTimeout(() => {
@@ -122,8 +122,9 @@ export default defineComponent({
         }, 1000);
       } else {
         this.reloadAttempt = 0;
-
-        this.events = workouts;
+        if (workouts !== null) {
+          this.events = workouts;
+        }
         if (event) event.target.complete();
       }
     },
@@ -135,9 +136,9 @@ export default defineComponent({
       e.stopPropagation();
       this.onDateClick(new Date(event.date))
     },
-    async onDateClick(event) {
+    async onDateClick(event: Date) {
       this.selectedDate = event;
-      let selectedModal = null;
+      let selectedModal: unknown;
       
       const isAdvancedTrainignsModeEnabled = await get("advancedTrainigMode");
       if (isAdvancedTrainignsModeEnabled) {
@@ -147,10 +148,10 @@ export default defineComponent({
       }
 
       const modal = await modalController.create({
-        component: selectedModal,
+        component: selectedModal as HTMLElement,
         componentProps: {
           item: {
-            date: this.selectedDate.format(),
+            date: this.selectedDate,
           },
           title: "Track workout",
           parent: this,

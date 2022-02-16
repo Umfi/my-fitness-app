@@ -72,7 +72,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -89,12 +89,13 @@ import {
   IonIcon,
   IonFooter,
   modalController,
-  toastController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { createProduct, updateProduct } from "@/service/ProductService.js";
+import { SearchResultModel, createProduct, updateProduct } from "@/service/ProductService";
 import { close } from "ionicons/icons";
+import { showToast } from "@/utils";
+
 
 export default defineComponent({
   name: "ModalManageProduct",
@@ -123,16 +124,16 @@ export default defineComponent({
   data() {
     return {
       name: "",
-      calories: null,
-      protein: null,
-      carbohydrate: null,
-      fat: null,
-      id: null,
+      calories: null as number | null,
+      protein: null as number | null,
+      carbohydrate: null as number | null,
+      fat: null as number | null,
+      id: -1,
     };
   },
   created() {
     if (this.$props.mode == "edit") {
-      var item = this.$props.item;
+      var item = this.$props.item as SearchResultModel;
 
       this.name = item.name;
       this.calories = item.calories;
@@ -152,17 +153,10 @@ export default defineComponent({
       const modal = await modalController.getTop();
       modal.dismiss();
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async submitProductAction() {
 
-      if (this.name == "" || this.calories == "" || this.carbohydrate == "" || this.fat == "" || this.protein == "") {
-        this.showToast("Couldn't perform action. Invalid input.");
+      if (this.name == "" || this.calories == null || this.carbohydrate == null || this.fat == null || this.protein == null) {
+        showToast("Couldn't perform action. Invalid input.");
         return;
       }
 
@@ -176,11 +170,11 @@ export default defineComponent({
         });
 
         if (created) {
-          this.showToast("Product created.");
-          this.$props.parent.doRefresh(false);
+          showToast("Product created.");
+          this.$props.parent.doRefresh();
           this.dismissModal();
         } else {
-          this.showToast("Couldn't create product.");
+          showToast("Couldn't create product.");
         }
       } else if (this.$props.mode == "edit") {
         const updated = await updateProduct({
@@ -193,11 +187,11 @@ export default defineComponent({
         });
 
         if (updated) {
-          this.showToast("Product updated.");
-          this.$props.parent.doRefresh(false);
+          showToast("Product updated.");
+          this.$props.parent.doRefresh();
           this.dismissModal();
         } else {
-          this.showToast("Couldn't update product.");
+          showToast("Couldn't update product.");
         }
       }
     },

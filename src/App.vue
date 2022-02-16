@@ -33,7 +33,7 @@
   </ion-app>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonApp,
   IonRouterOutlet,
@@ -48,14 +48,13 @@ import {
   IonIcon,
   IonLabel,
   IonToggle,
-  menuController,
-  toastController
+  menuController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
 import { cloudDownloadOutline, moon } from 'ionicons/icons';
 
-import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService.js";
+import { logout, isLoggedIn, storeFCMToken } from "@/service/AuthService";
 
 import { PushNotifications } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
@@ -63,7 +62,8 @@ import { Capacitor } from '@capacitor/core';
 import { AppVersion } from '@ionic-native/app-version';
 import { Downloader } from '@ionic-native/downloader';
 
-import { get, set } from "@/helper/storage.js";
+import { get, set } from "@/helper/storage";
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "App",
@@ -131,13 +131,6 @@ export default defineComponent({
     }
   },
   methods: {
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     logout: function () {
       logout()
         .then(() => {
@@ -167,7 +160,7 @@ export default defineComponent({
     updateApp: function() {
 
       menuController.close();
-      this.showToast("The latest version is being downloaded. However, you need to install it manually.");
+      showToast("The latest version is being downloaded. However, you need to install it manually.");
 
       var request = {
           uri: "https://github.com/Umfi/my-fitness-app/releases/download/latest-build/myfitnessapp-latest.apk",
@@ -186,7 +179,7 @@ export default defineComponent({
       .then((location) => console.log('File downloaded at:'+location))
       .catch((error) => console.error(error));
     },
-    changeTheme(isDarkMode) {
+    changeTheme(isDarkMode: boolean) {
       if (isDarkMode) {
         this.theme = "dark";
         document.body.classList.add('dark');

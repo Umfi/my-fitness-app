@@ -230,7 +230,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -245,7 +245,6 @@ import {
   IonItem,
   IonCheckbox,
   modalController,
-  toastController,
   loadingController,
   IonLabel,
   IonIcon,
@@ -253,12 +252,30 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { storeWorkout, getAllWorkoutsFromDay } from "@/service/WorkoutService.js";
+import { storeWorkout, getAllWorkoutsFromDay } from "@/service/WorkoutService";
 import { close } from "ionicons/icons";
+import { showToast } from "@/utils";
 
 
 export default defineComponent({
   name: "ModalManageWorkout",
+  components: {
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonButton,
+    IonButtons,
+    IonRow,
+    IonCol,
+    IonList,
+    IonListHeader,
+    IonItem,
+    IonCheckbox,
+    IonLabel,
+    IonIcon,
+    IonFooter
+  },
   props: {
     item: { type: Object, default: null },
     title: { type: String },
@@ -266,66 +283,54 @@ export default defineComponent({
   },
   data() {
     return {
-      id: null,
-      shoulders: null,
-      chest: null,
-      back: null,
-      arms: null,
-      legs: null,
-      abs: null,
-      cardio: null,
+      id: 0,
+      shoulders: false,
+      chest: false,
+      back: false,
+      arms: false,
+      legs: false,
+      abs: false,
+      cardio: false,
     };
   },
   async mounted() {
+    // Reset image
+    this.resetMuscleImage();
+
     await this.showLoading();
 
     getAllWorkoutsFromDay(this.$props.item.date).then(result => {
+      if (result !== null) {
+        for (var i = 0; i < result.length; i++) {
 
-      // Reset image
-      this.updateMuscleImage(document.getElementById("Deltoids"), 0);
-      this.updateMuscleImage(document.getElementById("Pectorals"), 0);
-      this.updateMuscleImage(document.getElementById("Trapezius"), 0);
-      this.updateMuscleImage(document.getElementById("Lats"), 0);
-      this.updateMuscleImage(document.getElementById("Biceps"), 0);
-      this.updateMuscleImage(document.getElementById("Triceps"), 0);
-      this.updateMuscleImage(document.getElementById("Forearms"), 0);
-      this.updateMuscleImage(document.getElementById("Abs"), 0);
-      this.updateMuscleImage(document.getElementById("Obliques"), 0);
-      this.updateMuscleImage(document.getElementById("Quads"), 0);
-      this.updateMuscleImage(document.getElementById("Adductors"), 0);
-      this.updateMuscleImage(document.getElementById("Glutes"), 0);
-      this.updateMuscleImage(document.getElementById("Hamstrings"), 0);
-      this.updateMuscleImage(document.getElementById("Calves"), 0);
+          if (result[i].shoulders == 1) {
+            this.shoulders = true;
+          }
 
-      for (var i = 0; i < result.length; i++) {
-        if (result[i].shoulders == 1) {
-          this.shoulders = 1;
+          if (result[i].chest == 1) {
+            this.chest = true;
+          }
+
+          if (result[i].back == 1) {
+            this.back = true;
+          }
+
+          if (result[i].arms == 1) {
+            this.arms = true;
+          }
+
+          if (result[i].legs == 1) {
+            this.legs = true;
+          }
+
+          if (result[i].abs == 1) {
+            this.abs = true;
+          }
+
+          if (result[i].cardio == 1) {
+            this.cardio = true;
+          }
         }
-
-        if (result[i].chest == 1) {
-          this.chest = 1;
-        }
-
-        if (result[i].back == 1) {
-          this.back = 1;
-        }
-
-        if (result[i].arms == 1) {
-          this.arms = 1;
-        }
-
-        if (result[i].legs == 1) {
-          this.legs = 1;
-        }
-
-        if (result[i].abs == 1) {
-          this.abs = 1;
-        }
-
-        if (result[i].cardio == 1) {
-          this.cardio = 1;
-        }
-
       }
 
       loadingController.dismiss()
@@ -340,13 +345,6 @@ export default defineComponent({
     async dismissModal() {
       const modal = await modalController.getTop();
       modal.dismiss();
-    },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
     },
     async showLoading() {
       const loading = await loadingController
@@ -371,79 +369,67 @@ export default defineComponent({
         });
       
       if (newEvent != null) {
-        this.$props.parent.doRefresh(false);
-        this.showToast("Workout tracked.");
+        this.$props.parent.doRefresh();
+        showToast("Workout tracked.");
         this.dismissModal();
       } else {
-        this.showToast("Couldn't track workout.");
+        showToast("Couldn't track workout.");
       }
     },
-    updateMuscleImage(el, val) {
-      if (val == true) {
-        el.classList.add("active");
-      } else {
-        el.classList.remove("active");
+    resetMuscleImage() {
+      this.updateMuscleImage(document.getElementById("Deltoids"), false);
+      this.updateMuscleImage(document.getElementById("Pectorals"), false);
+      this.updateMuscleImage(document.getElementById("Trapezius"), false);
+      this.updateMuscleImage(document.getElementById("Lats"), false);
+      this.updateMuscleImage(document.getElementById("Biceps"), false);
+      this.updateMuscleImage(document.getElementById("Triceps"), false);
+      this.updateMuscleImage(document.getElementById("Forearms"), false);
+      this.updateMuscleImage(document.getElementById("Abs"), false);
+      this.updateMuscleImage(document.getElementById("Obliques"), false);
+      this.updateMuscleImage(document.getElementById("Quads"), false);
+      this.updateMuscleImage(document.getElementById("Adductors"), false);
+      this.updateMuscleImage(document.getElementById("Glutes"), false);
+      this.updateMuscleImage(document.getElementById("Hamstrings"), false);
+      this.updateMuscleImage(document.getElementById("Calves"), false);
+    },
+    updateMuscleImage(el: HTMLElement | null, val: boolean) {
+      if (el !== null) {
+        if (val === true) {
+          el.classList.add("active");
+        } else {
+          el.classList.remove("active");
+        }
       }
     }
   },
   watch: {
-    shoulders(newVal) {
-      var element = document.getElementById("Deltoids");
-      this.updateMuscleImage(element, newVal);
+    shoulders(newVal: boolean) {
+      this.updateMuscleImage(document.getElementById("Deltoids"), newVal);
     },
-    chest(newVal) {
-      var element = document.getElementById("Pectorals");
-      this.updateMuscleImage(element, newVal);
+    chest(newVal: boolean) {
+      console.log(newVal)
+      this.updateMuscleImage(document.getElementById("Pectorals"), newVal);
     },
-    back(newVal) {
-      var element = document.getElementById("Trapezius");
-      var element2 = document.getElementById("Lats");
-      this.updateMuscleImage(element, newVal);
-      this.updateMuscleImage(element2, newVal);
+    back(newVal: boolean) {
+      this.updateMuscleImage(document.getElementById("Trapezius"), newVal);
+      this.updateMuscleImage(document.getElementById("Lats"), newVal);
     },
-    arms(newVal) {
-      var element = document.getElementById("Biceps");
-      var element2 = document.getElementById("Triceps");
-      var element3 = document.getElementById("Forearms");
-      this.updateMuscleImage(element, newVal);
-      this.updateMuscleImage(element2, newVal);
-      this.updateMuscleImage(element3, newVal);
+    arms(newVal: boolean) {
+      this.updateMuscleImage(document.getElementById("Biceps"), newVal);
+      this.updateMuscleImage(document.getElementById("Triceps"), newVal);
+      this.updateMuscleImage(document.getElementById("Forearms"), newVal);
     },
-    abs(newVal) {
-      var element = document.getElementById("Abs");
-      var element2 = document.getElementById("Obliques");
-      this.updateMuscleImage(element, newVal);
-      this.updateMuscleImage(element2, newVal);
+    abs(newVal: boolean) {
+      this.updateMuscleImage(document.getElementById("Abs"), newVal);
+      this.updateMuscleImage(document.getElementById("Obliques"), newVal);
     },
-    legs(newVal) {
-      var element = document.getElementById("Quads");
-      var element2 = document.getElementById("Adductors");
-      var element3 = document.getElementById("Glutes");
-      var element4 = document.getElementById("Hamstrings");
-      var element5 = document.getElementById("Calves");
-      this.updateMuscleImage(element, newVal);
-      this.updateMuscleImage(element2, newVal);
-      this.updateMuscleImage(element3, newVal);
-      this.updateMuscleImage(element4, newVal);
-      this.updateMuscleImage(element5, newVal);
+    legs(newVal: boolean) {
+        this.updateMuscleImage(document.getElementById("Quads"), newVal);
+        this.updateMuscleImage(document.getElementById("Adductors"), newVal);
+        this.updateMuscleImage(document.getElementById("Glutes"), newVal);
+        this.updateMuscleImage(document.getElementById("Hamstrings"), newVal);
+        this.updateMuscleImage(document.getElementById("Calves"), newVal);
     },
-  },
-  components: {
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
-    IonButton,
-    IonButtons,
-    IonRow,
-    IonCol,
-    IonList,
-    IonListHeader,
-    IonItem,
-    IonCheckbox,
-    IonLabel,
-    IonIcon,
-    IonFooter
-  },
+  }
 });
 </script>

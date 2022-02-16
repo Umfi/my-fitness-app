@@ -105,7 +105,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -128,12 +128,12 @@ import {
   IonSelect,
   IonSelectOption,
   IonDatetime,
-  toastController,
   loadingController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { updateUserData } from "@/service/UserService.js";
+import { updateUserData } from "@/service/UserService";
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "Setup",
@@ -162,22 +162,15 @@ export default defineComponent({
   },
   data() {
     return {
-      gender: null,
-      dob: null,
-      weight: null,
-      height: null,
-      activity: null,
-      goal: null
+      gender: null as string | null,
+      dob: null as string | null,
+      weight: null as number | null,
+      height: null as number | null,
+      activity: null as string | null,
+      goal: null as string | null,
     };
   },
   methods: {
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController.create({
         message: "Please wait...",
@@ -186,24 +179,30 @@ export default defineComponent({
       await loading.present();
     },
     async setupProfile() {
-      await this.showLoading();
       
-      let setupSuccessful = await updateUserData({
-            'gender' : this.gender,
-            'dob' : this.dob,
-            'weight': this.weight,
-            'height' : this.height,
-            'activity' : this.activity,
-            'goal':  this.goal,
-            'language' : 'en'
-      });
+      if (this.gender !== null && this.dob != null && this.weight != null && this.height != null && this.activity != null && this.goal != null) {
+      
+        await this.showLoading();
+        
+        let setupSuccessful = await updateUserData({
+              'gender' : parseInt(this.gender),
+              'dob' : this.dob,
+              'weight': this.weight,
+              'height' : this.height,
+              'activity' : parseInt(this.activity),
+              'goal':  parseInt(this.goal),
+              'language' : 'en'
+        });
 
-      loadingController.dismiss();
-      if (setupSuccessful) {
-       this.$router.push('/tabs/overview');
-       this.showToast("Setup succesful!");
+        loadingController.dismiss();
+        if (setupSuccessful) {
+          this.$router.push('/tabs/overview');
+          showToast("Setup succesful!");
+        } else {
+          showToast("Setup failed!");
+        }
       } else {
-        this.showToast("Setup failed!");
+        showToast("Setup failed!");
       }
     },
   },

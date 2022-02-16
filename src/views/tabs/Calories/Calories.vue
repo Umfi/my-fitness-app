@@ -213,7 +213,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import {
   IonContent,
@@ -249,7 +249,8 @@ import {
   IonInfiniteScrollContent,
   modalController,
   alertController,
-  toastController
+  RefresherCustomEvent,
+  InfiniteScrollCustomEvent
 } from "@ionic/vue";
 
 import { add, create, trash, timeOutline, personCircleOutline, barcodeOutline } from "ionicons/icons";
@@ -262,10 +263,9 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Keyboard } from '@capacitor/keyboard';
 import { Capacitor } from '@capacitor/core';
 
-import { searchProduct, searchProductByBarcode, removeProduct, untrackCalories } from "@/service/ProductService.js";
+import { SearchResultModel, SearchHistoryModel, TodayResultModel, searchProduct, searchProductByBarcode, removeProduct, untrackCalories } from "@/service/ProductService";
+import { showToast } from "@/utils";
 
-import  Donut  from 'vue-css-donut-chart/src/components/Donut';
-//import 'vue-css-donut-chart/dist/vcdonut.css';
 
 export default defineComponent({
   name: "Calories",
@@ -300,15 +300,14 @@ export default defineComponent({
     IonRefresher,
     IonRefresherContent,
     IonInfiniteScroll, 
-    IonInfiniteScrollContent,
-    'vc-donut' : Donut
+    IonInfiniteScrollContent
   },
   data() {
     return {
-      suggestions: [],
-      filteredSuggestions: [],
-      searchResult: [],
-      today: [],
+      suggestions: [] as Array<SearchHistoryModel>,
+      filteredSuggestions: [] as Array<SearchHistoryModel>,
+      searchResult: [] as Array<SearchResultModel>,
+      today: [] as Array<TodayResultModel>,
       searchTerm: "",
       searchFilter: "all",
       isSearching: false,
@@ -336,22 +335,15 @@ export default defineComponent({
   },
   created() {
     this.page = 1;
-    this.doRefresh(false);
+    this.doRefresh();
   },
   methods: {
-    doRefresh(event) {
+    doRefresh(event?: RefresherCustomEvent) {
         this.search(this.searchTerm, 1);
         window.dispatchEvent(new Event('resize'));
         if (event) event.target.complete();
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
-    loadData(ev) {
+    loadData(ev: InfiniteScrollCustomEvent) {
       setTimeout(() => {
         this.page += 1;
         this.search(this.searchTerm, this.page);
@@ -365,7 +357,7 @@ export default defineComponent({
         }
       }, 500);
     },
-    suggest(input) {
+    suggest(input: string) {
       if (input == "") {
         this.filteredSuggestions = [];
       } else {
@@ -374,16 +366,15 @@ export default defineComponent({
         });
       }
     },
-    selectSuggestion(suggestion) {
+    selectSuggestion(suggestion: string) {
       this.searchTerm = suggestion;
       this.filteredSuggestions = [];
       var that = this;
       setTimeout(function(){
           that.search(suggestion, 1);
       }, 200);
-      
     },
-    async search(searchTerm, page) {
+    async search(searchTerm: string, page: number) {
 
       if (Capacitor.isPluginAvailable('Keyboard')) {
         Keyboard.hide();
@@ -413,11 +404,11 @@ export default defineComponent({
 
 
           if ((this.searchResult.length == 0 && searchTerm != "" && this.searchFilter == "all") || (this.today.length == 0 && searchTerm != "" && this.searchFilter == "today"))  {
-            this.showToast("No products found.");
+            showToast("No products found.");
           }
       }
     },
-    searchFilterChanged(filter) {
+    searchFilterChanged(filter: string) {
       this.searchTerm = "";
       this.searchFilter = filter;
 
@@ -425,7 +416,7 @@ export default defineComponent({
         this.searchResult = [];
       } 
     },
-    filterToday(searchTerm) {
+    filterToday(searchTerm: string) {
       if (this.searchFilter == "today" && searchTerm != "") {
         this.today = this.today.filter(function(value){ 
           return value.name.toUpperCase().indexOf(searchTerm.toUpperCase()) > -1
@@ -444,7 +435,7 @@ export default defineComponent({
               this.searchResult.unshift(scannedProduct);
             }
           } else {
-            this.showToast("No product found.");
+            showToast("No product found.");
           }
         }
       } catch (e) {
@@ -452,7 +443,7 @@ export default defineComponent({
       }
 
     },
-    async addCalories(itm) {
+    async addCalories(itm: SearchResultModel) {
       const modal = await modalController
         .create({
           component: ModalAddCalories,
@@ -463,7 +454,7 @@ export default defineComponent({
         })
       return modal.present();
     },
-    async removeCalories(itm) {
+    async removeCalories(itm: TodayResultModel) {
         const alert = await alertController
         .create({
           header: 'Untrack Item!',
@@ -478,15 +469,13 @@ export default defineComponent({
               text: 'Yes',
               handler: async () => {
                 
-                const deleted = await untrackCalories({
-                    id: itm.id
-                });
+                const deleted = await untrackCalories(itm.id);
 
                 if (deleted) {
-                  this.showToast("Product untracked.");
-                  this.doRefresh(false);
+                  showToast("Product untracked.");
+                  this.doRefresh();
                 } else {
-                  this.showToast("Couldn't untrack product.");
+                  showToast("Couldn't untrack product.");
                 }
 
               },
@@ -508,7 +497,7 @@ export default defineComponent({
         })
       return modal.present();
     },
-    async editItem(itm) {
+    async editItem(itm: SearchResultModel) {
       const modal = await modalController
         .create({
           component: ModalManageProduct,
@@ -521,7 +510,7 @@ export default defineComponent({
         })
       return modal.present();
     },
-    async deleteItem(item) {
+    async deleteItem(item: SearchResultModel) {
 
       const alert = await alertController
         .create({
@@ -537,16 +526,13 @@ export default defineComponent({
               text: 'Yes',
               handler: async () => {
                 
-                const deleted = await removeProduct({
-                    name: item.name,
-                    id: item.id
-                });
+                const deleted = await removeProduct(item.name, item.id);
 
                 if (deleted) {
-                  this.showToast("Product deleted.");
-                  this.doRefresh(false);
+                  showToast("Product deleted.");
+                  this.doRefresh();
                 } else {
-                  this.showToast("Couldn't delete product.");
+                  showToast("Couldn't delete product.");
                 }
 
               },

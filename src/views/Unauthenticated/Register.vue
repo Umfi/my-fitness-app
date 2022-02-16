@@ -106,7 +106,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -125,12 +125,12 @@ import {
   IonButton,
   IonCol,
   IonRow,
-  toastController,
   loadingController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { register } from "@/service/AuthService.js";
+import { register } from "@/service/AuthService";
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "Register",
@@ -225,13 +225,6 @@ export default defineComponent({
       this.errorPasswordconfirm = "";
       return true;
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController.create({
         message: "Please wait...",
@@ -264,14 +257,14 @@ export default defineComponent({
       loadingController.dismiss();
       if (registerSuccessful) {
         this.$router.push("/login");
-        this.showToast("Registration succesful!");
+        showToast("Registration succesful!");
         this.onceSubmitted = false;
         this.name = "";
         this.email = "";
         this.password = "";
-        this.password_confirmation = "";
+        this.passwordconfirm = "";
       } else {
-        this.showToast("Registration failed!");
+        showToast("Registration failed!");
       }
     },
   },

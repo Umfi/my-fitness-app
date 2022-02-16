@@ -272,7 +272,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -286,7 +286,6 @@ import {
   IonListHeader,
   IonItem,
   modalController,
-  toastController,
   loadingController,
   alertController,
   IonLabel,
@@ -305,14 +304,43 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { getAllAdvancedWorkoutsFromDay, storeAdvancedWorkout, storeWorkout } from "@/service/WorkoutService.js";
+import { ExerciseSetModel, getAllAdvancedWorkoutsFromDay, storeAdvancedWorkout, storeWorkout } from "@/service/WorkoutService";
+import { PersonalRecordModel } from "@/service/StatsService";
+
 import { close, trophy } from "ionicons/icons";
 
 import ModalAddExercise from "./ModalAddExercise.vue";
+import { showToast } from "@/utils";
 
 
 export default defineComponent({
   name: "ModalDetailedWorkout",
+  components: {
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonButton,
+    IonButtons,
+    IonRow,
+    IonCol,
+    IonList,
+    IonListHeader,
+    IonItem,
+    IonLabel,
+    IonIcon,
+    IonFooter,
+    IonText,
+    IonAccordion,
+    IonAccordionGroup,
+    IonGrid,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonSelect,
+    IonSelectOption
+  },
   props: {
     item: { type: Object, default: null },
     title: { type: String },
@@ -320,10 +348,10 @@ export default defineComponent({
   },
   data() {
     return {
-      exercises: [],
-      personalRecords: [],
+      exercises: [] as Array<ExerciseSetModel>,
+      personalRecords: [] as Array<PersonalRecordModel>,
       workoutFinished: false,
-      muscles: null,
+      muscles: [] as Array<string>,
       loading: true
     };
   },
@@ -343,27 +371,29 @@ export default defineComponent({
     var that = this;
     getAllAdvancedWorkoutsFromDay(this.$props.item.date).then(result => {
 
-      var tmp = {};
-      for (var j = 0; j < result.length; j++) {
-        tmp[result[j].name] = [];
-      }
+      if (result !== null) {
+        var tmp = {};
+        for (var j = 0; j < result.length; j++) {
+          tmp[result[j].name] = [];
+        }
 
-      for (var i = 0; i < result.length; i++) {
-        tmp[result[i].name].push({
-              repetitions: result[i].repetitions,
-              weight: result[i].weight
-        })
-      }
+        for (var i = 0; i < result.length; i++) {
+          tmp[result[i].name].push({
+                repetitions: result[i].repetitions,
+                weight: result[i].weight
+          })
+        }
 
-      for (var prop in tmp) {
-        that.exercises.push({
-            name: prop,
-            sets: tmp[prop]
-        })
-      }
+        for (var prop in tmp) {
+          that.exercises.push({
+              name: prop,
+              sets: tmp[prop]
+          })
+        }
 
-      if (that.exercises.length > 0) {
-        that.workoutFinished = true;
+        if (that.exercises.length > 0) {
+          that.workoutFinished = true;
+        }
       }
 
       loadingController.dismiss();
@@ -379,13 +409,6 @@ export default defineComponent({
     async dismissModal() {
       const modal = await modalController.getTop();
       modal.dismiss();
-    },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
     },
     async showLoading() {
       this.loading = true;
@@ -403,8 +426,8 @@ export default defineComponent({
           componentProps: {
           exerciseName: "",
           setsData: [{
-            repetitions: "",
-            weight: ""
+            repetitions: 0,
+            weight: 0
           }]
           },
         })
@@ -420,7 +443,7 @@ export default defineComponent({
 
         return modal.present();
     },
-    async viewExercise(index) {
+    async viewExercise(index: number) {
       const modal = await modalController.create({
         component: ModalAddExercise,
         componentProps: {
@@ -433,12 +456,12 @@ export default defineComponent({
     async trackWorkout() {
 
       if (this.muscles == null || this.muscles.length == 0) {
-        this.showToast("To track a workout you need to select a muscle group.");
+        showToast("To track a workout you need to select a muscle group.");
         return;
       }
 
       if (this.exercises.length == 0) {
-        this.showToast("To track a workout you need to add the exercises that you have done.");
+        showToast("To track a workout you need to add the exercises that you have done.");
         return;
       }
       
@@ -484,43 +507,45 @@ export default defineComponent({
           });
         
           if (aW != null) {
-            this.$props.parent.doRefresh(false);
-            this.showToast("Workout tracked.");
+            this.$props.parent.doRefresh();
+            showToast("Workout tracked.");
             this.personalRecords = aW.new_personal_records;
             this.workoutFinished = true;
           } else {
-            this.showToast("Couldn't track workout.");
+            showToast("Couldn't track workout.");
           }
         } else {
-          this.showToast("Couldn't track workout.");
+          showToast("Couldn't track workout.");
         }  
     },
     resetMuscleImage() {
-      this.updateMuscleImage(document.getElementById("Deltoids"), 0);
-      this.updateMuscleImage(document.getElementById("Pectorals"), 0);
-      this.updateMuscleImage(document.getElementById("Trapezius"), 0);
-      this.updateMuscleImage(document.getElementById("Lats"), 0);
-      this.updateMuscleImage(document.getElementById("Biceps"), 0);
-      this.updateMuscleImage(document.getElementById("Triceps"), 0);
-      this.updateMuscleImage(document.getElementById("Forearms"), 0);
-      this.updateMuscleImage(document.getElementById("Abs"), 0);
-      this.updateMuscleImage(document.getElementById("Obliques"), 0);
-      this.updateMuscleImage(document.getElementById("Quads"), 0);
-      this.updateMuscleImage(document.getElementById("Adductors"), 0);
-      this.updateMuscleImage(document.getElementById("Glutes"), 0);
-      this.updateMuscleImage(document.getElementById("Hamstrings"), 0);
-      this.updateMuscleImage(document.getElementById("Calves"), 0);
+      this.updateMuscleImage(document.getElementById("Deltoids"), false);
+      this.updateMuscleImage(document.getElementById("Pectorals"), false);
+      this.updateMuscleImage(document.getElementById("Trapezius"), false);
+      this.updateMuscleImage(document.getElementById("Lats"), false);
+      this.updateMuscleImage(document.getElementById("Biceps"), false);
+      this.updateMuscleImage(document.getElementById("Triceps"), false);
+      this.updateMuscleImage(document.getElementById("Forearms"), false);
+      this.updateMuscleImage(document.getElementById("Abs"), false);
+      this.updateMuscleImage(document.getElementById("Obliques"), false);
+      this.updateMuscleImage(document.getElementById("Quads"), false);
+      this.updateMuscleImage(document.getElementById("Adductors"), false);
+      this.updateMuscleImage(document.getElementById("Glutes"), false);
+      this.updateMuscleImage(document.getElementById("Hamstrings"), false);
+      this.updateMuscleImage(document.getElementById("Calves"), false);
     },
-    updateMuscleImage(el, val) {
-      if (val == true) {
-        el.classList.add("active");
-      } else {
-        el.classList.remove("active");
+    updateMuscleImage(el: HTMLElement | null, val: boolean) {
+      if (el !== null) {
+        if (val === true) {
+          el.classList.add("active");
+        } else {
+          el.classList.remove("active");
+        }
       }
     }
   },
   watch: {
-    muscles(newVal) {
+    muscles(newVal: Array<string>) {
       this.resetMuscleImage();
 
       if (newVal.includes("shoulders")) {
@@ -555,33 +580,7 @@ export default defineComponent({
         this.updateMuscleImage(document.getElementById("Calves"), true);
       }
     },
-  },
-  components: {
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
-    IonButton,
-    IonButtons,
-    IonRow,
-    IonCol,
-    IonList,
-    IonListHeader,
-    IonItem,
-    IonLabel,
-    IonIcon,
-    IonFooter,
-    IonText,
-    IonAccordion,
-    IonAccordionGroup,
-    IonGrid,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonSelect,
-    IonSelectOption
-  },
+  }
 });
 </script>
 <style scoped>

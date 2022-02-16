@@ -52,8 +52,8 @@
   </ion-page>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script lang="ts">
+import { defineComponent, ref } from "vue";
 import {
   IonContent,
   IonHeader,
@@ -73,10 +73,10 @@ import {
   toastController
 } from "@ionic/vue";
 
-import TimerComponent from "./TimerComponent";
+import TimerComponent from "./TimerComponent.vue"
 
 import { Brightness } from '@ionic-native/brightness';
-import { get, set } from "../../helper/storage.js";
+import { get, set } from "../../helper/storage";
 
 export default defineComponent({
   name: "Timer",
@@ -97,6 +97,10 @@ export default defineComponent({
     IonInput,
     IonButton,
     TimerComponent
+  },
+  setup() {
+    const timer = ref<InstanceType<typeof TimerComponent>>();
+    return { timer };
   },
   data() {
     return {
@@ -127,17 +131,17 @@ export default defineComponent({
 
     const iSets = await get("intervaltimer_sets")
     if (iSets) {
-        this.sets = iSets;
+        this.sets = parseInt(iSets);
     }
 
     const iTrainingtime = await get("intervaltimer_trainingtime")
     if (iTrainingtime) {
-        this.trainingtime = iTrainingtime;
+        this.trainingtime = parseInt(iTrainingtime);
     }
 
     const iBreaktime = await get("intervaltimer_breaktime")
     if (iBreaktime) {
-        this.breaktime = iBreaktime;
+        this.breaktime = parseInt(iBreaktime);
     }
 
    },
@@ -158,25 +162,33 @@ export default defineComponent({
         return;
      }
      
-     set("intervaltimer_sets", this.sets);
-     set("intervaltimer_trainingtime", this.trainingtime);
-     set("intervaltimer_breaktime", this.breaktime);
+     set("intervaltimer_sets", this.sets.toString());
+     set("intervaltimer_trainingtime", this.trainingtime.toString());
+     set("intervaltimer_breaktime", this.breaktime.toString());
 
      this.showTimer = true;
      this.resumeBtnVis = false;
-     this.$refs.timer.initialTimerStart();
+     if (this.timer) {
+      this.timer.initialTimerStart();
+     }
    },
    pauseTimer() {
     this.resumeBtnVis = true;
-    this.$refs.timer.pauseTimer();
+    if (this.timer) {
+      this.timer.pauseTimer();
+    }
    },
    resumeTimer() {
     this.resumeBtnVis = false;
-    this.$refs.timer.resumeTimer();
+    if (this.timer) {
+      this.timer.resumeTimer();
+    }
    },
    stopTimer() {
     this.showTimer = false;
-    this.$refs.timer.stopTimer();
+    if (this.timer) {
+      this.timer.stopTimer();
+    }
    }
   },
 });

@@ -337,7 +337,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import {
   IonContent,
@@ -368,23 +368,26 @@ import {
   IonFabButton,
   IonIcon,
   modalController,
-  toastController,
-  actionSheetController
+  actionSheetController,
+  RefresherCustomEvent
 } from "@ionic/vue";
 
-import VueApexCharts from "vue3-apexcharts";
+import { ApexOptions } from "apexcharts";
+import VueApexCharts, { VueApexChartsComponent } from "vue3-apexcharts";
 
 import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowBack, arrowForward, trophy } from "ionicons/icons";
 
-import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService.js";
+import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService";
 
-import { getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary, getPersonalRecords } from "@/service/StatsService.js";
+import { User, getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary, getPersonalRecords, PersonalRecordModel } from "@/service/StatsService";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 import ModalDetailedWorkout from "../Workouts/ModalDetailedWorkout.vue";
 import ModalTrackRecord from "./ModalTrackRecord.vue";
 
-import { set } from "@/helper/storage.js";
+import { set } from "@/helper/storage";
+import { showToast } from "@/utils";
+
 
 export default defineComponent({
   name: "Overview",
@@ -426,8 +429,8 @@ export default defineComponent({
   data() {
     return {
       renderContent: false,
-      settings: null,
-      user: null,
+      settings: null as any,
+      user: null as User | null,
       calories: 0,
       protein: 0,
       carbohydrate: 0,
@@ -443,6 +446,9 @@ export default defineComponent({
           toolbar: {
             show: false
           },
+        },
+        theme: {
+          mode: "light"
         },
         dataLabels: {
             enabled: true
@@ -474,8 +480,7 @@ export default defineComponent({
           }
         }
       ]
-      
-      },
+      } as ApexOptions,
       currentWorkoutDate: new Date(),
       workoutSeriesTitle: "Month Year",
       series: [
@@ -492,6 +497,9 @@ export default defineComponent({
             show: false
           },
         },
+        theme: {
+          mode: "light"
+        },
         dataLabels: {
             enabled: false
         },
@@ -506,7 +514,7 @@ export default defineComponent({
             show: false
           }
         }
-      },
+      } as ApexOptions,
       currentWeightDate: new Date(),
       weightSeriesTitle: "Month Year",
       weightSeries: [
@@ -524,6 +532,9 @@ export default defineComponent({
               enabled: true
             }
           },
+          theme: {
+            mode: "light"
+          },
           plotOptions: {
             radialBar: {
               startAngle: -90,
@@ -531,7 +542,7 @@ export default defineComponent({
               track: {
                 background: "#e7e7e7",
                 strokeWidth: '97%',
-                margin: 5, // margin is in pixels
+                margin: 5,
                 dropShadow: {
                   enabled: true,
                   top: 2,
@@ -568,7 +579,7 @@ export default defineComponent({
               stops: [0, 50, 53, 91]
             },
           },
-      },
+      } as ApexOptions,
       waterSeries: [0],
       ////
       bmi_text: "",
@@ -576,7 +587,7 @@ export default defineComponent({
       bmi_value: 0,
       bmi_style: "success",
       ///
-      personalRecords: [],
+      personalRecords: [] as Array<PersonalRecordModel>,
       ///
       loadingCard1: false,
       loadingCard2: false,
@@ -593,11 +604,11 @@ export default defineComponent({
     this.renderContent = false;
   },
   ionViewWillEnter() {
-    this.doRefresh(false);
+    this.doRefresh();
   },
   methods: 
   {
-    async doRefresh(event) {
+    async doRefresh(event?: RefresherCustomEvent) {
         this.loadingCard1 = true;
         this.loadingCard2 = true;
         this.loadingCard3 = true;
@@ -628,15 +639,7 @@ export default defineComponent({
         window.dispatchEvent(new Event('resize'));
         
         if (event) 
-          event.target.complete();
-        
-    },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
+          event.target.complete();     
     },
     async loadCaloriesSummary() {
 
@@ -668,14 +671,15 @@ export default defineComponent({
         setTimeout(() => {
       
           setTimeout(() => {
-             this.$refs.waterChart.updateSeries(this.waterSeries, true);
+             (this.$refs.waterChart as VueApexChartsComponent).updateSeries(this.waterSeries, true);
           }, 500);
 
-          this.waterChartOptions = {
-            theme: {
-              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
-            }
-          };
+          if (this.waterChartOptions.theme){
+            this.waterChartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
+          }
+
+          (this.$refs.waterChart as VueApexChartsComponent).updateOptions(this.waterChartOptions);
+         
         }, 500);
 
         return true;
@@ -683,7 +687,7 @@ export default defineComponent({
 
       return false;
     },
-    async loadMonthlyWorkoutSummary(month, year) {
+    async loadMonthlyWorkoutSummary(month: number, year: number) {
 
       const data = await getMonthlyWorkoutSummary(month, year);
 
@@ -696,17 +700,16 @@ export default defineComponent({
 
         this.loadingCard4 = false;
         setTimeout(() => {
-          this.chartOptions = {
-            theme: {
-              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
-            }
-          };
+          if (this.chartOptions.theme){
+            this.chartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
+          }
 
-          this.$refs.workoutChart.updateSeries([{
+          (this.$refs.workoutChart as VueApexChartsComponent).updateSeries([{
             data: this.series[0].data,
           }], true);
 
-
+          (this.$refs.workoutChart as VueApexChartsComponent).updateOptions(this.chartOptions);
+         
         }, 500);
 
         return true;
@@ -714,13 +717,13 @@ export default defineComponent({
 
       return false;
     },
-    async loadMonthlyWeightSummary(month, year) {
+    async loadMonthlyWeightSummary(month: number, year: number) {
 
       const data = await getWeightSummary(month, year);
 
       if (data != null) {
 
-        var arr = [];
+        var arr = [] as Array<number>;
         if (data.month.length > 0) {
           for (var i = 0; i < data.month.length; i++) {
             arr.push(data.month[i].weight);
@@ -740,15 +743,16 @@ export default defineComponent({
         this.loadingCard5 = false;
         setTimeout(() => {
 
-          this.weightChartOptions = {
-            theme: {
-              mode: document.body.classList.contains("dark") ? 'dark' : 'light'
-            }
-          };
+          if (this.weightChartOptions.theme){
+            this.weightChartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
+          }
 
-          this.$refs.weightChart.updateSeries([{
+          (this.$refs.weightChart as VueApexChartsComponent).updateSeries([{
             data: this.weightSeries[0].data,
           }], true);
+
+           (this.$refs.weightChart as VueApexChartsComponent).updateOptions(this.weightChartOptions);
+         
 
         }, 500);
         
@@ -784,7 +788,7 @@ export default defineComponent({
 
       var today = new Date();
       
-      let selectedModal = null;
+      let selectedModal: unknown;
       
       if (this.isAdvancedTrainignsModeEnabled()) {
         selectedModal = ModalDetailedWorkout;
@@ -794,10 +798,10 @@ export default defineComponent({
 
       const modal = await modalController
         .create({
-          component: selectedModal,
+          component: selectedModal as HTMLElement,
            componentProps: {
             item: {
-              date: today.format(),
+              date: today,
             },
             title: "Track workout",
             parent: this,
@@ -813,9 +817,9 @@ export default defineComponent({
 
       if (tracked) {
         this.loadDailyWaterConsumption();
-        this.showToast("Glass of water tracked.");
+        showToast("Glass of water tracked.");
       } else {
-        this.showToast("Couldn't track water consumption.");
+        showToast("Couldn't track water consumption.");
       }
 
     },
@@ -838,7 +842,7 @@ export default defineComponent({
           var weight = userData.details.weight;
           var height = userData.details.height;
           var bmi = weight / (height * height) * 10000;
-          bmi = bmi.toFixed(2);
+          bmi = Math.round( bmi * 1e2 ) / 1e2
 
           this.bmi_value = bmi;
 
@@ -873,7 +877,7 @@ export default defineComponent({
         }
       return false;
     },
-    async showCardActionMenu(cardID, cardTitle) {
+    async showCardActionMenu(cardID: number, cardTitle: string) {
      
       var actions = [
         {
@@ -881,17 +885,18 @@ export default defineComponent({
           role: 'destructive',
           icon: eyeOff,
           handler: async () => {
-              var data = { 
+            
+            var data = { 
                 "key": "showCard" + cardID, 
-                "value": false 
+                "value": "false" 
             };
             const result = await updateUserSetting(data);
         
             if (!result) {
-                this.showToast("Something went wrong. Could not hide card.")
+                showToast("Something went wrong. Couldn't hide card.")
             } else {
-              this.doRefresh(false);
-              this.showToast("You can show this card again. Just enable it in the settings.");
+              this.doRefresh();
+              showToast("You can show this card again. Just enable it in the settings.");
             }
           },
         },
@@ -941,7 +946,7 @@ export default defineComponent({
         });
       await actionSheet.present();
     },
-    isCardVisible(cardID) {
+    isCardVisible(cardID: number) {
       if (this.settings != null) {
           if ("showCard" + cardID in this.settings) {
               var returnVal = this.settings["showCard" + cardID];
@@ -959,15 +964,15 @@ export default defineComponent({
           if ("advancedTrainigMode" in this.settings) {
               var returnVal = this.settings["advancedTrainigMode"];
               if (returnVal === true) {
-                  set("advancedTrainigMode", true);
+                  set("advancedTrainigMode", "true");
                   return true;
               } else {
-                  set("advancedTrainigMode", false);
+                  set("advancedTrainigMode", "false");
                   return false;
               }
           }
       }
-      set("advancedTrainigMode", false);
+      set("advancedTrainigMode", "false");
       return false;
     },
   }

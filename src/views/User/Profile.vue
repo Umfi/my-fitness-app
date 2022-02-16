@@ -78,16 +78,10 @@
                   required
                 >
                   <ion-select-option value="0">little active</ion-select-option>
-                  <ion-select-option value="1"
-                    >slightly active</ion-select-option
-                  >
-                  <ion-select-option value="2"
-                    >moderately active</ion-select-option
-                  >
+                  <ion-select-option value="1" >slightly active</ion-select-option>
+                  <ion-select-option value="2">moderately active</ion-select-option>
                   <ion-select-option value="3">very active</ion-select-option>
-                  <ion-select-option value="4"
-                    >extremely active</ion-select-option
-                  >
+                  <ion-select-option value="4">extremely active</ion-select-option>
                 </ion-select>
               </ion-item>
 
@@ -100,9 +94,7 @@
                   required
                 >
                   <ion-select-option value="0">Fat loss</ion-select-option>
-                  <ion-select-option value="1"
-                    >Muscle building</ion-select-option
-                  >
+                  <ion-select-option value="1">Muscle building</ion-select-option>
                   <ion-select-option value="2">Keep weight</ion-select-option>
                 </ion-select>
               </ion-item>
@@ -135,7 +127,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -159,13 +151,13 @@ import {
   IonSelectOption,
   IonDatetime,
   IonItemDivider,
-  toastController,
   loadingController,
   alertController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { updateUserData, getUserData, deleteAccount } from "@/service/UserService.js";
+import { updateUserData, getUserData, deleteAccount } from "@/service/UserService";
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "Profile",
@@ -196,12 +188,12 @@ export default defineComponent({
   data() {
     return {
       loaded: false,
-      gender: null,
-      dob: null,
-      weight: null,
-      height: null,
-      activity: null,
-      goal: null,
+      gender: null as string | null,
+      dob: null as string | null,
+      weight: null as number | null,
+      height: null as number | null,
+      activity: null as string | null,
+      goal: null as string | null,
     };
   },
   async created() {
@@ -221,13 +213,6 @@ export default defineComponent({
     this.loaded = true;
   },
   methods: {
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController.create({
         message: "Please wait...",
@@ -254,9 +239,9 @@ export default defineComponent({
 
                 if (deleted) {
                   this.$router.push("/login");
-                  this.showToast("Account has been deleted!");
+                  showToast("Account has been deleted!");
                 } else {
-                  this.showToast("Couldn't delete account.");
+                  showToast("Couldn't delete account.");
                 }
               },
             },
@@ -265,24 +250,28 @@ export default defineComponent({
       return alert.present();
     },
     async updateProfile() {
-      await this.showLoading();
+      if (this.gender !== null && this.dob != null && this.weight != null && this.height != null && this.activity != null && this.goal != null) {
+        await this.showLoading();
 
-      let updateSuccessful = await updateUserData({
-        gender: this.gender,
-        dob: this.dob,
-        weight: this.weight,
-        height: this.height,
-        activity: this.activity,
-        goal: this.goal,
-        language: "en",
-      });
+        let updateSuccessful = await updateUserData({
+          gender: parseInt(this.gender),
+          dob: this.dob,
+          weight: this.weight,
+          height: this.height,
+          activity: parseInt(this.activity),
+          goal: parseInt(this.goal),
+          language: "en",
+        });
 
-      loadingController.dismiss();
-      if (updateSuccessful) {
-        this.showToast("Update succesful!");
+        loadingController.dismiss();
+        if (updateSuccessful) {
+          showToast("Update succesful!");
+        } else {
+          showToast("Update failed!");
+        }
       } else {
-        this.showToast("Update failed!");
-      }
+          showToast("Update failed!");
+      } 
     },
   },
 });

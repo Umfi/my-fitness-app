@@ -1,6 +1,60 @@
-import { get, set, remove } from "../helper/storage.js";
-import $axios from "../helper/axios.js";
-import { config } from "../config.js"
+import { get, set, remove } from "../helper/storage";
+import $axios from "../helper/axios";
+import $config from "@/config";
+
+
+interface UserDetailDataModel {
+    activity: number;
+    birthday: string;
+    created_at: string;
+    gender: number;
+    goal: number;
+    height: number;
+    id: number;
+    language: string;
+    settings: string;
+    updated_at: string;
+    user_id: number;
+    weight: number;
+}
+
+interface UserDataModel {
+    calories: number;
+    carbohydrate: number;
+    created_at: string;
+    details: UserDetailDataModel;
+    email: string;
+    email_verified_at: null
+    fat: number;
+    fcmtoken: string;
+    id: number;
+    name: string;
+    protein: number;
+    updated_at: string;
+}
+
+interface UpdateUserDataModel {
+    gender: number;
+    dob: string;
+    weight: number;
+    height: number;
+    activity: number;
+    goal: number;
+    language: string;
+}
+
+interface UpdateSettingModel {
+    key: string;
+    value: string;
+}
+
+interface WaterConsumptionModel {
+    ml: number;
+}
+
+interface TrackWeightModel {
+    weight: number;
+}
 
 export async function isSetup() {
     const set_up = await get("is_setup")
@@ -11,8 +65,8 @@ export async function isSetup() {
     }
 }
 
-export async function updateUserData(detail) {
-    const data = await $axios({ url: config.API_BASE_URL + 'user', data: detail, method: 'POST' })
+export async function updateUserData(detail: UpdateUserDataModel) {
+    const data = await $axios({ url: $config.API_BASE_URL + 'user', data: detail, method: 'POST' })
         .then(resp => {
             if (resp.data.user.calories > 0) {
                 const is_setup = 'true';
@@ -31,14 +85,11 @@ export async function updateUserData(detail) {
 }
 
 export async function getUserData() {
-    const data = await $axios(config.API_BASE_URL + 'user')
+    const data = await $axios($config.API_BASE_URL + 'user')
         .then(resp => {
-            if (resp.data[0]) {
-                if (resp.data[0].calories != null) {
-                  return resp.data[0];
-                }
+            if (resp.data.calories != null) {
+                return resp.data as UserDataModel;
             }
-
             return null;
         })
         .catch(err => {
@@ -49,8 +100,8 @@ export async function getUserData() {
         return data;
 }
 
-export async function updateUserSetting(setting) {
-    const data = await $axios({ url: config.API_BASE_URL + 'updateSettings', data: setting, method: 'POST' })
+export async function updateUserSetting(setting: UpdateSettingModel) {
+    const data = await $axios({ url: $config.API_BASE_URL + 'updateSettings', data: setting, method: 'POST' })
         .then(resp => {
             if (resp.data.status) {
                 return true;
@@ -66,8 +117,8 @@ export async function updateUserSetting(setting) {
         return data;
 }
 
-export async function trackWeight(weight) {
-    const data = await $axios({ url: config.API_BASE_URL + 'trackWeight', data: weight, method: 'POST' })
+export async function trackWeight(weight: TrackWeightModel) {
+    const data = await $axios({ url: $config.API_BASE_URL + 'trackWeight', data: weight, method: 'POST' })
         .then(response => {
             if (response.data.weight) {
                 return true;
@@ -83,8 +134,8 @@ export async function trackWeight(weight) {
         return data;
 }
 
-export async function trackWaterConsumption(ml) {
-    const data = await $axios({ url: config.API_BASE_URL + 'trackWaterConsumption', data: ml, method: 'POST' })
+export async function trackWaterConsumption(ml: WaterConsumptionModel) {
+    const data = await $axios({ url: $config.API_BASE_URL + 'trackWaterConsumption', data: ml, method: 'POST' })
         .then(response => {
             if (response.data.waterConsumption) {
                 return true;
@@ -101,7 +152,7 @@ export async function trackWaterConsumption(ml) {
 }
 
 export async function deleteAccount() {
-    const data = await $axios({ url: config.API_BASE_URL + 'deleteAccount', method: 'DELETE' })
+    const data = await $axios({ url: $config.API_BASE_URL + 'deleteAccount', method: 'DELETE' })
         .then(resp => {
             if (resp.data.status) {
                 remove("access_token")

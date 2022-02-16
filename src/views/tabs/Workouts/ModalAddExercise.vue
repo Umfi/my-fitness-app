@@ -17,7 +17,7 @@
           v-model="exercise"
           type="text"
           spellcheck="false"
-          autocapitalize="off"
+          autocapitalize="on"
           @ionInput="suggest($event.target.value)"
         ></ion-input>
         <ion-note slot="error" color="danger">Invalid value.</ion-note>
@@ -52,7 +52,7 @@
           <ion-card-content>
             <ion-item :class="submittedOnce && (sets[index].repetitions == '' || isNaN(sets[index].repetitions) || sets[index].repetitions == 0) ? 'ion-invalid' : ''">
                 <ion-label>Repetitions</ion-label>
-                <ion-input type="number" v-model="sets[index].repetitions" class="ion-text-center"></ion-input>
+                <ion-input type="number" clearInput="true" v-model="sets[index].repetitions" class="ion-text-center"></ion-input>
                 <ion-button slot="end" fill="none"  @click="openRepetitionPicker(index)">
                     <ion-icon slot="icon-only" color="tertiary" :icon="caretUpCircle"></ion-icon>
                 </ion-button>
@@ -60,7 +60,7 @@
             </ion-item>
             <ion-item :class="submittedOnce && (sets[index].weight == '' || isNaN(sets[index].weight)) ? 'ion-invalid' : ''">
                 <ion-label>Weight&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</ion-label>
-                <ion-input type="number" v-model="sets[index].weight" class="ion-text-center"></ion-input>
+                <ion-input type="number" clearInput="true" v-model="sets[index].weight" class="ion-text-center"></ion-input>
                 <ion-button slot="end" fill="none"  @click="openWeightPicker(index)">
                     <ion-icon slot="icon-only" color="tertiary" :icon="caretUpCircle"></ion-icon>
                 </ion-button>
@@ -80,7 +80,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -93,7 +93,6 @@ import {
   IonList,
   IonItem,
   modalController,
-  toastController,
   loadingController,
   pickerController,
   IonLabel,
@@ -111,10 +110,32 @@ import { defineComponent } from "vue";
 
 import { close, caretUpCircle, closeCircleOutline } from "ionicons/icons";
 
-import { getAllExercises } from "@/service/WorkoutService.js";
+import { SetModel, getAllExercises, ExerciseModel } from "@/service/WorkoutService";
 
 export default defineComponent({
   name: "ModalAddExercise",
+  components: {
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonButton,
+    IonButtons,
+    IonRow,
+    IonCol,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonIcon,
+    IonFooter,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonGrid,
+    IonInput,
+    IonNote
+  },
   props: {
     exerciseName: { type: String, default: "" },
     setsData: { type: Object, default: null },
@@ -122,20 +143,20 @@ export default defineComponent({
   data() {
     return {
       submittedOnce: false,
-      suggestions: [],
-      filteredSuggestions: [],
+      suggestions: [] as Array<ExerciseModel>,
+      filteredSuggestions: [] as Array<ExerciseModel>,
       exercise: "",
       sets: [
         {
-          repetitions: "",
-          weight: ""
+          repetitions: 0,
+          weight: 0
         },
-      ]
+      ] as Array<SetModel>
     };
   },
   async mounted() {
     this.exercise = this.$props.exerciseName;
-    this.sets = this.$props.setsData;
+    this.sets = this.$props.setsData as Array<SetModel>;
     this.suggestions = await getAllExercises();
   },
   setup() {
@@ -148,13 +169,6 @@ export default defineComponent({
       const modal = await modalController.getTop();
       modal.dismiss();
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
     async showLoading() {
       const loading = await loadingController
         .create({
@@ -163,7 +177,7 @@ export default defineComponent({
 
       await loading.present();
     },
-    suggest(input) {
+    suggest(input: string) {
       if (input == "") {
         this.filteredSuggestions = [];
       } else {
@@ -172,17 +186,17 @@ export default defineComponent({
         });
       }
     },
-    selectSuggestion(suggestion) {
+    selectSuggestion(suggestion: string) {
       this.exercise = suggestion;
       this.filteredSuggestions = [];
     },
     addSet() {
      this.sets.push({
-          repetitions: "",
-          weight: ""
+          repetitions: 0,
+          weight: 0
         });
     },
-    removeSet(index) {
+    removeSet(index: number) {
       let tmp = this.sets;
       tmp = tmp.slice(0,index).concat(tmp.slice(index+1));
       this.sets = tmp;
@@ -202,7 +216,7 @@ export default defineComponent({
         }
       }, 500);
     },
-    async openRepetitionPicker(index) {
+    async openRepetitionPicker(index: number) {
       const picker = await pickerController.create({
         columns: [
             {
@@ -246,7 +260,7 @@ export default defineComponent({
       });
       await picker.present();
     },
-    async openWeightPicker(index) {
+    async openWeightPicker(index: number) {
       const picker = await pickerController.create({
         columns: [
             {
@@ -296,29 +310,7 @@ export default defineComponent({
       });
       await picker.present();
     },
-  },
-  components: {
-    IonContent,
-    IonHeader,
-    IonTitle,
-    IonToolbar,
-    IonButton,
-    IonButtons,
-    IonRow,
-    IonCol,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonIcon,
-    IonFooter,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonGrid,
-    IonInput,
-    IonNote
-  },
+  }
 });
 </script>
 <style scoped>

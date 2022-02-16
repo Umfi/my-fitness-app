@@ -12,7 +12,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -38,8 +38,6 @@ export default defineComponent({
     this.trackWeight();
   },
   methods: {
-    async doRefresh() {
-    },
     async trackWeight() {
 
       const modal = await modalController

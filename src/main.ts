@@ -24,16 +24,20 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 
 import { SplashScreen } from '@capacitor/splash-screen';
-import { get } from "@/helper/storage.js";
+import { get } from "@/helper/storage";
+
+import Donut from 'vue-css-donut-chart';
+import 'vue-css-donut-chart/dist/vcdonut.css';
 
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
+  .use(router)
+  .use(Donut);
 
 router.isReady().then(async () => {
   app.mount('#app');
 
-  let selectedTheme = await get("theme");
+  const selectedTheme = await get("theme");
   if (selectedTheme == "dark") {
     document.body.classList.add("dark");
   } else {

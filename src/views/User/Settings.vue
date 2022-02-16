@@ -98,7 +98,7 @@
   </ion-page>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -121,8 +121,8 @@ import {
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { getUserData, updateUserSetting } from "@/service/UserService.js";
-import {  set } from "@/helper/storage.js";
+import { getUserData, updateUserSetting } from "@/service/UserService";
+import {  set } from "@/helper/storage";
 
 export default defineComponent({
   name: "Settings",
@@ -157,7 +157,7 @@ export default defineComponent({
     }
   },
   methods: {
-    async showToast(msg) {
+    async showToast(msg: string) {
       const toast = await toastController.create({
         message: msg,
         duration: 2000,
@@ -171,7 +171,7 @@ export default defineComponent({
 
       await loading.present();
     },
-    getSetting(key) {
+    getSetting(key: string) {
         if (this.settings != null) {
             if (key in this.settings) {
                 var returnVal = this.settings[key];
@@ -185,7 +185,7 @@ export default defineComponent({
 
         return false;
     },
-    async updateSetting(key, value) {
+    async updateSetting(key: string, value: string) {
         var data = { 
             "key": key, 
             "value": value 
@@ -193,7 +193,7 @@ export default defineComponent({
         const result = await updateUserSetting(data);
         set(key, value);
         if (!result) {
-            this.showToast("Something went wrong. Could not update setting.")
+            this.showToast("Something went wrong. Couldn't update setting.")
         }
     }
   },

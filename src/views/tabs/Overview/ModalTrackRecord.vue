@@ -57,7 +57,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 import {
   IonContent,
   IonHeader,
@@ -76,13 +76,12 @@ import {
   IonFabButton,
   IonFab,
   modalController,
-  toastController,
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { storePersonalRecords, getPersonalRecords } from "@/service/StatsService.js";
+import { PersonalRecordModel, storePersonalRecords, getPersonalRecords } from "@/service/StatsService";
 import { close, trash, add } from "ionicons/icons";
-
+import { showToast } from "@/utils";
 
 export default defineComponent({
   name: "ModalTrackRecord",
@@ -115,7 +114,7 @@ export default defineComponent({
   data() {
     return {
       newID: 0,
-      records: []
+      records: [] as Array<PersonalRecordModel>
     };
   },
   async mounted() {
@@ -130,16 +129,9 @@ export default defineComponent({
       const modal = await modalController.getTop();
       modal.dismiss();
     },
-    async showToast(msg) {
-      const toast = await toastController.create({
-        message: msg,
-        duration: 2000,
-      });
-      toast.present();
-    },
-    remove(id) {
+    remove(id: number) {
         this.records = this.records.filter(function(record) {
-            return record.id != id;
+            return record.id !== id;
         });
     },
     addRecord() {
@@ -147,38 +139,37 @@ export default defineComponent({
         const newRecord = { 
             id: this.newID,
             description: '',
-            value: ''
+            value: 0
         };
         this.records.push(newRecord);
     },
     async saveRecords() {
  
       const invalidRecordDescription = this.records.filter(function(record) {
-            return record.description.trim() == "";
+        return record.description.trim() == "";
       });
       if (invalidRecordDescription.length > 0) {
-        this.showToast("Couldn't store personal records. Invalid description.");
+        showToast("Couldn't store personal records. Invalid description.");
         return;
       }
 
       const invalidRecordValue = this.records.filter(function(record) {
-            return record.value.trim() == "" || record.value <= 0 || record.value >= 500 ;
+        return record.value <= 0 || record.value >= 500;
       });
+
       if (invalidRecordValue.length > 0) {
-        this.showToast("Couldn't store personal records. Invalid value.");
+        showToast("Couldn't store personal records. Invalid value.");
         return;
       }
 
-      var tracked = await storePersonalRecords({
-        records: this.records,
-      });
+      var tracked = await storePersonalRecords(this.records);
 
       if (tracked) {
-        this.$props.parent.doRefresh(false);
-        this.showToast("Personal records saved.");
+        this.$props.parent.doRefresh();
+        showToast("Personal records saved.");
         this.dismissModal();
       } else {
-        this.showToast("Couldn't save personal records.");
+        showToast("Couldn't save personal records.");
       }
     },
   }
