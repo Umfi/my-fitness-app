@@ -35,7 +35,6 @@ const app = createApp(App)
   .use(Donut);
 
 router.isReady().then(async () => {
-  app.mount('#app');
 
   const selectedTheme = await get("theme");
   if (selectedTheme == "dark") {
@@ -43,6 +42,8 @@ router.isReady().then(async () => {
   } else {
     document.body.classList.remove("dark");
   }
+
+  app.mount('#app');
 
   SplashScreen.hide();
 });

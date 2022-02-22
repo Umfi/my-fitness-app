@@ -8,310 +8,23 @@
         <ion-title>My Fitness App</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content v-if="user" v-show="renderContent">
+    <ion-content v-show="renderContent">
       <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
         <ion-refresher-content> </ion-refresher-content>
       </ion-refresher>
-      <!-- Calories Card-->
-      <ion-card v-if="!loadingCard1 && isCardVisible(1)" @click="showCardActionMenu(1, 'Calories Overview Card')">
-        <ion-card-header>
-          <ion-card-title>
-            Calories Overview
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-list>
-              <ion-item>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <b>Calories</b>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-progress-bar :value="caloriesValue"></ion-progress-bar>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        {{ parseInt(calories) }} kcal / {{ parseInt(user.calories) }} kcal</ion-label >
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-item>
-              <ion-item>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <b>Protein</b>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-progress-bar color="success" :value="proteinValue"></ion-progress-bar>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        {{ parseInt(protein) }} g / {{ parseInt(user.protein) }} g</ion-label >
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-item>
-              <ion-item>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <b>Carbohydrate</b>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-progress-bar color="warning" :value="carbohydrateValue"></ion-progress-bar>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        {{ parseInt(carbohydrate) }} g / {{ parseInt(user.carbohydrate) }} g</ion-label >
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-item>
-              <ion-item>
-                <ion-grid>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <b>Fat</b>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-progress-bar color="danger" :value="fatValue"></ion-progress-bar>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        {{ parseInt(fat) }} g / {{ parseInt(user.fat) }} g</ion-label >
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-item>
-            </ion-list>
-        </ion-card-content>
-      </ion-card>
 
-      <ion-card v-if="loadingCard1">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-list>
-              <ion-item v-for="n in 4" v-bind:key="n">
-                <ion-grid>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <ion-skeleton-text animated style="width: 40%"></ion-skeleton-text>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                  <ion-row>
-                    <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
-                  </ion-row>
-                  <ion-row>
-                    <ion-col text-center>
-                      <ion-label class="center-tex">
-                        <ion-skeleton-text animated style="width: 20%"></ion-skeleton-text>
-                      </ion-label>
-                    </ion-col>
-                  </ion-row>
-                </ion-grid>
-              </ion-item>
-            </ion-list>
-        </ion-card-content>
-      </ion-card>
+      <calories-card ref="card1" v-if="isCardVisible(1)" @pushed="showCardActionMenu(1, 'Calories Overview Card')"></calories-card>
 
-     <!-- Water Consume Card -->
-      <ion-card v-show="!loadingCard2 && isCardVisible(2)" @click="showCardActionMenu(2, 'Water Consumption Card')">
-        <ion-card-header>
-          <ion-card-title>
-            Water Consumption
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-         <apexchart
-            ref="waterChart"
-            width="100%"
-            height="300"
-            type="radialBar"
-            :options="waterChartOptions"
-            :series="waterSeries"
-          ></apexchart>
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card v-if="loadingCard2">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-thumbnail style="width: 100%;">
-          <ion-skeleton-text animated></ion-skeleton-text>
-          </ion-thumbnail>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- BMI Card -->
-      <ion-card v-bind:color="bmi_style" v-show="!loadingCard3 && isCardVisible(3)" @click="showCardActionMenu(3, 'BMI Card')">
-        <ion-card-header>
-          <ion-card-title>
-            BMI
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <ion-row>
-              <ion-col>
-                <ion-label v-text="bmi_value" style="font-size: 25px; font-weight: bold;"></ion-label>
-              </ion-col>
-              <ion-col class="ion-text-end ion-align-self-center">
-                    <ion-icon v-if="bmi_icon == 'sad'" style="font-size: 25px; font-weight: bold;" :icon="sadOutline"></ion-icon>
-                    <ion-icon v-if="bmi_icon == 'happy'" style="font-size: 25px; font-weight: bold;" :icon="happyOutline"></ion-icon>
-              </ion-col>
-              <ion-col class="ion-align-self-center">
-                <ion-label v-text="bmi_text"></ion-label>
-              </ion-col>
-            </ion-row>
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card v-if="loadingCard3">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-thumbnail style="width: 100%;">
-          <ion-skeleton-text animated></ion-skeleton-text>
-          </ion-thumbnail>
-        </ion-card-content>
-      </ion-card>
+      <water-consumption-card ref="card2" v-if="isCardVisible(2)" @pushed="showCardActionMenu(2, 'Water Consumption Card')"></water-consumption-card>
      
+      <bmi-card ref="card3" v-if="isCardVisible(3)" @pushed="showCardActionMenu(3, 'BMI Card')"></bmi-card>
      
-      <!-- Workout Card -->
-      <ion-card v-show="!loadingCard4 && isCardVisible(4)" @click="showCardActionMenu(4, 'Monthly Workout Summary Card')">
-        <ion-card-header>
-          <ion-card-title>
-            Monthly Workout Summary
-          </ion-card-title>
-          <ion-card-subtitle>
-            {{ workoutSeriesTitle }}
-          </ion-card-subtitle>
-        </ion-card-header>
-        <ion-card-content>
-         <apexchart
-            ref="workoutChart"
-            width="100%"
-            height="300"
-            type="bar"
-            :options="chartOptions"
-            :series="series"
-          ></apexchart>
-        </ion-card-content>
-      </ion-card>
+      <workout-card ref="card4" v-if="isCardVisible(4)" @pushed="showCardActionMenu(4, 'Workout Summary Card')"></workout-card>
+   
+      <weight-card ref="card5" v-if="isCardVisible(5)" @pushed="showCardActionMenu(5, 'Weight Summary Card')"></weight-card>
 
-      <ion-card v-if="loadingCard4">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-thumbnail style="width: 100%;">
-          <ion-skeleton-text animated></ion-skeleton-text>
-          </ion-thumbnail>
-        </ion-card-content>
-      </ion-card>
-
-
-      <!-- Weight Card -->
-      <ion-card v-show="!loadingCard5 && isCardVisible(5)" @click="showCardActionMenu(5, 'Monthly Weight Summary Card')">
-        <ion-card-header>
-          <ion-card-title>
-            Monthly Weight Summary
-          </ion-card-title>
-          <ion-card-subtitle>
-            {{ weightSeriesTitle }}
-          </ion-card-subtitle>
-        </ion-card-header>
-        <ion-card-content>
-         <apexchart
-            ref="weightChart"
-            width="100%"
-            height="300"
-            type="line"
-            :options="weightChartOptions"
-            :series="weightSeries"
-          ></apexchart>
-        </ion-card-content>
-      </ion-card>
-
-      <ion-card v-if="loadingCard5">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-thumbnail style="width: 100%;">
-          <ion-skeleton-text animated></ion-skeleton-text>
-          </ion-thumbnail>
-        </ion-card-content>
-      </ion-card>
-
-      <!-- Personal Records Card -->
-      <ion-card v-show="!loadingCard6 && isCardVisible(6)" @click="showCardActionMenu(6, 'Personal Records Card')">
-        <ion-card-header>
-          <ion-card-title>
-            Personal Records
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <ion-row>
-              <ion-col size="4" class="ion-text-center ion-align-self-center">
-                <ion-icon color="warning" style="font-size: 25px; font-weight: bold;" :icon="trophy"></ion-icon>
-              </ion-col>
-              <ion-col class="ion-text-end ion-align-self-center">
-                     <ion-row v-for="record in personalRecords" v-bind:key="record.id">{{ record.description}}: {{ record.value }} kg </ion-row>
-                     <ion-row v-if="personalRecords.length == 0">No records set yet</ion-row>
-              </ion-col>
-            </ion-row>
-        </ion-card-content>
-      </ion-card>
-      
-      <ion-card v-if="loadingCard6">
-        <ion-card-header>
-          <ion-card-title>
-            <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-thumbnail style="width: 100%;">
-          <ion-skeleton-text animated></ion-skeleton-text>
-          </ion-thumbnail>
-        </ion-card-content>
-      </ion-card>
+      <personal-record-card ref="card6" v-if="isCardVisible(6)" @pushed="showCardActionMenu(6, 'Personal Records Card')"></personal-record-card>
      
-
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button>
           <ion-icon :icon="add"></ion-icon>
@@ -331,8 +44,6 @@
            </ion-fab-button>
         </ion-fab-list>
       </ion-fab>
-
-
     </ion-content>
   </ion-page>
 </template>
@@ -349,20 +60,6 @@ import {
   IonMenuButton,
   IonRefresher,
   IonRefresherContent,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonProgressBar,
-  IonGrid,
-  IonCol,
-  IonRow,
-  IonCard,
-  IonCardHeader,
-  IonCardContent,
-  IonCardTitle,
-  IonCardSubtitle,
-  IonSkeletonText,
-  IonThumbnail,
   IonFab,
   IonFabList,
   IonFabButton,
@@ -372,14 +69,11 @@ import {
   RefresherCustomEvent
 } from "@ionic/vue";
 
-import { ApexOptions } from "apexcharts";
-import VueApexCharts, { VueApexChartsComponent } from "vue3-apexcharts";
 
 import { add, scale, barbell, water, sadOutline, happyOutline, eyeOff, close, arrowBack, arrowForward, trophy } from "ionicons/icons";
 
 import { trackWaterConsumption, getUserData, updateUserSetting } from "@/service/UserService";
 
-import { User, getDailyCalories, getWaterConsumption, getMonthlyWorkoutSummary, getWeightSummary, getPersonalRecords, PersonalRecordModel } from "@/service/StatsService";
 import ModalTrackWeight from "./ModalTrackWeight.vue";
 import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 import ModalDetailedWorkout from "../Workouts/ModalDetailedWorkout.vue";
@@ -388,6 +82,12 @@ import ModalTrackRecord from "./ModalTrackRecord.vue";
 import { set } from "@/helper/storage";
 import { showToast } from "@/utils";
 
+import CaloriesCard from "@/components/Overview/CaloriesCard.vue";
+import WaterConsumptionCard from "@/components/Overview/WaterConsumptionCard.vue";
+import BmiCard from "@/components/Overview/BmiCard.vue";
+import WorkoutCard from "@/components/Overview/WorkoutCard.vue";
+import WeightCard from "@/components/Overview/WeightCard.vue";
+import PersonalRecordCard from "@/components/Overview/PersonalRecordCard.vue";
 
 export default defineComponent({
   name: "Overview",
@@ -401,25 +101,16 @@ export default defineComponent({
     IonMenuButton,
     IonRefresher,
     IonRefresherContent,
-    IonItem,
-    IonList,
-    IonLabel,
-    IonProgressBar,
-    IonGrid,
-    IonCol,
-    IonRow,
-    IonCard,
-    IonCardHeader,
-    IonCardContent,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonSkeletonText,
-    IonThumbnail,
     IonFab,
     IonFabList,
     IonFabButton,
     IonIcon,
-    apexchart: VueApexCharts
+    CaloriesCard,
+    WaterConsumptionCard,
+    BmiCard,
+    WorkoutCard,
+    WeightCard,
+    PersonalRecordCard
   },
   setup() {
     return {
@@ -430,171 +121,10 @@ export default defineComponent({
     return {
       renderContent: false,
       settings: null as any,
-      user: null as User | null,
-      calories: 0,
-      protein: 0,
-      carbohydrate: 0,
-      fat: 0,
-      caloriesValue: 0,
-      proteinValue: 0,
-      carbohydrateValue: 0,
-      fatValue: 0,
-      ////
-      chartOptions: {
-        chart: {
-          id: 'vuechart-workouts',
-          toolbar: {
-            show: false
-          },
-        },
-        theme: {
-          mode: "light"
-        },
-        dataLabels: {
-            enabled: true
-        },
-        tooltip: {
-          enabled: false,
-        },
-        legend: {
-          show: false
-        },
-        colors:['#84A07C', '#01BAEF', '#20BF55', '#1B998B', '#FF674D', '#CF1259', '#7776BC'],
-        plotOptions: {
-          bar: {
-            distributed: true
-          }
-        },
-        xaxis: {
-          categories: ["Shoulders", "Chest", "Back", "Legs", "Arms", "Abs", "Cardio"],
-           labels: {
-            show: true
-          }
-        },
-        yaxis: [
-        {
-          labels: {
-            formatter: function(val) {
-              return val.toFixed(0);
-            }
-          }
-        }
-      ]
-      } as ApexOptions,
+      ///
       currentWorkoutDate: new Date(),
-      workoutSeriesTitle: "Month Year",
-      series: [
-        {
-          name: "Workouts",
-          data: [1,1,1,1,1,1,1],
-        },
-      ],
       ///
-      weightChartOptions: {
-        chart: {
-          id: 'vuechart-weight',
-          toolbar: {
-            show: false
-          },
-        },
-        theme: {
-          mode: "light"
-        },
-        dataLabels: {
-            enabled: false
-        },
-        tooltip: {
-          enabled: false,
-        },
-        legend: {
-          show: false
-        },
-        xaxis: {
-          labels: {
-            show: false
-          }
-        }
-      } as ApexOptions,
       currentWeightDate: new Date(),
-      weightSeriesTitle: "Month Year",
-      weightSeries: [
-        {
-          name: "Weight",
-          data: [1,1,1,1,1,1,1],
-        },
-      ],
-      ///
-      waterChartOptions: {
-          chart: {
-            type: 'radialBar',
-            offsetY: -20,
-            sparkline: {
-              enabled: true
-            }
-          },
-          theme: {
-            mode: "light"
-          },
-          plotOptions: {
-            radialBar: {
-              startAngle: -90,
-              endAngle: 90,
-              track: {
-                background: "#e7e7e7",
-                strokeWidth: '97%',
-                margin: 5,
-                dropShadow: {
-                  enabled: true,
-                  top: 2,
-                  left: 0,
-                  color: '#999',
-                  opacity: 1,
-                  blur: 2
-                }
-              },
-              dataLabels: {
-                name: {
-                  show: false
-                },
-                value: {
-                  offsetY: -2,
-                  fontSize: '22px'
-                }
-              }
-            }
-          },
-          grid: {
-            padding: {
-              top: -10
-            }
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shade: 'light',
-              shadeIntensity: 0.4,
-              inverseColors: false,
-              opacityFrom: 1,
-              opacityTo: 1,
-              stops: [0, 50, 53, 91]
-            },
-          },
-      } as ApexOptions,
-      waterSeries: [0],
-      ////
-      bmi_text: "",
-      bmi_icon: "happy",
-      bmi_value: 0,
-      bmi_style: "success",
-      ///
-      personalRecords: [] as Array<PersonalRecordModel>,
-      ///
-      loadingCard1: false,
-      loadingCard2: false,
-      loadingCard3: false,
-      loadingCard4: false,
-      loadingCard5: false,
-      loadingCard6: false,
     };
   },
   ionViewDidEnter() {
@@ -609,169 +139,38 @@ export default defineComponent({
   methods: 
   {
     async doRefresh(event?: RefresherCustomEvent) {
-        this.loadingCard1 = true;
-        this.loadingCard2 = true;
-        this.loadingCard3 = true;
-        this.loadingCard4 = true;
-        this.loadingCard5 = true;
-        this.loadingCard6 = true;
 
         const userData = await getUserData();
         if (userData != null && userData.details != null) {
             this.settings = JSON.parse(userData.details.settings);
         }
         
-        this.loadCaloriesSummary();
-        
-        this.loadDailyWaterConsumption();
-
-        this.calculateBMI();
-
         const current = new Date();
         this.currentWorkoutDate = new Date();
         this.currentWeightDate = new Date();
-        this.loadMonthlyWorkoutSummary(current.getMonth() + 1, current.getFullYear());
-    
-        this.loadMonthlyWeightSummary(current.getMonth() + 1, current.getFullYear());
 
-        this.loadPersonalRecords();
+        if (this.$refs.card1)
+          (this.$refs.card1 as InstanceType<typeof CaloriesCard>).reload();
+
+        if (this.$refs.card2)
+          (this.$refs.card2 as InstanceType<typeof WaterConsumptionCard>).reload();
+
+        if (this.$refs.card3)
+          (this.$refs.card3 as InstanceType<typeof BmiCard>).reload();
+
+        if (this.$refs.card4)
+          (this.$refs.card4 as InstanceType<typeof WorkoutCard>).reload(current.getMonth() + 1, current.getFullYear());
+
+        if (this.$refs.card5)
+          (this.$refs.card5 as InstanceType<typeof WeightCard>).reload(current.getMonth() + 1, current.getFullYear());
+
+        if (this.$refs.card6)
+          (this.$refs.card6 as InstanceType<typeof PersonalRecordCard>).reload();
 
         window.dispatchEvent(new Event('resize'));
         
         if (event) 
           event.target.complete();     
-    },
-    async loadCaloriesSummary() {
-
-      const data = await getDailyCalories();
-      
-      if (data != null) {
-        this.user = data.user;
-        this.calories = data.calories;
-        this.protein = data.protein;
-        this.carbohydrate = data.carbohydrate;
-        this.fat = data.fat;
-        this.caloriesValue = data.caloriesValue;
-        this.proteinValue = data.proteinValue;
-        this.carbohydrateValue = data.carbohydrateValue;
-        this.fatValue = data.fatValue;
-        this.loadingCard1 = false;
-        return true;
-      }
-
-      return false;
-    },
-    async loadDailyWaterConsumption() {
-
-      const data = await getWaterConsumption();
-      
-      if (data != null) {
-        this.waterSeries = [data.waterConsumption];
-        this.loadingCard2 = false;
-        setTimeout(() => {
-      
-          setTimeout(() => {
-             (this.$refs.waterChart as VueApexChartsComponent).updateSeries(this.waterSeries, true);
-          }, 500);
-
-          if (this.waterChartOptions.theme){
-            this.waterChartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
-          }
-
-          (this.$refs.waterChart as VueApexChartsComponent).updateOptions(this.waterChartOptions);
-         
-        }, 500);
-
-        return true;
-      }
-
-      return false;
-    },
-    async loadMonthlyWorkoutSummary(month: number, year: number) {
-
-      const data = await getMonthlyWorkoutSummary(month, year);
-
-      if (data != null) {
-        const current = new Date();
-        current.setMonth(month-1);
-
-        this.workoutSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
-        this.series[0].data = data;
-
-        this.loadingCard4 = false;
-        setTimeout(() => {
-          if (this.chartOptions.theme){
-            this.chartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
-          }
-
-          (this.$refs.workoutChart as VueApexChartsComponent).updateSeries([{
-            data: this.series[0].data,
-          }], true);
-
-          (this.$refs.workoutChart as VueApexChartsComponent).updateOptions(this.chartOptions);
-         
-        }, 500);
-
-        return true;
-      }
-
-      return false;
-    },
-    async loadMonthlyWeightSummary(month: number, year: number) {
-
-      const data = await getWeightSummary(month, year);
-
-      if (data != null) {
-
-        var arr = [] as Array<number>;
-        if (data.month.length > 0) {
-          for (var i = 0; i < data.month.length; i++) {
-            arr.push(data.month[i].weight);
-          }
-        } else {
-          if (data.fallback > 0) {
-            arr.push(data.fallback);
-          }
-        }
-
-        const current = new Date();
-        current.setMonth(month-1);
-
-        this.weightSeriesTitle = current.toLocaleString('default', { month: 'long' }) + " " + year;
-        this.weightSeries[0].data = arr;
-        
-        this.loadingCard5 = false;
-        setTimeout(() => {
-
-          if (this.weightChartOptions.theme){
-            this.weightChartOptions.theme.mode = document.body.classList.contains("dark") ? 'dark' : 'light';
-          }
-
-          (this.$refs.weightChart as VueApexChartsComponent).updateSeries([{
-            data: this.weightSeries[0].data,
-          }], true);
-
-           (this.$refs.weightChart as VueApexChartsComponent).updateOptions(this.weightChartOptions);
-         
-
-        }, 500);
-        
-
-        return true;
-      }
-
-      return false;
-    },
-    async loadPersonalRecords() {
-      const data = await getPersonalRecords();
-  
-      if (data != null) {
-        this.personalRecords = data;
-        this.loadingCard6 = false;
-        return true;
-      }
-
-      return false;
     },
     async trackWeight() {
 
@@ -816,7 +215,10 @@ export default defineComponent({
       });
 
       if (tracked) {
-        this.loadDailyWaterConsumption();
+        
+        if (this.$refs.card2)
+          (this.$refs.card2 as InstanceType<typeof WaterConsumptionCard>).reload();
+
         showToast("Glass of water tracked.");
       } else {
         showToast("Couldn't track water consumption.");
@@ -833,49 +235,6 @@ export default defineComponent({
           },
         })
       return modal.present();
-    },
-    async calculateBMI() {
-        
-        const userData = await getUserData();
-
-        if (userData != null) {
-          var weight = userData.details.weight;
-          var height = userData.details.height;
-          var bmi = weight / (height * height) * 10000;
-          bmi = Math.round( bmi * 1e2 ) / 1e2
-
-          this.bmi_value = bmi;
-
-          if (bmi < 18.5) {
-            this.bmi_style = "warning";
-            this.bmi_icon = "sad";
-            this.bmi_text = "underweight";
-          } else if (bmi >= 18.5 && bmi < 25) {
-            this.bmi_style = "success";
-            this.bmi_icon = "happy";
-            this.bmi_text = "normal weight";
-          } else if (bmi >= 25 && bmi < 30) {
-            this.bmi_style = "warning";
-            this.bmi_icon = "sad";
-            this.bmi_text = "slight overweight";
-          } else if (bmi >= 30 && bmi < 35) {
-            this.bmi_style = "danger";
-            this.bmi_icon = "sad";
-            this.bmi_text = "overweight";
-          } else if (bmi >= 35 && bmi < 40) {
-            this.bmi_style = "danger";
-            this.bmi_icon = "sad";
-            this.bmi_text = "strong overweight";
-          } else {
-            this.bmi_style = "danger";
-            this.bmi_icon = "sad";
-            this.bmi_text = "very strong overweight";
-          }
-
-          this.loadingCard3 = false;
-          return true;
-        }
-      return false;
     },
     async showCardActionMenu(cardID: number, cardTitle: string) {
      
@@ -907,11 +266,13 @@ export default defineComponent({
           handler: async () => {
             if (cardID == 4) {
               this.currentWorkoutDate.setMonth(this.currentWorkoutDate.getMonth()-1);
-              this.loadMonthlyWorkoutSummary(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
+              if (this.$refs.card4)
+                (this.$refs.card4 as InstanceType<typeof WorkoutCard>).reload(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
             } else if (cardID == 5) {
               this.currentWeightDate.setMonth(this.currentWeightDate.getMonth()-1);
-              this.loadMonthlyWeightSummary(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
-            }
+              if (this.$refs.card5)
+                (this.$refs.card5 as InstanceType<typeof WeightCard>).reload(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
+             }
           },
         },
         {
@@ -921,10 +282,12 @@ export default defineComponent({
           handler: async () => {
             if (cardID == 4) {
               this.currentWorkoutDate.setMonth(this.currentWorkoutDate.getMonth()+1);
-              this.loadMonthlyWorkoutSummary(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
+              if (this.$refs.card4)
+                (this.$refs.card4 as InstanceType<typeof WorkoutCard>).reload(this.currentWorkoutDate.getMonth()+1, this.currentWorkoutDate.getFullYear());
             } else if (cardID == 5) {
               this.currentWeightDate.setMonth(this.currentWeightDate.getMonth()+1);
-              this.loadMonthlyWeightSummary(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
+              if (this.$refs.card5)
+                (this.$refs.card5 as InstanceType<typeof WeightCard>).reload(this.currentWeightDate.getMonth()+1, this.currentWeightDate.getFullYear());
             }
           },
         },
@@ -978,9 +341,3 @@ export default defineComponent({
   }
 })
 </script>
-<style scoped>
-.center-tex {
-  display: flex;
-  justify-content: center;
-}
-</style>
