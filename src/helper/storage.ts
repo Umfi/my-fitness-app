@@ -7,7 +7,7 @@ export async function set(key: string, value: string) {
   });
 }
 
-export async function get(key: string) : Promise<string>{
+export async function get(key: string) : Promise<any>{
   const item = await Storage.get({ key: key });
   if (item && item.value !== null) {
     return JSON.parse(item.value);

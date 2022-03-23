@@ -140,8 +140,8 @@ export default defineComponent({
       this.selectedDate = event;
       let selectedModal: unknown;
       
-      const isAdvancedTrainignsModeEnabled = await get("advancedTrainigMode");
-      if (isAdvancedTrainignsModeEnabled) {
+      let isAdvancedTrainignsModeEnabled : boolean = await get("advancedTrainigMode");
+      if (isAdvancedTrainignsModeEnabled == true) {
         selectedModal = ModalDetailedWorkout;
       } else {
         selectedModal = ModalManageWorkout;

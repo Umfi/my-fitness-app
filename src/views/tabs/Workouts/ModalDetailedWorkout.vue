@@ -460,15 +460,18 @@ export default defineComponent({
         return;
       }
 
+      let alertText : string;
+
       if (this.exercises.length == 0) {
-        showToast("To track a workout you need to add the exercises that you have done.");
-        return;
+        alertText = "Are you really done with your workout? You have not tracked any exercise.";
+      } else {
+        alertText = "Are you really done with your workout?";
       }
       
       const alert = await alertController
         .create({
           header: 'Finish workout?',
-          message: 'Are you really done with your workout?',
+          message: alertText,
           buttons: [
             {
               text: 'No',
@@ -483,7 +486,7 @@ export default defineComponent({
               },
             },
           ],
-        });
+       });
       return alert.present();
     },
     async trackWorkoutAction() { 
