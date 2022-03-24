@@ -44,7 +44,7 @@ export default defineComponent({
         .create({
           component: ModalTrackWeight,
            componentProps: {
-            parent: this
+            parent: null
           },
         })
 

@@ -154,7 +154,9 @@ export default defineComponent({
       });
 
       if (tracked) {
-        props.parent.doRefresh();
+        if (props.parent != null) {
+          props.parent.doRefresh();
+        }
         showToast("Weight tracked.");
         dismissModal();
       } else {

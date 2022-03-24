@@ -11,7 +11,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@capacitor/android": "^3.1.1",
+    "@capacitor/android": "^3.4.0",
     "@capacitor/app": "^1.1.0",
     "@capacitor/camera": "^1.2.4",
     "@capacitor/core": "^3.4.0",
