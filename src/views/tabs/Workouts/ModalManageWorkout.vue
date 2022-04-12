@@ -407,7 +407,6 @@ export default defineComponent({
       this.updateMuscleImage(document.getElementById("Deltoids"), newVal);
     },
     chest(newVal: boolean) {
-      console.log(newVal)
       this.updateMuscleImage(document.getElementById("Pectorals"), newVal);
     },
     back(newVal: boolean) {

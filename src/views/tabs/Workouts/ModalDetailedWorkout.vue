@@ -451,6 +451,13 @@ export default defineComponent({
           setsData: this.exercises[index].sets
         },
       });
+      modal.onDidDismiss().then((data) => {
+          if (data['data'] != undefined) {
+              this.exercises[index].name = data['data'].exercise;
+              this.exercises[index].sets = data['data'].sets;  
+          }
+      });
+
       return modal.present();
     },
     async trackWorkout() {
