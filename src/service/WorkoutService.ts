@@ -1,6 +1,7 @@
 import $axios from "../helper/axios";
 import $config from "@/config";
 import { PersonalRecordModel } from "@/service/StatsService"
+import { getUserData } from "./UserService";
 
 export interface WorkoutModel {
   id: number;
@@ -201,4 +202,23 @@ export async function storeAdvancedWorkout(workout: StoreAdvancedWorkoutModel) {
         })
 
         return data;
+}
+
+export async function isAdvancedTrainignsModeEnabled() {
+    const userData = await getUserData();
+    if (userData != null && userData.details != null) {
+        const settings = JSON.parse(userData.details.settings);
+        
+        if (settings != null) {
+            if ("advancedTrainigMode" in settings) {
+                const returnVal = settings["advancedTrainigMode"];
+                if (returnVal === true) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+    }
+    return false;
 }

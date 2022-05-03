@@ -58,8 +58,7 @@ import {
   RefresherCustomEvent,
 } from "@ionic/vue";
 
-import { WorkoutModel, getAllWorkouts } from "@/service/WorkoutService";
-import { get } from "@/helper/storage";
+import { WorkoutModel, getAllWorkouts, isAdvancedTrainignsModeEnabled } from "@/service/WorkoutService";
 
 
 import VueCal from "vue-cal";
@@ -140,8 +139,8 @@ export default defineComponent({
       this.selectedDate = event;
       let selectedModal: unknown;
       
-      let isAdvancedTrainignsModeEnabled : boolean = await get("advancedTrainigMode");
-      if (isAdvancedTrainignsModeEnabled == true) {
+      const isAdvancedModeEnabled = await isAdvancedTrainignsModeEnabled();
+      if (isAdvancedModeEnabled) {
         selectedModal = ModalDetailedWorkout;
       } else {
         selectedModal = ModalManageWorkout;

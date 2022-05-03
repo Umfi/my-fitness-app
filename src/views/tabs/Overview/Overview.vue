@@ -79,7 +79,6 @@ import ModalManageWorkout from "../Workouts/ModalManageWorkout.vue";
 import ModalDetailedWorkout from "../Workouts/ModalDetailedWorkout.vue";
 import ModalTrackRecord from "./ModalTrackRecord.vue";
 
-import { set } from "@/helper/storage";
 import { showToast } from "@/utils";
 
 import CaloriesCard from "@/components/Overview/CaloriesCard.vue";
@@ -88,6 +87,7 @@ import BmiCard from "@/components/Overview/BmiCard.vue";
 import WorkoutCard from "@/components/Overview/WorkoutCard.vue";
 import WeightCard from "@/components/Overview/WeightCard.vue";
 import PersonalRecordCard from "@/components/Overview/PersonalRecordCard.vue";
+import { isAdvancedTrainignsModeEnabled } from "@/service/WorkoutService";
 
 export default defineComponent({
   name: "Overview",
@@ -189,7 +189,8 @@ export default defineComponent({
       
       let selectedModal: unknown;
       
-      if (this.isAdvancedTrainignsModeEnabled()) {
+      const isAdvancedModeEnabled = await isAdvancedTrainignsModeEnabled();
+      if (isAdvancedModeEnabled) {
         selectedModal = ModalDetailedWorkout;
       } else {
         selectedModal = ModalManageWorkout;
@@ -321,23 +322,7 @@ export default defineComponent({
           }
       }
       return true;
-    },
-    isAdvancedTrainignsModeEnabled() {
-      if (this.settings != null) {
-          if ("advancedTrainigMode" in this.settings) {
-              var returnVal = this.settings["advancedTrainigMode"];
-              if (returnVal === true) {
-                  set("advancedTrainigMode", "true");
-                  return true;
-              } else {
-                  set("advancedTrainigMode", "false");
-                  return false;
-              }
-          }
-      }
-      set("advancedTrainigMode", "false");
-      return false;
-    },
+    }
   }
 })
 </script>
