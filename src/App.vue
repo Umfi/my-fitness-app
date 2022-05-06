@@ -48,7 +48,9 @@ import {
   IonIcon,
   IonLabel,
   IonToggle,
-  menuController
+  menuController,
+  useBackButton, 
+  useIonRouter
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
@@ -64,6 +66,8 @@ import { Downloader } from '@ionic-native/downloader';
 
 import { get, set } from "@/helper/storage";
 import { showToast } from "@/utils";
+
+import { App } from '@capacitor/app';
 
 export default defineComponent({
   name: "App",
@@ -88,7 +92,14 @@ export default defineComponent({
       theme: "light"
     };
   },
-   setup() {
+  setup() {
+    const ionRouter = useIonRouter();
+    useBackButton(-1, () => {
+      if (!ionRouter.canGoBack()) {
+        App.exitApp();
+      }
+    });
+
     return {
       cloudDownloadOutline, moon
     }
