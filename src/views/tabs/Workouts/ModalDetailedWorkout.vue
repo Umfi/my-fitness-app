@@ -6,7 +6,7 @@
         <ion-button @click="saveWorkout" v-if="muscles.length > 0 && exercises.length > 0">
           <ion-icon slot="icon-only" :icon="save"></ion-icon>
         </ion-button>
-        <ion-button @click="loadSavedWorkout">
+        <ion-button @click="loadSavedWorkout" v-if="storedWorkoutRoutines">
           <ion-icon slot="icon-only" :icon="folderOpen"></ion-icon>
         </ion-button>
       </ion-buttons>

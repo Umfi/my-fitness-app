@@ -1,20 +1,22 @@
 <template>
  <ion-card v-show="!loadingCard" ref="card">
         <ion-card-header>
-          <ion-card-title>
+          <ion-card-title class="ion-align-self-center">
             Personal Records
           </ion-card-title>
         </ion-card-header>
         <ion-card-content>
+          <ion-grid>
             <ion-row>
-              <ion-col size="2" class="ion-text-center ion-align-self-center">
-                <ion-icon color="warning" style="font-size: 25px; font-weight: bold;" :icon="trophy"></ion-icon>
-              </ion-col>
-              <ion-col class="ion-text-end ion-align-self-center">
-                     <ion-row v-for="record in personalRecords" v-bind:key="record.id">{{ record.description}}: {{ record.value }} kg </ion-row>
-                     <ion-row v-if="personalRecords.length == 0">No records set yet</ion-row>
-              </ion-col>
+              <ion-col>Exercise</ion-col>
+              <ion-col class="ion-text-end">Weight</ion-col>
             </ion-row>
+            <ion-row v-for="record in personalRecords" v-bind:key="record.id">
+              <ion-col>{{ record.description}}</ion-col>
+              <ion-col class="ion-text-end"><b>{{ record.value }}</b> kg</ion-col>
+            </ion-row>
+            <ion-row v-if="personalRecords.length == 0">No records set yet</ion-row>
+          </ion-grid>
         </ion-card-content>
       </ion-card>
       
@@ -35,9 +37,9 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from "vue";
 import {
+  IonGrid,
   IonCol,
   IonRow,
-  IonIcon,
   IonCard,
   IonCardHeader,
   IonCardContent,
@@ -48,7 +50,6 @@ import {
 
 import { createGesture } from '@ionic/vue';
 
-import { trophy } from "ionicons/icons";
 
 import { getPersonalRecords, PersonalRecordModel } from "@/service/StatsService";
 
@@ -56,9 +57,9 @@ export default defineComponent({
   name: "PersonalRecordCard",
   emits: ["pushed"],
   components: {
+    IonGrid,
     IonCol,
     IonRow,
-    IonIcon,
     IonCard,
     IonCardHeader,
     IonCardContent,
@@ -128,8 +129,24 @@ export default defineComponent({
      });
 
      return {
-         card, trophy, personalRecords, loadingCard, reload
+         card, personalRecords, loadingCard, reload
      }
   }
 })
 </script>
+<style scoped>
+
+ion-grid {
+  --ion-grid-column-padding: 10px;
+  border-collapse: collapse;
+  border-style: hidden;
+}
+
+ion-row:first-child {
+  font-weight: bold;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+
+
+</style>
