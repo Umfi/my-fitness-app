@@ -36,6 +36,7 @@ interface StoreWorkoutModel {
 export interface AdvancedWorkoutModel {
   id: number;
   advanced_training_id: number;
+  advanced_training_routine_id: number;
   exercise_id: number;
   repetitions: number;
   weight: number;
@@ -55,6 +56,12 @@ export interface ExerciseModel {
 interface StoreAdvancedWorkoutModel {
     date: string;
     exercises: ExerciseSetModel[];
+}
+
+interface WorkoutRoutineModel {
+    name: string;
+    exercises: ExerciseSetModel[];
+    muscles: string[];
 }
 
 interface StoreAdvancedWorkoutResultModel {
@@ -83,6 +90,19 @@ export interface SetModel {
     repetitions: number;
     weight: number;
 }
+
+export interface AdvanceTraningRoutineResultModel {
+  id: number;
+  user_id: number;
+  name: string;
+  muscles: string;
+  created_at: string;
+  updated_at: string;
+  advanced_training_sets: AdvancedWorkoutModel[];
+}
+
+
+
 
 export async function getAllWorkouts(startDate: string, endDate: string) {
     const data = await $axios({ url: $config.API_BASE_URL + 'trainings', data: { "from": startDate, "to": endDate}, method: 'POST' })
@@ -221,4 +241,38 @@ export async function isAdvancedTrainignsModeEnabled() {
         }
     }
     return false;
+}
+
+export async function saveWorkoutRoutine(workout: WorkoutRoutineModel) {
+    const data = await $axios({ url: $config.API_BASE_URL + 'createAdvancedTrainingRoutine', data: workout, method: 'POST' })
+        .then(response => {
+            if (response.data) {
+                return true;
+            } 
+            
+            return false;
+        })
+        .catch(err => {
+            console.log(err);
+            return false;
+        })
+
+        return data;
+}
+
+export async function getAllWorkoutRoutines() {
+    const data = await $axios({ url: $config.API_BASE_URL + 'advancedTrainingRoutines', method: 'GET' })
+        .then(response => {
+            if (response.data) { 
+                return response.data as Array<AdvanceTraningRoutineResultModel>;
+            }
+
+            return null;
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        })
+
+        return data;
 }

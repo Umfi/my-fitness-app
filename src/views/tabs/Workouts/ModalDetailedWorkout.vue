@@ -2,6 +2,14 @@
   <ion-header translucent>
     <ion-toolbar>
       <ion-title>Track Workout</ion-title>
+      <ion-buttons slot="primary" v-if="!workoutFinished">
+        <ion-button @click="saveWorkout" v-if="muscles.length > 0 && exercises.length > 0">
+          <ion-icon slot="icon-only" :icon="save"></ion-icon>
+        </ion-button>
+        <ion-button @click="loadSavedWorkout">
+          <ion-icon slot="icon-only" :icon="folderOpen"></ion-icon>
+        </ion-button>
+      </ion-buttons>
       <ion-buttons slot="end">
         <ion-button @click="dismissModal">
           <ion-icon slot="icon-only" :icon="close"></ion-icon>
@@ -300,14 +308,15 @@ import {
   IonCardTitle,
   IonCardContent,
   IonSelect,
-  IonSelectOption
+  IonSelectOption,
+  AlertInput
 } from "@ionic/vue";
 import { defineComponent } from "vue";
 
-import { ExerciseSetModel, getAllAdvancedWorkoutsFromDay, storeAdvancedWorkout, storeWorkout } from "@/service/WorkoutService";
+import { ExerciseSetModel, AdvanceTraningRoutineResultModel, getAllAdvancedWorkoutsFromDay, getAllWorkoutRoutines, saveWorkoutRoutine, storeAdvancedWorkout, storeWorkout } from "@/service/WorkoutService";
 import { PersonalRecordModel } from "@/service/StatsService";
 
-import { close, trophy } from "ionicons/icons";
+import { close, trophy, folderOpen, save } from "ionicons/icons";
 
 import ModalAddExercise from "./ModalAddExercise.vue";
 import { showToast } from "@/utils";
@@ -352,6 +361,7 @@ export default defineComponent({
       personalRecords: [] as Array<PersonalRecordModel>,
       workoutFinished: false,
       muscles: [] as Array<string>,
+      storedWorkoutRoutines: [] as Array<AdvanceTraningRoutineResultModel> | null,
       loading: true
     };
   },
@@ -369,6 +379,9 @@ export default defineComponent({
   async mounted() {
     await this.showLoading();
     var that = this;
+
+    this.storedWorkoutRoutines = await getAllWorkoutRoutines(); 
+
     getAllAdvancedWorkoutsFromDay(this.$props.item.date).then(result => {
 
       if (result !== null) {
@@ -402,7 +415,7 @@ export default defineComponent({
   },
   setup() {
     return {
-      close, trophy
+      close, trophy, folderOpen, save
     };
   },
   methods: {
@@ -527,6 +540,106 @@ export default defineComponent({
         } else {
           showToast("Couldn't track workout.");
         }  
+    },
+    async saveWorkout() {
+      const alert = await alertController
+        .create({
+          header: 'Save Workout',
+          inputs: [
+            {
+              name: 'name',
+              placeholder: 'Name of Workout',
+            }
+          ],
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary'
+            },
+            {
+              text: 'Ok',
+              handler: async (input: AlertInput) => {
+                if (input.name) {
+                  const stored = await saveWorkoutRoutine({
+                    name: input.name,
+                    exercises: this.exercises,
+                    muscles: this.muscles
+                  });
+
+                  if (stored) {
+                    showToast("Workout has been saved.");
+                  } else {
+                    showToast("An error occurred. Could not save Workout.");
+                  }
+                }
+              },
+            },
+          ],
+        });
+      return alert.present();
+    },
+    async loadSavedWorkout() {
+      if (this.storedWorkoutRoutines) {
+        const that = this;
+
+        const alertInputs = [] as Array<AlertInput>;
+        for (var i = 0; i < this.storedWorkoutRoutines.length; i++) {
+          alertInputs.push({
+              type: 'radio',
+              label: this.storedWorkoutRoutines[i].name,
+              value: "routine-" + i,
+          });
+        }
+        const alert = await alertController
+        .create({
+          header: 'Load stored workout?',
+          subHeader: 'Current tracking will be overriden!',
+          inputs: alertInputs,
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'secondary',
+            },
+            {
+              text: 'Ok',
+              handler: (input: string) => {
+                if (input && input.length > 0) {
+                  if (that.storedWorkoutRoutines) {
+                    const index = input.split("-");
+
+                    const result = that.storedWorkoutRoutines[parseInt(index[1])];
+                    that.muscles = result.muscles.split(',');
+                    that.exercises = [];
+                    
+                    var tmp = {};
+                    for (var j = 0; j < result.advanced_training_sets.length; j++) {
+                      tmp[result.advanced_training_sets[j].name] = [];
+                    }
+
+                    for (var i = 0; i < result.advanced_training_sets.length; i++) {
+                      tmp[result.advanced_training_sets[i].name].push({
+                            repetitions: result.advanced_training_sets[i].repetitions,
+                            weight: result.advanced_training_sets[i].weight
+                      })
+                    }
+
+                    for (var prop in tmp) {
+                      that.exercises.push({
+                          name: prop,
+                          sets: tmp[prop]
+                      })
+                    }
+                  }
+                }
+              },
+            },
+          ],
+        });
+
+        return alert.present();
+      }
     },
     resetMuscleImage() {
       this.updateMuscleImage(document.getElementById("Deltoids"), false);
