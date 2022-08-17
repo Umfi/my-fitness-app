@@ -210,6 +210,12 @@
         </ion-fab-button>
       </ion-fab>
     </ion-content>
+
+    <ion-row v-show="isScanning">
+      <ion-col class="ion-no-padding">
+        <ion-button expand="full" @click="stopScan()" >Stop Scanning</ion-button>
+      </ion-col>
+    </ion-row>
   </ion-page>
 </template>
 
@@ -259,7 +265,7 @@ import ModalAddCalories from './ModalAddCalories.vue'
 import ModalManageProduct from "./ModalManageProduct.vue";
 
 
-import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Keyboard } from '@capacitor/keyboard';
 import { Capacitor } from '@capacitor/core';
 
@@ -314,6 +320,7 @@ export default defineComponent({
       hideAll: false,
       page: 1,
       maxResults: 400,
+      isScanning: false,
       renderContent: false
     };
   },
@@ -321,6 +328,7 @@ export default defineComponent({
     this.renderContent = true;
   },
   ionViewWillLeave() {
+    this.stopScan();
     this.renderContent = false;
   },
   setup() {
@@ -423,11 +431,21 @@ export default defineComponent({
         });
       }
     },
+    stopScan() {
+      BarcodeScanner.stopScan();
+      this.renderContent = true;
+      this.isScanning = false;
+    },
     async scanBarcode() {
+      this.isScanning = true;
       try {
-        const scanResult = await BarcodeScanner.scan();
-        if (scanResult) {
-          const scannedProduct = await searchProductByBarcode(scanResult.text);
+        this.renderContent = false;
+
+        const scanResult = await BarcodeScanner.startScan();
+        if (scanResult.hasContent && scanResult.content) {
+          this.renderContent = true;
+          this.isScanning = false;
+          const scannedProduct = await searchProductByBarcode(scanResult.content);
           if (scannedProduct != null) {
             this.searchTerm = scannedProduct.name;
             await this.search(scannedProduct.name, 1);

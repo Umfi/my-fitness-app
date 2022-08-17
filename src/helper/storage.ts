@@ -1,14 +1,14 @@
-import { Storage } from "@capacitor/storage";
+import { Preferences } from "@capacitor/preferences";
 
 export async function set(key: string, value: string) {
-  await Storage.set({
+  await Preferences.set({
     key: key,
     value: JSON.stringify(value)
   });
 }
 
 export async function get(key: string) : Promise<any>{
-  const item = await Storage.get({ key: key });
+  const item = await Preferences.get({ key: key });
   if (item && item.value !== null) {
     return JSON.parse(item.value);
   } 
@@ -17,7 +17,7 @@ export async function get(key: string) : Promise<any>{
 }
 
 export async function remove(key: string) {
-  await Storage.remove({
+  await Preferences.remove({
     key: key
   });
 }

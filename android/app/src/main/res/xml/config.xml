@@ -23,9 +23,5 @@
     <param name="android-package" value="hr.integrator.cordova.plugins.downloader.Downloader"/>
   </feature>
 
-  <feature name="BarcodeScanner">
-    <param name="android-package" value="com.phonegap.plugins.barcodescanner.BarcodeScanner"/>
-  </feature>
-
   
 </widget>
