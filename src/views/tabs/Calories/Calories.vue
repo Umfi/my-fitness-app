@@ -436,7 +436,25 @@ export default defineComponent({
       this.renderContent = true;
       this.isScanning = false;
     },
+    async checkCameraPermission() {
+      // check or request permission
+      const status = await BarcodeScanner.checkPermission({ force: true });
+
+      if (status.granted) {
+        // the user granted permission
+        return true;
+      }
+
+      return false;
+    },
     async scanBarcode() {
+
+      const canSan = await this.checkCameraPermission();
+      if (!canSan) {
+        showToast("No camera permission has been granted for the barcode scanner.");
+        return;
+      }
+
       this.isScanning = true;
       try {
         this.renderContent = false;
