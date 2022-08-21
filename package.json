@@ -27,7 +27,7 @@
     "@ionic-native/core": "^5.36.0",
     "@ionic-native/downloader": "^5.36.0",
     "@ionic-native/media": "^5.36.0",
-    "@ionic/vue": "^6.0.0",
+    "@ionic/vue": "^6.2.4-dev.11660836281.1a11712b",
     "@ionic/vue-router": "^6.0.0",
     "apexcharts": "^3.33.0",
     "axios": "^0.25.0",
