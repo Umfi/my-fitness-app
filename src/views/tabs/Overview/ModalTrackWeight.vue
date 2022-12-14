@@ -74,6 +74,8 @@ import { add, remove, close } from "ionicons/icons";
 import { createGesture } from '@ionic/vue';
 
 import { showToast } from "@/utils";
+import { Capacitor } from "@capacitor/core";
+import { PushNotifications } from '@capacitor/push-notifications';
 
 export default defineComponent({
   name: "ModalTrackWeight",
@@ -154,6 +156,11 @@ export default defineComponent({
       });
 
       if (tracked) {
+
+        if (Capacitor.isPluginAvailable('PushNotifications')) {
+          PushNotifications.removeAllDeliveredNotifications();
+        }
+        
         if (props.parent != null) {
           props.parent.doRefresh();
         }
